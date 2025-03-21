@@ -13,6 +13,3 @@ app.listen(process.env.PORT, ()=>{
 
 
 module.exports = app;
-
-
-console.log("lkfjsl")
