@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f8e6e6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .error-container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .error-code {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 120px;
+            font-weight: 800;
+            color: #2c2c2c;
+        }
+        
+        .phone-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            z-index: 1;
+        }
+        
+        .battery {
+            width: 80px;
+            height: 140px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            margin: 0 10px;
+            position: relative;
+            overflow: hidden;
+            z-index: 20;
+        }
+        
+        .battery::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .battery-level {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20%;
+            background-color: #ee2c2c;
+        }
+        
+        .message {
+            margin-top: 30px;
+            color: #2c2c2c;
+            font-size: 18px;
+            position: relative;
+            z-index: 20;
+            background-color: rgba(248, 230, 230, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .back-link {
+            color: #ee2c2c;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 80px;
+            }
+            
+            .battery {
+                width: 50px;
+                height: 90px;
+            }
+            
+            .battery::before {
+                width: 40px;
+                height: 8px;
+                top: -4px;
+            }
+            
+            .message {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 60px;
+            }
+            
+            .battery {
+                width: 35px;
+                height: 65px;
+                border-radius: 8px;
+            }
+            
+            .battery::before {
+                width: 25px;
+                height: 5px;
+                top: -3px;
+                border-radius: 3px;
+            }
+            
+            .message {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+    <body>
+        <div class="container">
+            <!-- Image URL will need to be updated to your actual image path -->
+            <img src="/images/p32-removebg-preview.png" alt="Red Smartphone" class="phone-image">
+            
+            <div class="error-container">
+                <div class="error-code">
+                    <span>4</span>
+                    <div class="battery">
+                        <div class="battery-level"></div>
+                    </div>
+                    <span>4</span>
+                </div>
+                <div class="message">
+                    Page not found. Check the address or <a href="<%= locals.prevUrl || '/' %>" class="back-link">go back</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Animate battery level
+                const batteryLevel = document.querySelector('.battery-level');
+                setTimeout(() => {
+                    batteryLevel.style.transition = 'height 1.5s ease-in-out';
+                    batteryLevel.style.height = '20%';
+                }, 500);
+            });
+        </script>
+    </body>
+    </html>
