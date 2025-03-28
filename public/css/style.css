@@ -396,6 +396,12 @@ mark,
   max-width: 100%;
   height: auto; }
 
+
+.img-fluids {
+    max-width: 100%;
+    height: 265px; }
+
+
 .img-thumbnail {
   padding: 0.25rem;
   background-color: #fff;
@@ -8548,7 +8554,7 @@ h1, h2, h3, h4, h5,
           .owl-carousel.home-slider .slider-item .slider-text {
             text-align: center; } }
         .owl-carousel.home-slider .slider-item .slider-text .one-third {
-          width: 65%;
+          width: 40%;
           position: relative;
           z-index: -1;
           background-position: center center; }
@@ -10666,3 +10672,31 @@ textarea.form-control {
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -136px; } }
+
+
+    .custom-search {
+      display: flex;
+      align-items: center;
+      background-color: #dedec7;
+      border: 1px solid #9b8c5a;
+      border-radius: 12px;
+      padding: 4px 20px;
+      box-shadow: inset 0 0 1px #8c7d4a;
+    }
+    
+    .search-label {
+      font-weight: bold;
+      font-size: 16px;
+      color: #403a27;
+      margin-right: 100px;
+    }
+    
+    .search-icon {
+      background: none;
+      border: none;
+      font-size: 10px;
+      color: #403a27;
+      cursor: pointer;
+    }
+    
+    

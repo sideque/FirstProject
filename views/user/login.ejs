@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Mobi World</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/login.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <input id="mes" type="hidden" value="<%= typeof message !== 'undefined' ? message : '' %>">
+
+  <div class="container py-5">
+    <div class="row justify-content-center align-items-center">
+      <!-- Form Section -->
+      <div class="col-md-6">
+        <div class="login-form-container">
+          <form onsubmit="return FormValidate(event)" method="post" action="/login">
+            <h2 class="text-center">Welcome back!</h2>
+            <p class="text-center">Enter your Credentials to access your account</p>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input class="form-control" id="email" name="email" placeholder="Enter your email">
+              <p id="emailerror" class="error-message" style="display: none"></p>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password">
+              <p id="passworderror" class="error-message" style="display: none"></p>
+            </div>
+
+            <% if (message && message.length > 0) { %>
+              <div class="alert alert-danger text-center">
+                <%= message %>
+              </div>
+            <% } %>
+            
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+            <div class="text-center mt-3">
+              <a href="/auth/google" class="btn btn-outline-secondary btn-block">
+                  <img src="https://img.icons8.com/color/16/000000/google-logo.png"> Sign up with Google
+              </a>
+          </div>
+
+            <p class="text-center mt-3">Don’t have an account? <a href="/signup" class="custom-link"> Sign Up</a>.</p>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Image Section (Hidden on small screens) -->
+      <div class="col-md-6 login-image d-none d-md-block">
+        <img src="/images/login.jpg" alt="Mobivault Phones" class="img-fluid" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script>
+    let message = document.getElementById('mes').value;
+    if (message) {
+      Swal.fire(message);
+    }
+
+    function FormValidate(event) {
+      let email = document.getElementById('email').value;
+      let pass = document.getElementById('password').value;
+
+      let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+      let valid = true;
+
+      if (email.trim() === '' || !emailRegex.test(email)) {
+        valid = false;
+        document.getElementById('emailerror').innerText = "Invalid email format";
+        document.getElementById('emailerror').style.display = "block";
+      }
+
+      if (pass.trim() === '' || !passwordRegex.test(pass)) {
+        valid = false;
+        document.getElementById('passworderror').innerText = "Password must include 8 characters, uppercase, lowercase and number";
+        document.getElementById('passworderror').style.display = "block";
+      }
+
+      if (!valid) {
+        event.preventDefault();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Please fix the errors above and try again.'
+        });
+
+        setTimeout(() => {
+          document.getElementById('emailerror').style.display = 'none';
+          document.getElementById('passworderror').style.display = 'none';
+        }, 3000);
+      }
+
+      return valid;
+    }
+  </script>
+</body>
+</html>
