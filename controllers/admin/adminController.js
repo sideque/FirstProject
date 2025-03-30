@@ -40,31 +40,39 @@ const login = async (req, res) => {
     }
 }
 
-// const loadDashboard = async (req, res) => {
-//     if (req.session.admin) {
-//         try {
-//             res.render("dashboard");
-//         } catch (error) {
-//             res.redirect("/pageerror");
-//         }
-//     } else {
-//         res.redirect("/admin/login"); 
-//     }
-// }
-
-const loadDashboard = async (req,res) =>{
-    if(req.session.admin){
-        try{
+const loadDashboard = async (req, res) => {
+    if (req.session.admin) {
+        try {
             const message = req.session.message;
             req.session.message = null;
-            res.render("dashboard",{message});
-        } catch (error){
+
+            const itemsPerPage = 5;
+            const currentPage = parseInt(req.query.page) || 1;
+
+            const totalUsers = await User.countDocuments();
+            const totalPages = Math.ceil(totalUsers / itemsPerPage);
+
+            const users = await User.find()
+                .skip((currentPage - 1) * itemsPerPage)
+                .limit(itemsPerPage);
+
+            res.render("dashboard", {
+                users,
+                message,
+                totalPages,
+                currentPage,
+                activePage: "dashboard"
+            });
+
+        } catch (error) {
+            console.log("Dashboard Error:", error);
             res.redirect("/pageerror");
         }
     } else {
-        res.redirect("/admin/login")
+        res.redirect("/admin/login");
     }
-}
+};
+
 
 const logout = async (req,res) =>{
     try{

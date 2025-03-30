@@ -26,11 +26,13 @@ app.use(session({
     }
 }));
 
-// // ✅ Pass user globally to all views
+
 app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
+    res.locals.user = req.user || req.session.user || null;  
     next();
-});
+  });
+  
+
 
 
 app.set('view engine','ejs')

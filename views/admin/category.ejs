@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MobiVault Dashboard</title>
+
+  <style>
+    /* General styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1E1E1E;
+    color: #333;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+/* Table styling */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.data-table th {
+    background-color: #4a6da7;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.data-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Button styling */
+.action-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 12px;
+    transition: background-color 0.3s;
+}
+
+.block-btn {
+    background-color: #e74c3c;
+}
+
+.block-btn:hover {
+    background-color: #c0392b;
+}
+
+.unblock-btn {
+    background-color: #2ecc71;
+}
+
+.unblock-btn:hover {
+    background-color: #27ae60;
+}
+
+.action-btn a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+/* Search container */
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-left: 250px;
+    padding: 10px 20px;
+}
+
+.search-icon {
+    margin-right: 10px;
+    color: #ccc;
+}
+
+/* Categories styling */
+.categories-container {
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.categories-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.categories-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.add-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.categories-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.categories-table th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #444;
+    font-weight: normal;
+    color: #fff;
+}
+
+.categories-table td {
+    padding: 10px;
+    border-bottom: 1px solid #444;
+    color: #fff;
+}
+
+.category-description {
+    color: #ccc;
+}
+
+.actions-column {
+    text-align: right;
+}
+
+/* Pagination styling */
+.pagination-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-container a,
+.pagination-container span {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 4px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.pagination-container a {
+    background-color: #4a6da7;
+}
+
+.pagination-container a:hover {
+    background-color: #385785;
+}
+
+.pagination-container .current-page {
+    background-color: #2ecc71;
+    font-weight: bold;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 200px;
+    }
+    .main-content {
+        margin-left: 200px;
+    }
+    .search-container {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+    }
+    .sidebar-menu a {
+        display: none;
+    }
+    .main-content {
+        margin-left: 60px;
+    }
+    .search-container {
+        margin-left: 60px;
+    }
+    .data-table {
+        font-size: 14px;
+    }
+    .data-table th, .data-table td {
+        padding: 8px 10px;
+    }
+    .action-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    .sidebar-menu {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px;
+    }
+    .main-content {
+        margin-left: 0;
+    }
+    .search-container {
+        margin-left: 0;
+    }
+}
+  </style>
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/sideBar.css">
+  
+  <!-- Custom CSS - Your main styles would go here -->
+  
+  <!-- External JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <ul class="sidebar-menu">
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <a href="#">Dashboard</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+            </svg>
+            <a href="#">Products</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19 5v14H5V5h14m1.1-2H3.9c-.5 0-.9.4-.9.9v16.2c0 .4.4.9.9.9h16.2c.4 0 .9-.5.9-.9V3.9c0-.5-.5-.9-.9-.9zM11 7h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2z"/>
+            </svg>
+            <a href="#">Orders</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            <a href="/admin/users">Users</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/>
+            </svg>
+            <a href="/admin/category"  class="active">Categories</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-11.5l-2 5-2-5H8l4 10 4-10h-3.5z"/>
+            </svg>
+            <a href="#">Brands</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+            </svg>
+            <a href="#">Offers</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+            </svg>
+            <a href="#">Settings</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+            <a href="#">Banner</a>
+        </li>
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
+            </svg>
+            <a href="#">Coupons</a>
+        </li>
+        <li class="logout">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <a href="/admin/logout" style="color:red">Logout</a>
+        </li>
+    </ul>
+  </div>
+
+  <!-- Top search bar -->
+  <div class="search-container">
+    <i class="fas fa-search search-icon"></i>
+    <i class="fa fa-user" style="font-size: 14px; margin-left: auto;"></i>
+  </div>
+
+  <!-- Main content area -->
+  <div class="main-content">
+    <!-- Categories container -->
+    <div class="categories-container">
+        <div class="categories-header">
+            <div class="categories-title">Categories</div>
+            <button class="add-button"><a href="/admin/add-category" style="color: white; text-decoration: none;">ADD Categories +</a></button>
+        </div>
+
+        <table class="categories-table">
+            <thead>
+                <tr>
+                    <th>NO</th>
+                    <th>CATEGORIES</th>
+                    <th>CATEGORY DESCRIPTION</th>
+                    <th>LAST UPDATED</th>
+                    <th class="actions-column">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach((category, index) => { %>
+                    <tr>
+                        <td><%= (currentPage - 1) * 4 + index + 1 %></td> <!-- Adjust numbering based on pagination -->
+                        <td><%= category.name %></td>
+                        <td class="category-description"><%= category.description %></td>
+                        <td><%= new Date(category.updatedAt).toLocaleDateString() %></td>
+                        <td class="actions-column">
+                            <!-- Edit and Delete actions -->
+                            <button class="action-btn block-btn">
+                                <a class="btn" href="/admin/edit-category/<%= category._id %>">Edit</a>
+                            </button>
+                            <button class="action-btn unblock-btn">
+                                <a class="btn" href="/admin/delete-category/<%= category._id %>">Delete</a>
+                            </button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+<div class="pagination-container">
+    <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="page-link">&laquo; Previous</a>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+            <span class="current-page"><%= i %></span> <!-- Highlight current page -->
+        <% } else { %>
+            <a href="?page=<%= i %>" class="page-link"><%= i %></a> <!-- Regular page link -->
+        <% } %>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>" class="page-link">Next &raquo;</a>
+    <% } %>
+</div>
+
+  </div>
+</body>
+</html>
