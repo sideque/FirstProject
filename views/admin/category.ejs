@@ -193,6 +193,12 @@ h1 {
     font-weight: bold;
 }
 
+.delete-btn a {
+    background-color: #e74c3c; /* red */
+    color: white;
+}
+
+
 /* Responsive Styles */
 @media (max-width: 992px) {
     .sidebar {
@@ -349,7 +355,7 @@ h1 {
             <button class="add-button"><a href="/admin/add-category" style="color: white; text-decoration: none;">ADD Categories +</a></button>
         </div>
 
-        <table class="categories-table">
+        <!-- <table class="categories-table">
             <thead>
                 <tr>
                     <th>NO</th>
@@ -362,19 +368,77 @@ h1 {
             <tbody>
                 <% categories.forEach((category, index) => { %>
                     <tr>
-                        <td><%= (currentPage - 1) * 4 + index + 1 %></td> <!-- Adjust numbering based on pagination -->
-                        <td><%= category.name %></td>
+                        <td><%= (currentPage - 1) * 4 + index + 1 %></td> <!-- Adjust numbering based on pagination
+                        <td class="categorry-name"><%= category.name %></td>
                         <td class="category-description"><%= category.description %></td>
-                        <td><%= new Date(category.updatedAt).toLocaleDateString() %></td>
+                        <td>
+                            <%if(category.categoryOffer){%>
+                                <%=category.categoryOffer%>
+                                <%}else{%>
+                                    0%
+                                    <%}%>
+                        </td>
+                        <!-- <td><%= new Date(category.updatedAt).toLocaleDateString() %></td> 
                         <td class="actions-column">
-                            <!-- Edit and Delete actions -->
+                            <%if(category.categoryOffer===0){%>
+                            <!-- Edit and Delete actions 
                             <button class="action-btn block-btn">
+                                <a class="btn" href="/admin/edit-category/<%= category._id %>" onclick="addOffer('<%=category._id%>')">Edit</a>
+                            </button>
+                            <%}else{%>
+                            <button class="action-btn unblock-btn">
+                                <a class="btn" href="/admin/delete-category/<%= category._id %>" onclick="removeOffer('<%=category._id%>')">Delete</a>
+                            </button>
+                            <%}%>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table> -->
+
+        <table class="categories-table">
+            <thead>
+                <tr>
+                    <th>NO</th>
+                    <th>CATEGORIES</th>
+                    <th>CATEGORY DESCRIPTION</th>
+                    <th>OFFER PERCENTAGE</th>
+                    <th class="actions-column">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach((category, index) => { %>
+                    <tr>
+                        <td><%= (currentPage - 1) * 4 + index + 1 %></td>
+                        <td class="category-name"><%= category.name %></td>
+                        <td class="category-description"><%= category.description %></td>
+                        <td>
+                            <%= category.categoryOffer ? `${category.categoryOffer}%` : '0%' %>
+                        </td>
+
+
+                        <td class="actions-column">
+                            <button class="action-btn block-btn">
+                                <a class="btn" href="#" onclick="addOffer('<%= category._id %>')">
+                                    <%= category.categoryOffer ? 'Update Offer' : 'Add Offer' %>
+                                </a>
+                            </button>
+                            <% if(category.categoryOffer > 0) { %>
+                                <button class="action-btn unblock-btn">
+                                    <a class="btn" href="#" onclick="removeOffer('<%= category._id %>')">Remove Offer</a>
+                                </button>
+                            <% } %>
+                            <button class="action-btn">
                                 <a class="btn" href="/admin/edit-category/<%= category._id %>">Edit</a>
                             </button>
-                            <button class="action-btn unblock-btn">
-                                <a class="btn" href="/admin/delete-category/<%= category._id %>">Delete</a>
+
+                            <button class="action-btn delete-btn">
+                                <a class="btn" href="#" onclick="deleteCategory('<%= category._id %>')">Delete</a>
                             </button>
+
                         </td>
+
+                        
                     </tr>
                 <% }) %>
             </tbody>
@@ -401,5 +465,339 @@ h1 {
 </div>
 
   </div>
+
+  <script>
+    
+    // async function addOffer(categoryId){
+    //     const {value:amount} = await Swal.fire({
+    //         title:"Offer in percentage",
+    //         input:"number",
+    //         inputLabel:"Percentage",
+    //         inputPlaceholder:"%"
+    //     });
+    //     if(amount){
+    //         try {
+                
+    //             const response = await fetch("/admin/addCategoryOffer",{
+    //                 method:"POST",
+    //                 headers:{
+    //                     'content-type':"application/json",
+    //                 },
+    //                 body:JSON.stringify({
+    //                     percentage:amount,
+    //                     categoryId:categoryId,
+    //                 }),
+    //             });
+
+    //             const data = await response.json();
+    //             if(response.ok && data.status === true){
+    //                 Swal.fire(
+    //                     "Offer added",
+    //                     "The offer has been added",
+    //                     "success"
+    //                 ).then(()=>{
+    //                     location.reload();
+    //                 })
+    //             }else{
+    //                 Swal.fire("Failed",data.message || "Adding offer failed" , "error")
+    //             }
+
+    //         } catch (error) {
+
+    //             Swal.fire(
+    //                 "Error",
+    //                 "An error occured while adding the offer",
+    //                 "error"
+    //             );
+    //             console.log("Error adding offer",error)   
+    //         }
+    //     }
+    // }
+
+    async function addOffer(categoryId) {
+    try {
+        // Prompt for percentage
+        const {value: amount, dismiss} = await Swal.fire({
+            title: "Offer in percentage",
+            input: "number",
+            inputLabel: "Percentage",
+            inputPlaceholder: "%",
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Please enter a percentage value';
+                }
+                if (value < 0 || value > 100) {
+                    return 'Percentage must be between 0 and 100';
+                }
+            }
+        });
+        
+        // Check if user cancelled the dialog
+        if (dismiss === Swal.DismissReason.cancel || amount === undefined) {
+            return;
+        }
+        
+        // Show loading indicator
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Adding category offer',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Make API request
+        const response = await fetch("/admin/addCategoryOffer", {
+            method: "POST",
+            headers: {
+                'Content-Type': "application/json",
+            },
+            body: JSON.stringify({
+                percentage: amount,
+                categoryId: categoryId,
+            }),
+        });
+        
+        // Check for non-JSON responses first
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error(`Server returned non-JSON response: ${await response.text()}`);
+        }
+        
+        const data = await response.json();
+        
+        if (response.ok && data.status === true) {
+            Swal.fire(
+                "Offer added",
+                "The offer has been added",
+                "success"
+            ).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire(
+                "Failed",
+                data.message || "Adding offer failed",
+                "error"
+            );
+        }
+    } catch (error) {
+        console.error("Error adding offer:", error);
+        
+        Swal.fire(
+            "Error",
+            "An error occurred while adding the offer. Please check console for details.",
+            "error"
+        );
+    }
+}
+
+
+    async function removeOffer(categoryId) {
+        try {
+
+            const response = await fetch("/admin/removeCategoryOffer",{
+                method:"POST",
+                headers:{
+                    "content-type" : "application/json",
+                },
+                body:JSON.stringify({
+                    categoryId:categoryId,
+                })
+            })
+
+            const data = await response.json();
+
+            if(response.ok && data.status === true){
+                Swal.fire(
+                    "Offer removed",
+                    "The offer has been removed",
+                    "success"
+                ).then(()=>{
+                    location.reload();
+                });
+            }else{
+                Swal.fire("Failed",data.message || "Removing offer failed","error");
+            }
+
+        } catch (error) {
+
+            Swal.fire(
+                "Error",
+                "An error occured while removing the offer",
+                "error"
+            );
+
+            console.error("Error removing offer",error);
+
+        }
+    }
+
+    async function deleteCategory(categoryId) {
+    try {
+        // First check if category has products
+        const response = await fetch(`/admin/category-has-products/${categoryId}`);
+        const data = await response.json();
+        
+        if (data.hasProducts) {
+            // Ask what to do with products
+            const { value: action } = await Swal.fire({
+                title: 'Delete Category',
+                html: `This category has ${data.count} associated product(s). What would you like to do?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Delete anyway',
+                input: 'radio',
+                inputOptions: {
+                    'delete': 'Delete all associated products',
+                    'reassign': 'Reassign products to another category'
+                },
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to choose an option!';
+                    }
+                }
+            });
+            
+            if (!action) return;
+            
+            if (action === 'reassign') {
+                // Get available categories
+                const catResponse = await fetch('/admin/get-categories');
+                const catData = await catResponse.json();
+                
+                if (!catData.success || catData.categories.length === 0) {
+                    return Swal.fire('Error', 'No other categories available for reassignment', 'error');
+                }
+                
+                // Create options for select dropdown
+                const categoryOptions = {};
+                catData.categories.forEach(cat => {
+                    categoryOptions[cat._id] = cat.name;
+                });
+                
+                // Ask which category to reassign to
+                const { value: targetCategoryId } = await Swal.fire({
+                    title: 'Select Target Category',
+                    input: 'select',
+                    inputOptions: categoryOptions,
+                    inputPlaceholder: 'Select a category',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to select a category!';
+                        }
+                    }
+                });
+                
+                if (!targetCategoryId) return;
+                
+                // Perform deletion with reassignment
+                const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fallbackCategory: targetCategoryId,
+                        deleteProducts: false
+                    })
+                });
+                
+                const deleteResult = await deleteResponse.json();
+                
+                if (deleteResult.success) {
+                    Swal.fire('Deleted!', 'Category deleted and products reassigned successfully.', 'success')
+                    .then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
+                }
+            } else {
+                // Confirm deletion with products
+                const confirmResult = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: `This will permanently delete the category and all ${data.count} associated product(s)!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete everything!'
+                });
+                
+                if (!confirmResult.isConfirmed) return;
+                
+                // Perform deletion with product deletion
+                const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        deleteProducts: true
+                    })
+                });
+                
+                const deleteResult = await deleteResponse.json();
+                
+                if (deleteResult.success) {
+                    Swal.fire('Deleted!', 'Category and all associated products deleted successfully.', 'success')
+                    .then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
+                }
+            }
+        } else {
+            // Simple confirmation for category with no products
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this category?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            // Perform simple deletion
+            const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
+                method: 'DELETE'
+            });
+            
+            // Check if the response is JSON
+            const contentType = deleteResponse.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const deleteResult = await deleteResponse.json();
+                
+                if (deleteResult.success) {
+                    Swal.fire('Deleted!', 'Category deleted successfully.', 'success')
+                    .then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
+                }
+            } else {
+                // Handle non-JSON response (redirect)
+                location.reload();
+            }
+        }
+    } catch (error) {
+        console.error('Error in delete process:', error);
+        Swal.fire('Error', 'An unexpected error occurred', 'error');
+    }
+}
+
+  </script>
 </body>
 </html>
