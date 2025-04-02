@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MobiVault Dashboard</title>
+  <title>MobiVault Brand</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     /* General styling */
@@ -106,22 +106,22 @@ h1 {
     color: #ccc;
 }
 
-/* Categories styling */
-.categories-container {
+/* Brands styling */
+.brands-container {
     background-color: #2a2a2a;
     border-radius: 8px;
     padding: 20px;
     margin-top: 20px;
 }
 
-.categories-header {
+.brands-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
 
-.categories-title {
+.brands-title {
     font-size: 24px;
     font-weight: bold;
     color: #fff;
@@ -137,12 +137,12 @@ h1 {
     cursor: pointer;
 }
 
-.categories-table {
+.brands-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.categories-table th {
+.brands-table th {
     text-align: left;
     padding: 10px;
     border-bottom: 1px solid #444;
@@ -150,13 +150,13 @@ h1 {
     color: #fff;
 }
 
-.categories-table td {
+.brands-table td {
     padding: 10px;
     border-bottom: 1px solid #444;
     color: #fff;
 }
 
-.category-description {
+.brands-description {
     color: #ccc;
 }
 
@@ -296,7 +296,7 @@ th.actions-column {
 </head>
 <body>
   <!-- Sidebar Navigation -->
-  <%-include("../../views/partials/admin/category-sidebar")%> 
+  <%-include("../../views/partials/admin/brand-sidebar")%> 
 
   <!-- Top search bar -->
   <div class="search-container">
@@ -306,70 +306,67 @@ th.actions-column {
 
   <!-- Main content area -->
   <div class="main-content">
-    <!-- Categories container -->
-    <div class="categories-container">
-        <div class="categories-header">
-            <div class="categories-title">Categories</div>
-            <button class="add-button"><a href="/admin/add-category" style="color: white; text-decoration: none;">ADD Categories +</a></button>
+    <!-- Brands container -->
+    <div class="brands-container">
+        <div class="brands-header">
+            <div class="brands-title">Brands</div>
+            <button class="add-button"><a href="/admin/add-brand" style="color: white; text-decoration: none;">ADD Brands +</a></button>
         </div>
 
-        <table class="categories-table">
+        <table class="brands-table">
             <thead>
                 <tr>
                     <th>NO</th>
-                    <th>CATEGORIES</th>
-                    <th>CATEGORY DESCRIPTION</th>
+                    <th>BRANDS</th>
+                    <th>BRAND DESCRIPTION</th>
                     <th>OFFER PERCENTAGE</th>
                     <th class="actions-column">ACTIONS</th>
                 </tr>
             </thead>
             <tbody>
-                <% categories.forEach((category, index) => { %>
-                    <tr>
-                        <td><%= (currentPage - 1) * 4 + index + 1 %></td>
-                        <td class="category-name"><%= category.name %></td>
-                        <td class="category-description"><%= category.description %></td>
-                        <td>
-                            <%= category.categoryOffer ? `${category.categoryOffer}%` : '0%' %>
-                        </td>
-
-                        <td class="actions-column">
-                            <!-- Consistent offer buttons -->
-                            <button class="action-btn <%= category.categoryOffer ? 'unblock-btn' : 'block-btn' %>">
-                                <a href="#" onclick="addOffer('<%= category._id %>')">
-                                    <%= category.categoryOffer ? 'Update Offer' : 'Add Offer' %>
-                                </a>
-                            </button>
-                            
-                            <% if(category.categoryOffer > 0) { %>
-                                <button class="action-btn unblock-btn">
-                                    <a href="#" onclick="removeOffer('<%= category._id %>')">Remove Offer</a>
+                <% if (Array.isArray(brands) && brands.length > 0) { %>
+                    <% brands.forEach((brand, index) => { %>
+                        <tr>
+                            <td><%= (currentPage - 1) * 4 + index + 1 %></td>
+                            <td class="brand-name"><%= brand.name %></td>
+                            <td class="brand-description"><%= brand.description %></td>
+                            <td>
+                                <%= brand.brandOffer ? `${brand.brandOffer}%` : '0%' %>
+                            </td>
+                            <td class="actions-column">
+                                <button class="action-btn <%= brand.brandOffer ? 'unblock-btn' : 'block-btn' %>">
+                                    <a href="#" onclick="addOffer('<%= brand._id %>')">
+                                        <%= brand.brandOffer ? 'Update Offer' : 'Add Offer' %>
+                                    </a>
                                 </button>
-                            <% } %>
-                            
-                            <!-- Clean up list/unlist - remove duplicate status indicator -->
-                            <% if (category.isListed) { %>
+                                <% if(brand.brandOffer > 0) { %>
+                                    <button class="action-btn unblock-btn">
+                                        <a href="#" onclick="removeOffer('<%= brand._id %>')">Remove Offer</a>
+                                    </button>
+                                <% } %>
+                                <% if (brand.isListed) { %>
+                                    <button class="action-btn block-btn">
+                                        <a href="/admin/listBrand?id=<%= brand._id %>">Unlist</a>
+                                    </button>
+                                <% } else { %>
+                                    <button class="action-btn unblock-btn">
+                                        <a href="/admin/unlistBrand?id=<%= brand._id %>">List</a>
+                                    </button>
+                                <% } %>
+                                <button class="action-btn" style="background-color: #4a6da7;">
+                                    <a href="/admin/edit-brand/<%= brand._id %>">Edit</a>
+                                </button>
                                 <button class="action-btn block-btn">
-                                    <a href="/admin/listCategory?id=<%= category._id %>">Unlist</a>
+                                    <a href="#" onclick="deleteBrand('<%= brand._id %>')">Delete</a>
                                 </button>
-                            <% } else { %>
-                                <button class="action-btn unblock-btn">
-                                    <a href="/admin/unlistCategory?id=<%= category._id %>">List</a>
-                                </button>
-                            <% } %>
-                            
-                            <!-- Keep edit and delete buttons consistent -->
-                            <button class="action-btn" style="background-color: #4a6da7;">
-                                <a href="/admin/edit-category/<%= category._id %>">Edit</a>
-                            </button>
-                            
-                            <button class="action-btn block-btn">
-                                <a href="#" onclick="deleteCategory('<%= category._id %>')">Delete</a>
-                            </button>
-                        </td>
-                        
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5">No brands available</td>
                     </tr>
-                <% }) %>
+                <% } %>
             </tbody>
         </table>
     </div>
@@ -397,7 +394,7 @@ th.actions-column {
 
   <script>
 
-    async function addOffer(categoryId) {
+    async function addOffer(brandId) {
     try {
         // Prompt for percentage
         const {value: amount, dismiss} = await Swal.fire({
@@ -424,7 +421,7 @@ th.actions-column {
         // Show loading indicator
         Swal.fire({
             title: 'Processing...',
-            text: 'Adding category offer',
+            text: 'Adding brand offer',
             allowOutsideClick: false,
             showConfirmButton: false,
             willOpen: () => {
@@ -433,14 +430,14 @@ th.actions-column {
         });
         
         // Make API request
-        const response = await fetch("/admin/addCategoryOffer", {
+        const response = await fetch("/admin/addBrandOffer", {
             method: "POST",
             headers: {
                 'Content-Type': "application/json",
             },
             body: JSON.stringify({
                 percentage: amount,
-                categoryId: categoryId,
+                brandId: brandId,
             }),
         });
         
@@ -479,16 +476,16 @@ th.actions-column {
 }
 
 
-    async function removeOffer(categoryId) {
+    async function removeOffer(brandId) {
         try {
 
-            const response = await fetch("/admin/removeCategoryOffer",{
+            const response = await fetch("/admin/removeBrandOffer",{
                 method:"POST",
                 headers:{
                     "content-type" : "application/json",
                 },
                 body:JSON.stringify({
-                    categoryId:categoryId,
+                    brandId:brandId,
                 })
             })
 
@@ -519,17 +516,17 @@ th.actions-column {
         }
     }
 
-    async function deleteCategory(categoryId) {
+    async function deleteBrand(brandId) {
     try {
         // First check if category has products
-        const response = await fetch(`/admin/category-has-products/${categoryId}`);
+        const response = await fetch(`/admin/brand-has-products/${brandId}`);
         const data = await response.json();
         
         if (data.hasProducts) {
             // Ask what to do with products
             const { value: action } = await Swal.fire({
-                title: 'Delete Category',
-                html: `This category has ${data.count} associated product(s). What would you like to do?`,
+                title: 'Delete Brand',
+                html: `This brand has ${data.count} associated product(s). What would you like to do?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -538,7 +535,7 @@ th.actions-column {
                 input: 'radio',
                 inputOptions: {
                     'delete': 'Delete all associated products',
-                    'reassign': 'Reassign products to another category'
+                    'reassign': 'Reassign products to another brand'
                 },
                 inputValidator: (value) => {
                     if (!value) {
@@ -550,44 +547,44 @@ th.actions-column {
             if (!action) return;
             
             if (action === 'reassign') {
-                // Get available categories
-                const catResponse = await fetch('/admin/get-categories');
+                // Get available brands
+                const catResponse = await fetch('/admin/get-brands');
                 const catData = await catResponse.json();
                 
-                if (!catData.success || catData.categories.length === 0) {
-                    return Swal.fire('Error', 'No other categories available for reassignment', 'error');
+                if (!catData.success || catData.brands.length === 0) {
+                    return Swal.fire('Error', 'No other brands available for reassignment', 'error');
                 }
                 
                 // Create options for select dropdown
-                const categoryOptions = {};
-                catData.categories.forEach(cat => {
-                    categoryOptions[cat._id] = cat.name;
+                const brandOptions = {};
+                catData.brands.forEach(cat => {
+                    brandOptions[cat._id] = cat.name;
                 });
                 
-                // Ask which category to reassign to
-                const { value: targetCategoryId } = await Swal.fire({
-                    title: 'Select Target Category',
+                // Ask which brand to reassign to
+                const { value: targetBrandId } = await Swal.fire({
+                    title: 'Select Target Brand',
                     input: 'select',
-                    inputOptions: categoryOptions,
-                    inputPlaceholder: 'Select a category',
+                    inputOptions: brandOptions,
+                    inputPlaceholder: 'Select a brand',
                     showCancelButton: true,
                     inputValidator: (value) => {
                         if (!value) {
-                            return 'You need to select a category!';
+                            return 'You need to select a brand!';
                         }
                     }
                 });
                 
-                if (!targetCategoryId) return;
+                if (!targetBrandId) return;
                 
                 // Perform deletion with reassignment
-                const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
+                const deleteResponse = await fetch(`/admin/delete-brand/${brandId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        fallbackCategory: targetCategoryId,
+                        fallbackCategory: targetBrandId,
                         deleteProducts: false
                     })
                 });
@@ -595,18 +592,18 @@ th.actions-column {
                 const deleteResult = await deleteResponse.json();
                 
                 if (deleteResult.success) {
-                    Swal.fire('Deleted!', 'Category deleted and products reassigned successfully.', 'success')
+                    Swal.fire('Deleted!', 'Brand deleted and products reassigned successfully.', 'success')
                     .then(() => {
                         location.reload();
                     });
                 } else {
-                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
+                    Swal.fire('Error', deleteResult.message || 'Failed to delete brand', 'error');
                 }
             } else {
                 // Confirm deletion with products
                 const confirmResult = await Swal.fire({
                     title: 'Are you sure?',
-                    text: `This will permanently delete the category and all ${data.count} associated product(s)!`,
+                    text: `This will permanently delete the brand and all ${data.count} associated product(s)!`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -617,7 +614,7 @@ th.actions-column {
                 if (!confirmResult.isConfirmed) return;
                 
                 // Perform deletion with product deletion
-                const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
+                const deleteResponse = await fetch(`/admin/delete-brand/${brandId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -630,19 +627,19 @@ th.actions-column {
                 const deleteResult = await deleteResponse.json();
                 
                 if (deleteResult.success) {
-                    Swal.fire('Deleted!', 'Category and all associated products deleted successfully.', 'success')
+                    Swal.fire('Deleted!', 'Brand and all associated products deleted successfully.', 'success')
                     .then(() => {
                         location.reload();
                     });
                 } else {
-                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
+                    Swal.fire('Error', deleteResult.message || 'Failed to delete brand', 'error');
                 }
             }
         } else {
             // Simple confirmation for category with no products
             const result = await Swal.fire({
                 title: 'Are you sure?',
-                text: "You want to delete this category?",
+                text: "You want to delete this brand?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -653,7 +650,7 @@ th.actions-column {
             if (!result.isConfirmed) return;
             
             // Perform simple deletion
-            const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
+            const deleteResponse = await fetch(`/admin/delete-brand/${brandId}`, {
                 method: 'DELETE'
             });
             
@@ -663,12 +660,12 @@ th.actions-column {
                 const deleteResult = await deleteResponse.json();
                 
                 if (deleteResult.success) {
-                    Swal.fire('Deleted!', 'Category deleted successfully.', 'success')
+                    Swal.fire('Deleted!', 'Brand deleted successfully.', 'success')
                     .then(() => {
                         location.reload();
                     });
                 } else {
-                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
+                    Swal.fire('Error', deleteResult.message || 'Failed to delete brand', 'error');
                 }
             } else {
                 // Handle non-JSON response (redirect)

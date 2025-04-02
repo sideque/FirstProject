@@ -56,7 +56,9 @@ const categoryInfo = async (req, res) => {
     }
     const loadAddCategory = (req,res) => {
         try {
-            res.render('add-category');
+            res.render('add-category',{
+                 activePage: "category"
+            });
         }catch (error) {
             console.log(error.message);
             res.redirect('/pageerror');
@@ -261,13 +263,11 @@ const loadEditCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
         const category = await Category.findById(categoryId);
-        
         if (!category) {
             req.flash('error', 'Category not found');
             return res.redirect('/admin/category');
         }
-        
-        res.render('admin/edit-category', { 
+        res.render('edit-category', {  // Remove 'admin/' prefix
             category, 
             title: 'Edit Category',
             error: req.flash('error'),
@@ -275,7 +275,6 @@ const loadEditCategory = async (req, res) => {
         });
     } catch (error) {
         console.error('Error loading edit category page:', error);
-       
         res.redirect('/admin/category');
     }
 };
@@ -314,6 +313,33 @@ const editCategory = async (req, res) => {
     }
 };
 
+const getListCategory = async (req,res) =>{
+    try {
+        
+        let id = req.query.id;
+        await Category.updateOne({_id:id},{$set:{isListed:false}});
+        res.redirect("/admin/category");
+
+    } catch (error) {
+        
+        res.redirect("/pageerror");
+
+    }
+}
+
+    const getUnlistCategory = async (req,res) =>{
+        try {
+            
+            let id = req.query.id;
+            await Category.updateOne({_id:id},{$set:{isListed:true}});
+            res.redirect("/admin/category");
+
+        } catch (error) {
+            
+            res.redirect("/pageerror")
+
+        }
+    }
 // Update your module.exports
 module.exports = {
     categoryInfo,
@@ -325,5 +351,7 @@ module.exports = {
     categoryHasProducts,
     getCategories,
     loadEditCategory,
-    editCategory
+    editCategory,
+    getListCategory,
+    getUnlistCategory
 };

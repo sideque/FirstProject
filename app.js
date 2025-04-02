@@ -13,7 +13,7 @@ const userMiddleware = require('./middlewares/userMiddleware');
 const flash = require('connect-flash');  // Add this at the top
 app.use(flash());  // Add this after session middleware
 
-// app.use(userMiddleware);  // എല്ലാ routes-ലും ഈ middleware പ്രവർത്തിക്കും
+// app.use(userMiddleware);  
 
 
 app.use(express.json());

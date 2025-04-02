@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MobiVault Dashboard</title>
+  <title>MobiVault Brand</title>
   
   <!-- External CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -144,7 +144,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <%-include("../../views/partials/admin/category-sidebar")%>   
+    <%-include("../../views/partials/admin/brand-sidebar")%>   
   <!-- Top search bar -->
   <!-- <div class="search-container">
     <i class="fas fa-search search-icon"></i>
@@ -153,82 +153,124 @@
   
   <!-- Main content -->
   <div class="container">
-    <h1>Add Categories</h1>
+    <h1>Add Brands</h1>
     
-    <form id="addCategoryForm">
+    <form id="addBrandForm">
         <div class="form-group">
-            <label for="category-name" class="form-label">Category Name:</label>
-            <input type="text" id="category-name" class="form-input">
+            <label for="brand-name" class="form-label">Brand Name:</label>
+            <input type="text" id="brand-name" class="form-input">
             <div id="name-error" class="error-message" style="color: red; display: none;"></div>
         </div>
         
         <div class="form-group">
-            <label for="category-description" class="form-label">Description:</label>
-            <textarea id="category-description" class="form-input"></textarea>
+            <label for="brand-description" class="form-label">Description:</label>
+            <!-- <textarea id="brand" class="form-input"></textarea> -->
+            <textarea id="brand-description" class="form-input"></textarea>
             <div id="description-error" class="error-message" style="color: red; display: none;"></div>
         </div>
         
         <div class="btn-container">
-            <button type="submit" class="btn-submit">ADD Category</button>
+            <button type="submit" class="btn-submit">ADD Brand</button>
         </div>
     </form>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('addCategoryForm');
+    const form = document.getElementById('addBrandForm');
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
 
+    // function handleFormSubmit(event) {
+    //     event.preventDefault();
+    //     if (!validateForm()) {
+    //         return;
+    //     }
+
+    //     const name = document.getElementById("brand-name").value.trim();
+    //     const description = document.getElementById("brand-description").value.trim();
+
+    //     fetch('/admin/addBrand', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ name, description })
+    //     })
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             return response.json().then(err => {
+    //                 throw new Error(err.error);
+    //             });
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(data => {
+    //         // Success! Redirect to brands page
+    //         window.location.href = '/admin/brand';
+    //     })
+    //     .catch(error => {
+    //         Swal.fire({
+    //             icon: 'error',
+    //             title: 'Oops',
+    //             text: error.message || 'An error occurred while adding the brand'
+    //         });
+    //     });
+    // }
+
     function handleFormSubmit(event) {
-        event.preventDefault();
-        if (!validateForm()) {
-            return;
-        }
-
-        const name = document.getElementById("category-name").value.trim();
-        const description = document.getElementById("category-description").value.trim();
-
-        fetch('/admin/addCategory', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name, description })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.error);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Success! Redirect to categories page
-            window.location.href = '/admin/category';
-        })
-        .catch(error => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops',
-                text: error.message || 'An error occurred while adding the category'
-            });
-        });
+    event.preventDefault();
+    console.log("Form submitted");
+    if (!validateForm()) {
+        console.log("Validation failed");
+        return;
     }
+    console.log("Validation passed, sending fetch");
+    const name = document.getElementById("brand-name").value.trim();
+    const description = document.getElementById("brand-description").value.trim();
+
+    fetch('/admin/addBrand', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, description })
+    })
+    .then(response => {
+        console.log("Response received:", response.status);
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.error);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Data:", data);
+        window.location.href = '/admin/brand';
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops',
+            text: error.message || 'An error occurred while adding the brand'
+        });
+    });
+}
 
     function validateForm() {
         clearErrorMessages();
-        const name = document.getElementById("category-name").value.trim();
-        const description = document.getElementById("category-description").value.trim();
+        const name = document.getElementById("brand-name").value.trim();
+        const description = document.getElementById("brand-description").value.trim();
         let isValid = true;
 
         if (name === "") {
             displayErrorMessage("name-error", "Please enter a name");
             isValid = false;
         } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-            displayErrorMessage("name-error", "Category name should contain only alphabetic characters");
+            displayErrorMessage("name-error", "Brand name should contain only alphabetic characters");
             isValid = false;
         }
 
