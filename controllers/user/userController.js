@@ -18,13 +18,16 @@ const loadHomePage = async (req,res) =>{
             const userData = await User.findOne({_id:user._id});
             res.render("home",{user:userData})
         }else{
-            return res.render('home');
+            // return res.render('home');
+            return res.render("home", { user: null });
         }
     }catch (error){
         console.log("Home page not loading:",error);
         res.status(500).send("Server Error")
     }
 }  
+
+
 const loadLogin = async (req, res) => {
     try {
       if (!req.session.user) {

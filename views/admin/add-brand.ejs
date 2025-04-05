@@ -182,42 +182,6 @@
         form.addEventListener('submit', handleFormSubmit);
     }
 
-    // function handleFormSubmit(event) {
-    //     event.preventDefault();
-    //     if (!validateForm()) {
-    //         return;
-    //     }
-
-    //     const name = document.getElementById("brand-name").value.trim();
-    //     const description = document.getElementById("brand-description").value.trim();
-
-    //     fetch('/admin/addBrand', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ name, description })
-    //     })
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             return response.json().then(err => {
-    //                 throw new Error(err.error);
-    //             });
-    //         }
-    //         return response.json();
-    //     })
-    //     .then(data => {
-    //         // Success! Redirect to brands page
-    //         window.location.href = '/admin/brand';
-    //     })
-    //     .catch(error => {
-    //         Swal.fire({
-    //             icon: 'error',
-    //             title: 'Oops',
-    //             text: error.message || 'An error occurred while adding the brand'
-    //         });
-    //     });
-    // }
 
     function handleFormSubmit(event) {
     event.preventDefault();
@@ -300,28 +264,5 @@
 });
 
 </script>
-   <!-- JavaScript for interactions 
-//    <!--<script>
-//     // Add any JavaScript functionality here
-//     document.addEventListener('DOMContentLoaded', function() {
-//       // Example: Add confirmation for block/unblock actions
-//       const blockButtons = document.querySelectorAll('.block-btn a');
-//       blockButtons.forEach(button => {
-//         button.addEventListener('click', function(e) {
-//           if (!confirm('Are you sure you want to block this user?')) {
-//             e.preventDefault();
-//           }
-//         });
-//       });
-      
-//       const unblockButtons = document.querySelectorAll('.unblock-btn a');
-//       unblockButtons.forEach(button => {
-//         button.addEventListener('click', function(e) {
-//           if (!confirm('Are you sure you want to unblock this user?')) {
-//             e.preventDefault();
-//           }
-//         });
-//       });
-//     });-->
 </body>
 </html>

@@ -8,7 +8,7 @@ const pageerror = async (req,res)=>{
 
 const loadLogin = (req, res) => {
     if (req.session.admin) {
-        return res.redirect("/admin/dashboard");
+        return res.redirect("/admin");
     }
     res.render("admin-login", { message: null });
 }
@@ -16,29 +16,29 @@ const loadLogin = (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(req.body);
+        console.log("Login Attempt:", email);
 
-        
         const admin = await User.findOne({ email });
 
-        
-        if (!admin) {
+        if (!admin || !admin.isAdmin) {  // Ensure user is an admin
+            console.log("Admin Not Found or Not Authorized");
             return res.render("admin-login", { message: "Invalid email or password." });
         }
 
-        // Compare the password
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if (passwordMatch) {
-            req.session.admin = true;
+            req.session.admin = { id: admin._id, email: admin.email, isAdmin: admin.isAdmin }; // Store full session
+            console.log("Session Set:", req.session.admin);
             return res.redirect("/admin");
         } else {
+            console.log("Incorrect Password");
             return res.render("admin-login", { message: "Invalid email or password." });
         }
     } catch (error) {
         console.log("Login error", error);
         return res.redirect("/pageerror");
     }
-}
+};
 
 const loadDashboard = async (req, res) => {
     if (req.session.admin) {

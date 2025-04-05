@@ -19,20 +19,32 @@ const userAuth = (req,res,next) =>{
     }
 }
 
-const adminAuth = (req,res,next) =>{
-    User.findOne({isAdmin:true})
-    .then(data => {
-        if(data){
-            next();
-        }else{
-            res.redirect("/admin/login")
-        }
-    })
-    .catch(error =>{
-        console.log("Error in adminauth middleware",error);
-        res.status(500).send("Interanal Server Error")
-    })
-}
+const adminAuth = (req, res, next) => {
+    console.log("Admin Auth Check:", req.session.admin);
+
+    if (req.session.admin && req.session.admin.isAdmin) { 
+        User.findById(req.session.admin.id)
+            .then(admin => {
+                if (admin && admin.isAdmin) {
+                    console.log("Admin Verified:", admin.email);
+                    next(); // Admin authenticated
+                } else {
+                    console.log("Not an Admin or Invalid Session");
+                    req.session.destroy();
+                    res.redirect("/admin/login");
+                }
+            })
+            .catch(error => {
+                console.log("Error in adminAuth middleware", error);
+                req.session.destroy();
+                res.redirect("/admin/login");
+            });
+    } else {
+        console.log("No Admin Session Found");
+        res.redirect("/admin/login");
+    }
+};
+
 
 module.exports = {
     userAuth,

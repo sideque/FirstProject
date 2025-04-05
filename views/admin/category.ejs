@@ -335,7 +335,7 @@ th.actions-column {
 
                         <td class="actions-column">
                             <!-- Consistent offer buttons -->
-                            <button class="action-btn <%= category.categoryOffer ? 'unblock-btn' : 'block-btn' %>">
+                            <!-- <button class="action-btn <%= category.categoryOffer ? 'unblock-btn' : 'block-btn' %>">
                                 <a href="#" onclick="addOffer('<%= category._id %>')">
                                     <%= category.categoryOffer ? 'Update Offer' : 'Add Offer' %>
                                 </a>
@@ -345,7 +345,7 @@ th.actions-column {
                                 <button class="action-btn unblock-btn">
                                     <a href="#" onclick="removeOffer('<%= category._id %>')">Remove Offer</a>
                                 </button>
-                            <% } %>
+                            <% } %> -->
                             
                             <!-- Clean up list/unlist - remove duplicate status indicator -->
                             <% if (category.isListed) { %>

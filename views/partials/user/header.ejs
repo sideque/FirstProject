@@ -74,7 +74,7 @@
               <a href="/cart" class="nav-link"><span class="icon-shopping_cart"></span> [0]</a>
             </li>
 
-            <% if (user) { %>
+            <% if (typeof user !== "undefined" && user) { %>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <%= user.name %>
@@ -87,11 +87,11 @@
             <% } else { %>
               <li class="nav-item"><a href="/login" class="nav-link">Login</a></li>
               <li class="nav-item"><a href="/signup" class="nav-link">Sign Up</a></li>
-            <% } %>
+            <% } %>            
           </ul>
         </div>
       </div>
-    </nav>
+    </nav>  
 
     <!-- JS Scripts: jQuery, Popper, Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

@@ -334,7 +334,7 @@ th.actions-column {
                                 <%= brand.brandOffer ? `${brand.brandOffer}%` : '0%' %>
                             </td>
                             <td class="actions-column">
-                                <button class="action-btn <%= brand.brandOffer ? 'unblock-btn' : 'block-btn' %>">
+                                <!-- <button class="action-btn <%= brand.brandOffer ? 'unblock-btn' : 'block-btn' %>">
                                     <a href="#" onclick="addOffer('<%= brand._id %>')">
                                         <%= brand.brandOffer ? 'Update Offer' : 'Add Offer' %>
                                     </a>
@@ -343,7 +343,7 @@ th.actions-column {
                                     <button class="action-btn unblock-btn">
                                         <a href="#" onclick="removeOffer('<%= brand._id %>')">Remove Offer</a>
                                     </button>
-                                <% } %>
+                                <% } %> -->
                                 <% if (brand.isListed) { %>
                                     <button class="action-btn block-btn">
                                         <a href="/admin/listBrand?id=<%= brand._id %>">Unlist</a>

@@ -4,7 +4,167 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Email Verification</title>
-  <link rel="stylesheet" href="/css/verify-otp.css" />
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-light: #e0e7ff;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --text-color: #1f2937;
+      --light-text: #6b7280;
+      --container-bg: #ffffff;
+      --input-border: #d1d5db;
+      --animation-timing: 0.3s;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #a5b4fc, #818cf8);
+      padding: 20px;
+    }
+    
+    .verification-container {
+      background-color: var(--container-bg);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      transition: transform var(--animation-timing);
+    }
+    
+    .verification-container:hover {
+      transform: translateY(-5px);
+    }
+    
+    .verification-title {
+      color: var(--text-color);
+      font-size: 26px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .verification-description {
+      color: var(--light-text);
+      margin-bottom: 30px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    
+    .code-input-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    
+    .code-input {
+      width: 50px;
+      height: 60px;
+      font-size: 24px;
+      border: 2px solid var(--input-border);
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-color);
+      background-color: #f9fafb;
+      transition: all var(--animation-timing);
+    }
+    
+    .code-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--primary-light);
+      background-color: white;
+      outline: none;
+      transform: scale(1.05);
+    }
+    
+    .code-input.filled {
+      background-color: var(--primary-light);
+      border-color: var(--primary-color);
+    }
+    
+    .submit-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all var(--animation-timing);
+      width: 100%;
+      max-width: 200px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+    }
+    
+    .submit-btn:hover {
+      background-color: #4338ca;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 10px rgba(79, 70, 229, 0.3);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    
+    .countdown-text {
+      color: var(--light-text);
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    
+    #timerValue {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    
+    .resend-link {
+      color: var(--primary-color);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--animation-timing);
+    }
+    
+    .resend-link:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+    
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    
+    @media (max-width: 480px) {
+      .code-input {
+        width: 40px;
+        height: 50px;
+        font-size: 20px;
+      }
+      
+      .verification-container {
+        padding: 30px 20px;
+      }
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -13,8 +173,8 @@
     <h2 class="verification-title">Email Verification</h2>
 
     <p class="verification-description">
-        Enter the 6-digit verification code that was sent to your Email Id
-      </p>
+        Enter the 6-digit verification code that was sent to your email
+    </p>
       
     <form
     id="otpForm"
@@ -29,7 +189,7 @@
         <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
         <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
       </div>
-      <button type="submit" class="submit-btn">Submit</button>
+      <button type="submit" class="submit-btn">Verify</button>
     </form>
 
    <p class="countdown-text">
@@ -45,17 +205,55 @@
   </div>
 
   <script>
-    let timer = 60;
+    let timer = 39; // Starting from 39 as shown in your HTML
     let countdown;
     const timerValue = document.getElementById("timerValue");
     const resendLink = document.getElementById("resendLink");
+    const inputs = document.querySelectorAll(".code-input");
+  
+    // Setup auto-focus for OTP inputs
+    inputs.forEach((input, index) => {
+      input.addEventListener("keyup", function(e) {
+        // Add filled class when input has value
+        if (this.value) {
+          this.classList.add("filled");
+        } else {
+          this.classList.remove("filled");
+        }
+        
+        // Move to next input if current is filled
+        if (this.value.length === 1 && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+        
+        // Handle backspace
+        if (e.key === "Backspace" && index > 0 && this.value.length === 0) {
+          inputs[index - 1].focus();
+        }
+      });
+      
+      input.addEventListener("paste", function(e) {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData("text").trim();
+        
+        if (/^\d+$/.test(pastedData) && pastedData.length === inputs.length) {
+          // Fill all inputs with pasted data
+          inputs.forEach((input, i) => {
+            input.value = pastedData[i];
+            input.classList.add("filled");
+          });
+          // Focus last input
+          inputs[inputs.length - 1].focus();
+        }
+      });
+    });
   
     function startTimer() {
       timer = 60;
   
       resendLink.style.pointerEvents = "none";
       resendLink.style.opacity = "0.5";
-      resendLink.style.color = "#000";
+      resendLink.style.color = "#6b7280";
       resendLink.style.textDecoration = "none";
   
       clearInterval(countdown); // Stop previous timer
@@ -69,8 +267,8 @@
           timerValue.textContent = "0";
           resendLink.style.pointerEvents = "auto";
           resendLink.style.opacity = "1";
-          resendLink.style.color = "#3b82f6";
-          resendLink.style.textDecoration = "underline";
+          resendLink.style.color = "var(--primary-color)";
+          resendLink.classList.add("pulse");
         }
       }, 1000);
     }
@@ -79,7 +277,6 @@
     startTimer();
   
     function validateOTPForm() {
-      const inputs = document.querySelectorAll(".code-input");
       let otp = "";
   
       inputs.forEach(input => {
@@ -87,10 +284,21 @@
       });
   
       if (otp.length !== 6 || isNaN(otp)) {
-        Swal.fire("Error", "Please enter a valid 6-digit OTP", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Invalid Code",
+          text: "Please enter a valid 6-digit verification code",
+          confirmButtonColor: "var(--primary-color)"
+        });
         return false;
       }
   
+      // Add loading effect to button
+      const submitBtn = document.querySelector(".submit-btn");
+      const originalText = submitBtn.innerText;
+      submitBtn.innerText = "Verifying...";
+      submitBtn.disabled = true;
+      
       $.ajax({
         type: "POST",
         url: "/verify-otp",
@@ -99,7 +307,9 @@
           if (response.success) {
             Swal.fire({
               icon: "success",
-              title: "OTP verified successfully",
+              title: "Verified!",
+              text: "Your email has been successfully verified",
+              confirmButtonColor: "var(--success-color)",
               showConfirmButton: false,
               timer: 1500,
             }).then(() => {
@@ -108,17 +318,23 @@
           } else {
             Swal.fire({
               icon: "error",
-              title: "Error",
-              text: response.message,
+              title: "Verification Failed",
+              text: response.message || "Please try again",
+              confirmButtonColor: "var(--primary-color)"
             });
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
           }
         },
         error: function() {
           Swal.fire({
             icon: "error",
-            title: "Invalid OTP",
-            text: "Please try again",
+            title: "Invalid Code",
+            text: "The verification code you entered is incorrect",
+            confirmButtonColor: "var(--primary-color)"
           });
+          submitBtn.innerText = originalText;
+          submitBtn.disabled = false;
         }
       });
   
@@ -126,6 +342,7 @@
     }
   
     function resendOTP() {
+      resendLink.classList.remove("pulse");
       clearInterval(countdown);
       startTimer();
   
@@ -134,9 +351,18 @@
         url: "/resend-otp",
         success: function(response) {
           if (response.success) {
+            // Clear all inputs
+            inputs.forEach(input => {
+              input.value = "";
+              input.classList.remove("filled");
+            });
+            inputs[0].focus();
+            
             Swal.fire({
               icon: "success",
-              title: "OTP Resent Successfully",
+              title: "Code Resent",
+              text: "A new verification code has been sent to your email",
+              confirmButtonColor: "var(--success-color)",
               showConfirmButton: false,
               timer: 1500,
             });
@@ -144,7 +370,8 @@
             Swal.fire({
               icon: "error",
               title: "Error",
-              text: "An error occurred while resending OTP. Please try again.",
+              text: "An error occurred while resending the code. Please try again.",
+              confirmButtonColor: "var(--primary-color)"
             });
           }
         },
@@ -152,7 +379,8 @@
           Swal.fire({
             icon: "error",
             title: "Server Error",
-            text: "Could not resend OTP. Try again later.",
+            text: "Could not resend verification code. Please try again later.",
+            confirmButtonColor: "var(--primary-color)"
           });
         }
       });
