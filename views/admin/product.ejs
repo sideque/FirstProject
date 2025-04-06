@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MobiVault Admin - Products</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/sideBar.css">
   <style>
@@ -15,10 +19,97 @@
       background-color: #161618;
       color: #ffffff;
     }
+    /* Header and Search Container */
+    .header-container {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 90;
+    }
+
+    /* Search Bar */
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background-color: #2A2A2A;
+      border: 1px solid #333;
+      border-radius: 20px;
+      color: white;
+      padding: 8px 15px 8px 40px;
+      width: 250px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #9747FF;
+      width: 280px;
+      box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      color: #999;
+      pointer-events: none;
+    }
+
+    /* Admin Profile */
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 25px;
+      transition: background-color 0.3s;
+      background-color: #2A2A2A;
+      padding: 5px 15px;
+      border-radius: 30px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .admin-profile:hover {
+      background-color: #2A2A2A;
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #4778FF;
+      margin-right: 10px;
+    }
+
+    .admin-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .admin-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      white-space: nowrap;
+    }
 
     /* Main Content Styles */
     .main-content {
       margin-left: 250px;
+      margin-top: 60px;
       padding: 20px;
       transition: margin-left 0.3s;
     }
@@ -229,6 +320,13 @@
       .main-content {
         margin-left: 200px;
       }
+      .search-input {
+        width: 200px;
+      }
+      
+      .search-input:focus {
+        width: 220px;
+      }
     }
 
     @media (max-width: 768px) {
@@ -244,11 +342,47 @@
       .action-btn {
         padding: 4px;
       }
+      .header-container {
+        top: 10px;
+        right: 15px;
+      }
+      
+      .admin-name {
+        display: none;
+      }
+      
+      .search-input {
+        width: 160px;
+      }
+      
+      .search-input:focus {
+        width: 180px;
+      }
+      
     }
 
     @media (max-width: 480px) {
       .main-content {
         margin-left: 0;
+      }
+      .header-container {
+        position: static;
+        justify-content: space-between;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .search-container {
+        width: 70%;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .search-input:focus {
+        width: 100%;
       }
     }
   </style>
@@ -258,6 +392,29 @@
     <%-include("../../views/partials/admin/product-sidebar")%> 
   <!-- Main content area -->
   <div class="main-content">
+
+    <div class="header-container">
+      <!-- Search -->
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="Search...">
+      </div>
+
+      <!-- Admin Profile Dropdown -->
+      <div class="admin-profile dropdown">
+        <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
+        </div>
+        <div class="admin-name">Admin User</div>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li><h6 class="dropdown-header">Admin User</h6></li>
+          <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li> -->
+          <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li> -->
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+        </ul>
+      </div>
+    </div>
     <!-- Products Header -->
     <div class="brands-container">
       <div class="brands-header">
@@ -337,6 +494,9 @@
       </div>
     </div>
   </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- JavaScript for interactive features (optional) -->
   <script>

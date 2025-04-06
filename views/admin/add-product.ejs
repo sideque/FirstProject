@@ -6,9 +6,12 @@
     <title>Add Product</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.css">
     <link rel="stylesheet" href="/css/sideBar.css">
     <link rel="stylesheet" href="/css/add-product.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
 </head>
 <body>
 
@@ -26,7 +29,7 @@
                 <div class="row">
                     <div class="col-md-12 mb-4">
                         <div class="mb-3">
-                            <label class="form-label">Product Images (Up to 3):</label>
+                            <label class="form-label">Product Images (3 images required):</label>
                             <div class="image-preview-container">
                                 <div class="image-wrapper">
                                     <div class="image-preview image-preview-empty" id="imagePreview0"></div>
@@ -60,7 +63,7 @@
                             
                             <div id="images-error" class="error-message"></div>
                             <div class="mt-2">
-                                <span class="helper-text">Click on any box to upload and crop image</span>
+                                <span class="helper-text">Click on any box to upload and crop image (all 3 images required)</span>
                             </div>
                         </div>
                     </div>
@@ -190,6 +193,8 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
     
     <script>
         // Global variables
@@ -240,7 +245,26 @@
                 if (validateForm()) {
                     // Convert base64 data to files for upload
                     prepareImagesForUpload();
-                    this.submit();
+                    
+                    // Submit the form and show success message
+                    const form = this;
+                    const isEditing = document.getElementById('productId').value !== '';
+                    
+                    // Use actual form submission
+                    form.submit();
+                    
+                    // Show success message with SweetAlert
+                    Swal.fire({
+                        title: isEditing ? 'Product Updated!' : 'Product Added!',
+                        text: isEditing ? 'The product has been successfully updated.' : 'The product has been successfully added.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        // Optional: Redirect to products list after success
+                        // if (result.isConfirmed) {
+                        //     window.location.href = '/admin/products';
+                        // }
+                    });
                 }
             });
             
@@ -260,9 +284,20 @@
         function handleFileSelect(event, index) {
             const file = event.target.files[0];
             if (!file) return;
-            
-            if (!file.type.match('image.*')) {
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];            
+            // if (!file.type.match('image.*')) {
+                if (!validTypes.includes(file.type)) {
                 showError('images-error', 'Please select an image file (JPEG, JPG, or PNG)');
+                event.target.value = '';
+                return;
+            }
+
+            //checking file size 
+            const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+            if(file.size > maxSizeInBytes){
+                showError('images-error', 'Image size should not exceed 10MB');
+                event.target.value = ''; //Clear large file
                 return;
             }
             
@@ -312,6 +347,9 @@
             // Show delete button
             deleteButtons[currentImageIndex].style.display = 'flex';
             
+            // Clear any previous image validation error
+            hideError('images-error');
+            
             // Close modal
             closeCropModal();
         }
@@ -343,29 +381,82 @@
         
         // Function to delete an existing image on the server
         function deleteServerImage(imagePath, productId, index) {
-            if (confirm('Are you sure you want to delete this image?')) {
-                fetch(`/admin/deleteProductImage/${productId}/${imagePath}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Clear the preview
-                        deleteImage(index);
-                    } else {
-                        alert('Failed to delete image');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the image');
-                });
-            }
+            Swal.fire({
+                title: 'Delete Image?',
+                text: 'Are you sure you want to delete this image?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/deleteProductImage/${productId}/${imagePath}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Clear the preview
+                            deleteImage(index);
+                            Swal.fire(
+                                'Deleted!',
+                                'The image has been deleted.',
+                                'success'
+                            );
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'Failed to delete image.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the image.',
+                            'error'
+                        );
+                    });
+                }
+            });
         }
         
         // Function to validate form
         function validateForm() {
             let isValid = true;
+            
+            // Validate product images (all 3 required)
+            const imagesFilled = [
+                document.getElementById('croppedImage0').value !== '',
+                document.getElementById('croppedImage1').value !== '',
+                document.getElementById('croppedImage2').value !== ''
+            ];
+            
+            // Check if we're editing or adding a new product
+            const isEditing = document.getElementById('productId').value !== '';
+            
+            // For new products, require all 3 images
+            // For editing, we need to check if images are already present on the server
+            if (!isEditing && (!imagesFilled[0] || !imagesFilled[1] || !imagesFilled[2])) {
+                showError('images-error', 'Please upload all 3 required product images');
+                isValid = false;
+            } else if (isEditing) {
+                // For editing, we need to check if there are images on the preview
+                const hasImages = previewElements.every(preview => 
+                    !preview.classList.contains('image-preview-empty')
+                );
+                if (!hasImages) {
+                    showError('images-error', 'Please upload all 3 required product images');
+                    isValid = false;
+                } else {
+                    hideError('images-error');
+                }
+            } else {
+                hideError('images-error');
+            }
             
             // Validate product name
             const productName = document.getElementById('productName').value;
@@ -514,12 +605,22 @@
                             });
                         }
                     } else {
-                        alert('Failed to load product data');
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to load product data',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error loading product data:', error);
-                    alert('An error occurred while loading product data');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while loading product data',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
         }
         

@@ -1,290 +1,662 @@
-<!-- views/product-list.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/sideBar.css">
-    <link rel="stylesheet" href="/css/add-product.css">
-    <style>
-        .product-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MobiVault Dashboard</title>
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  
+  <!-- Custom CSS -->
+  <style>
+    /* General styling */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #1E1E1E;
+        color: #333;
+    }
+    
+    /* Sidebar styling */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 250px;
+        background-color: #2A2A2A;
+        color: #fff;
+        overflow-y: auto;
+        transition: all 0.3s;
+        z-index: 100;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sidebar-menu {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    
+    .sidebar-menu li {
+        position: relative;
+        margin: 5px 0;
+    }
+    
+    .sidebar-menu li a {
+        padding: 12px 20px;
+        color: #b3b3b3;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+    
+    .sidebar-menu li a:hover, .sidebar-menu li a.active {
+        color: #fff;
+        background-color: rgba(151, 71, 255, 0.2);
+        border-left: 4px solid #9747FF;
+    }
+    
+    .sidebar-menu li a.active {
+        color: #fff;
+        background-color: rgba(151, 71, 255, 0.2);
+        border-left: 4px solid #9747FF;
+    }
+    
+    .sidebar-menu li a .fas, .sidebar-menu li a .far, .sidebar-menu li svg {
+        margin-right: 10px;
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+    }
+    
+    .sidebar-menu .logout {
+        margin-top: 40px;
+    }
+    
+    .main-content {
+        margin-left: 250px;
+        padding: 20px;
+        transition: margin-left 0.3s;
+        position: relative;
+        min-height: 100vh;
+    }
+    
+    .page-title {
+        margin-bottom: 30px;
+        color: #fff;
+        font-weight: 600;
+        border-left: 4px solid #9747FF;
+        padding-left: 15px;
+    }
+    
+    /* Header container and admin profile */
+    .header-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 50;
+    }
+
+    .search-container {
+      position: relative;
+      margin-right: 15px;
+    }
+
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      background-color: #2A2A2A;
+      padding: 5px 15px;
+      border-radius: 30px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 10px;
+      border: 2px solid #9747FF;
+    }
+
+    .admin-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .admin-name {
+      color: white;
+      font-weight: 500;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    
+    /* Table styling */
+    .table-container {
+      margin-top: 80px;
+      background-color: #2A2A2A;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 30px;
+        background-color: transparent;
+        color: #e0e0e0;
+    }
+    
+    .data-table th {
+        background-color: #9747FF;
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        border-top: 1px solid #444;
+    }
+    
+    .data-table th:first-child {
+        border-top-left-radius: 8px;
+    }
+    
+    .data-table th:last-child {
+        border-top-right-radius: 8px;
+    }
+    
+    .data-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #444;
+    }
+    
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .data-table tr:hover td {
+        background-color: #333;
+    }
+    
+    /* Button styling */
+    .action-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 12px;
+        transition: all 0.3s;
+        display: inline-block;
+    }
+    
+    .block-btn {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .block-btn:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+    }
+    
+    .unblock-btn {
+        background-color: #2ecc71;
+        color: white;
+    }
+    
+    .unblock-btn:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+    }
+    
+    .action-btn a {
+        color: white;
+        text-decoration: none;
+        display: block;
+    }
+
+    /* Search styling */
+    .search-container {
+        position: relative;
+    }
+    
+    .search-input {
+      background-color: #2A2A2A;
+      border: 1px solid #333;
+      border-radius: 20px;
+      color: white;
+      padding: 8px 15px 8px 40px;
+      width: 250px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #9747FF;
+      width: 280px;
+      box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      pointer-events: none;
+    }
+    
+    /* App Logo */
+    .app-logo {
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid #3A3A3A;
+        margin-bottom: 10px;
+    }
+    
+    .app-logo h2 {
+        color: #fff;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .app-logo span {
+        color: #9747FF;
+    }
+    
+    /* No users message */
+    .no-data {
+        text-align: center;
+        padding: 30px;
+        color: #888;
+        font-style: italic;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+        .sidebar {
+            width: 200px;
         }
         
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        .main-content {
+            margin-left: 200px;
+        }
+        .search-input {
+          width: 200px;
         }
         
-        .product-image {
-            height: 200px;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: #f8f9fa;
+        .search-input:focus {
+          width: 220px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 60px;
         }
         
-        .product-info {
-            padding: 15px;
+        .sidebar-menu li a span {
+            display: none;
         }
         
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
+        .sidebar-menu li a {
+            justify-content: center;
+            padding: 15px 5px;
         }
         
+        .sidebar-menu li a .fas,
+        .sidebar-menu li a .far,
+        .sidebar-menu li svg {
+            margin-right: 0;
+        }
+        
+        .app-logo h2 {
+            font-size: 0;
+        }
+        
+        .app-logo::after {
+            content: "MV";
+            font-size: 18px;
+            font-weight: 700;
+            color: #9747FF;
+        }
+        
+        .main-content {
+            margin-left: 60px;
+        }
+        .data-table {
+            font-size: 14px;
+        }
+        .data-table th, .data-table td {
+            padding: 8px 10px;
+        }
         .action-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 11px;
+        }
+        .header-container {
+          top: 10px;
+          right: 15px;
+        }
+        
+        .admin-name {
+          display: none;
+        }
+        
+        .search-input {
+          width: 160px;
+        }
+        
+        .search-input:focus {
+          width: 180px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .sidebar {
+            width: 0;
+            transform: translateX(-60px);
+        }
+        
+        .sidebar.open {
+            width: 200px;
+            transform: translateX(0);
+        }
+        
+        .sidebar.open .sidebar-menu li a span {
+            display: inline;
+        }
+        
+        .sidebar.open .app-logo h2 {
+            font-size: 20px;
+        }
+        
+        .sidebar.open .app-logo::after {
+            content: "";
+        }
+        
+        .main-content {
+            margin-left: 0;
+        }
+        
+        .menu-toggler {
+            display: block;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 200;
+            background: #9747FF;
+            color: white;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        .edit-btn {
-            background-color: #4b70dd;
-            color: white;
+        .header-container {
+          position: static;
+          justify-content: flex-end;
+          padding: 10px;
+          width: 100%;
+          box-sizing: border-box;
+          margin-bottom: 20px;
         }
         
-        .delete-btn {
-            background-color: #dc3545;
-            color: white;
+        .search-container {
+          width: 70%;
         }
         
-        .filters {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .search-input {
+          width: 100%;
         }
         
-        .price-tag {
-            font-weight: bold;
-            color: #28a745;
+        .search-input:focus {
+          width: 100%;
         }
         
-        .original-price {
-            text-decoration: line-through;
-            color: #6c757d;
-            font-size: 0.9em;
-            margin-left: 8px;
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
         }
-    </style>
+    }
+  </style>
+  
+  <!-- External JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+  <!-- Mobile menu toggler -->
+  <div class="menu-toggler d-md-none">
+    <i class="fas fa-bars"></i>
+  </div>
 
-    <%-include("../../views/partials/admin/product-sidebar")%> 
-    
-    <div class="main-content" id="mainContent">
-        <div class="container-fluid py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0">Product List</h4>
-                <a href="/admin/add-product" class="btn btn-primary">+ Add New Product</a>
-            </div>
-            
-            <div class="filters">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label for="filterCategory" class="form-label">Filter by Category</label>
-                        <select class="form-select" id="filterCategory">
-                            <option value="">All Categories</option>
-                            <% categories.forEach(category => { %>
-                                <option value="<%= category.name %>"><%= category.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <label for="filterBrand" class="form-label">Filter by Brand</label>
-                        <select class="form-select" id="filterBrand">
-                            <option value="">All Brands</option>
-                            <% brands.forEach(brand => { %>
-                                <option value="<%= brand.name %>"><%= brand.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <label for="sortBy" class="form-label">Sort by</label>
-                        <select class="form-select" id="sortBy">
-                            <option value="newest">Newest First</option>
-                            <option value="priceAsc">Price: Low to High</option>
-                            <option value="priceDesc">Price: High to Low</option>
-                            <option value="nameAsc">Name: A to Z</option>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3 mb-3">
-                        <label for="search" class="form-label">Search</label>
-                        <input type="text" class="form-control" id="search" placeholder="Search products...">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row" id="productContainer">
-                <% if (products && products.length > 0) { %>
-                    <% products.forEach(product => { %>
-                        <div class="col-md-3 mb-4 product-item" 
-                             data-category="<%= product.category ? product.category.name : '' %>" 
-                             data-brand="<%= product.brand %>">
-                            <div class="product-card">
-                                <!-- <div class="product-image" style="background-image: url('/uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : 'placeholder.jpg' %>')"></div> -->
-                                <div class="product-info">
-                                    <h5 class="product-title"><%= product.productName %></h5>
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="price-tag">₹<%= product.salePrice || product.regularPrice %></span>
-                                        <% if (product.salePrice && product.salePrice < product.regularPrice) { %>
-                                            <span class="original-price">₹<%= product.regularPrice %></span>
-                                        <% } %>
-                                    </div>
-                                    <p class="mb-1"><strong>Brand:</strong> <%= product.brand %></p>
-                                    <p class="mb-1"><strong>Category:</strong> <%= product.category ? product.category.name : 'N/A' %></p>
-                                    <p class="mb-1"><strong>Stock:</strong> <%= product.quantity %></p>
-                                    <div class="action-buttons">
-                                        <a href="/admin/edit-product/<%= product._id %>" class="action-btn edit-btn">Edit</a>
-                                        <button class="action-btn delete-btn" onclick="deleteProduct('<%= product._id %>')">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } else { %>
-                    <div class="col-12 text-center py-5">
-                        <h5>No products found</h5>
-                        <p>Start by adding your first product</p>
-                        <a href="/admin/add-product" class="btn btn-primary mt-3">Add New Product</a>
-                    </div>
-                <% } %>
-            </div>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <div class="app-logo">
+      <h2>Mobi<span>Vault</span></h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/admin/dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Products</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Orders</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/users" class="active">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/category">
+                <i class="fas fa-list"></i>
+                <span>Categories</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-tag"></i>
+                <span>Brands</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-percent"></i>
+                <span>Offers</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-images"></i>
+                <span>Banner</span>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Coupons</span>
+            </a>
+        </li>
+        <li class="logout">
+            <a href="/admin/logout" style="color:#ff6b6b;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    </ul>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Top search bar and admin profile -->
+    <div class="header-container">
+      <!-- Search -->
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="Search users...">
+      </div>
+
+      <!-- Admin Profile Dropdown -->
+      <div class="admin-profile dropdown">
+        <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
         </div>
+        <div class="admin-name">Admin User</div>
+        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a>
+          <a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+        </div>
+      </div>
     </div>
     
-    <button id="scrollTopBtn" class="scroll-top-btn" onclick="scrollToTop()">↑</button>
+    <h1 class="page-title">User Management</h1>
     
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set up scroll to top button
-            window.addEventListener('scroll', function() {
-                const scrollBtn = document.getElementById('scrollTopBtn');
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    scrollBtn.style.display = 'flex';
-                } else {
-                    scrollBtn.style.display = 'none';
-                }
-            });
-            
-            // Set up filtering and sorting
-            const filterCategory = document.getElementById('filterCategory');
-            const filterBrand = document.getElementById('filterBrand');
-            const sortBy = document.getElementById('sortBy');
-            const search = document.getElementById('search');
-            
-            filterCategory.addEventListener('change', applyFilters);
-            filterBrand.addEventListener('change', applyFilters);
-            sortBy.addEventListener('change', applyFilters);
-            search.addEventListener('input', applyFilters);
-            
-            function applyFilters() {
-                const selectedCategory = filterCategory.value.toLowerCase();
-                const selectedBrand = filterBrand.value.toLowerCase();
-                const searchTerm = search.value.toLowerCase();
-                const productItems = document.querySelectorAll('.product-item');
-                
-                productItems.forEach(item => {
-                    const category = item.getAttribute('data-category').toLowerCase();
-                    const brand = item.getAttribute('data-brand').toLowerCase();
-                    const title = item.querySelector('.product-title').textContent.toLowerCase();
-                    
-                    const categoryMatch = !selectedCategory || category === selectedCategory;
-                    const brandMatch = !selectedBrand || brand === selectedBrand;
-                    const searchMatch = !searchTerm || title.includes(searchTerm);
-                    
-                    if (categoryMatch && brandMatch && searchMatch) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-                
-                // Apply sorting
-                const sortValue = sortBy.value;
-                const container = document.getElementById('productContainer');
-                const items = Array.from(container.querySelectorAll('.product-item'));
-                
-                items.sort((a, b) => {
-                    if (sortValue === 'newest') {
-                        // This would require adding data attributes for created date
-                        return 0; // Keep original order for now
-                    } else if (sortValue === 'priceAsc') {
-                        const priceA = parseFloat(a.querySelector('.price-tag').textContent.replace('₹', ''));
-                        const priceB = parseFloat(b.querySelector('.price-tag').textContent.replace('₹', ''));
-                        return priceA - priceB;
-                    } else if (sortValue === 'priceDesc') {
-                        const priceA = parseFloat(a.querySelector('.price-tag').textContent.replace('₹', ''));
-                        const priceB = parseFloat(b.querySelector('.price-tag').textContent.replace('₹', ''));
-                        return priceB - priceA;
-                    } else if (sortValue === 'nameAsc') {
-                        const nameA = a.querySelector('.product-title').textContent;
-                        const nameB = b.querySelector('.product-title').textContent;
-                        return nameA.localeCompare(nameB);
-                    }
-                    return 0;
-                });
-                
-                // Reappend in new order
-                items.forEach(item => {
-                    container.appendChild(item);
-                });
-            }
+    <div class="table-container">
+      <table class="data-table">
+          <thead>
+              <tr>
+                  <th>USER NAME</th>
+                  <th>EMAIL</th>
+                  <th>PHONE</th>
+                  <th>DATE OF CREATION</th>
+                  <th>ACTION</th>
+              </tr>
+          </thead>
+          <tbody>
+              <!-- Sample data for demonstration -->
+              <tr>
+                  <td>John Doe</td>
+                  <td>johndoe@example.com</td>
+                  <td>+1 234-567-8901</td>
+                  <td>Apr 1, 2025</td>
+                  <td>
+                      <button class="action-btn block-btn">
+                          <a href="/admin/blockCustomer?id=123">BLOCK</a>
+                      </button>
+                  </td>
+              </tr>
+              <tr>
+                  <td>Jane Smith</td>
+                  <td>janesmith@example.com</td>
+                  <td>+1 987-654-3210</td>
+                  <td>Mar 25, 2025</td>
+                  <td>
+                      <button class="action-btn unblock-btn">
+                          <a href="/admin/unblockCustomer?id=456">UNBLOCK</a>
+                      </button>
+                  </td>
+              </tr>
+              <tr>
+                  <td>Mark Wilson</td>
+                  <td>markwilson@example.com</td>
+                  <td>+1 555-123-4567</td>
+                  <td>Mar 20, 2025</td>
+                  <td>
+                      <button class="action-btn block-btn">
+                          <a href="/admin/blockCustomer?id=789">BLOCK</a>
+                      </button>
+                  </td>
+              </tr>
+              <!-- If using EJS, you can uncomment and use this instead -->
+              <!--
+              <% if(users && users.length > 0) { %>
+                  <% for(let i = 0; i < users.length; i++) { %>
+                  <tr>
+                      <td><%= users[i].name %></td>
+                      <td><%= users[i].email %></td>
+                      <td><%= users[i].phone %></td>
+                      <td><%= users[i].createdOn ? users[i].createdOn.toDateString() : "N/A" %></td>
+                      <td>
+                          <% if(users[i].isBlocked === false) { %>
+                              <button class="action-btn block-btn">
+                                  <a href="/admin/blockCustomer?id=<%= users[i]._id %>">BLOCK</a>
+                              </button>
+                          <% } else { %>
+                              <button class="action-btn unblock-btn">
+                                  <a href="/admin/unblockCustomer?id=<%= users[i]._id %>">UNBLOCK</a>
+                              </button>
+                          <% } %>
+                      </td>
+                  </tr>
+                  <% } %>
+              <% } else { %>
+                  <tr>
+                      <td colspan="5" class="no-data">No users found</td>
+                  </tr>
+              <% } %>
+              -->
+          </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // JavaScript for handling admin profile interactions and mobile sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+      // Mobile menu toggle functionality
+      const menuToggler = document.querySelector('.menu-toggler');
+      const sidebar = document.querySelector('.sidebar');
+      
+      if (menuToggler) {
+        menuToggler.addEventListener('click', function() {
+          sidebar.classList.toggle('open');
         });
-        
-        // Function to delete product
-        function deleteProduct(productId) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                fetch(`/admin/delete-product/${productId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remove product from DOM
-                        const productElement = document.querySelector(`[data-id="${productId}"]`);
-                        if (productElement) {
-                            productElement.remove();
-                        }
-                        alert('Product deleted successfully');
-                        // Reload page if needed
-                        location.reload();
-                    } else {
-                        alert('Failed to delete product');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred');
-                });
-            }
+      }
+      
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 480 && 
+            !event.target.closest('.sidebar') && 
+            !event.target.closest('.menu-toggler') &&
+            sidebar.classList.contains('open')) {
+          sidebar.classList.remove('open');
         }
-        
-        // Function to scroll to top
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-    </script>
+      });
+      
+      // You can add additional functionality here if needed
+      console.log('Admin dashboard loaded successfully');
+    });
+  </script>
 </body>
 </html>

@@ -73,10 +73,10 @@ router.post("/edit-brand/:id", adminAuth, brandController.editBrand);
 // Product Management
 router.get("/product", adminAuth, productController.getProductAddPage);
 router.get("/add-product", adminAuth, productController.getProductPage);
-// router.post("/addProduct", adminAuth, uploads.array("images", 3), productController.addProducts);
-router.delete("/delete-product/:id", productController.deleteProduct); // New route to delete products
-router.get("/edit-product/:id", productController.getProductEditPage);  
+// router.delete("/delete-product/:id", productController.deleteProduct); // New route to delete products
+// router.get("/edit-product/:id", productController.getProductEditPage);  
 // Replace your current /addProduct route with this
 router.post("/addProduct", adminAuth, uploads.array("images", 3), productController.addProducts);
+router.get("/products",adminAuth,productController.getAllProducts);
 
 module.exports = router;

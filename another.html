@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobiVault Admin - Products</title>
+    
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/sideBar.css">
+    
+    <!-- External Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Internal Styles -->
+    <style>
+        /* [Previous CSS remains unchanged] */
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <%- include("../../views/partials/admin/product-sidebar") %>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header Section -->
+        <header class="header-container">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search...">
+            </div>
+
+            <div class="admin-profile dropdown">
+                <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
+                </div>
+                <div class="admin-name">Admin User</div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                    <li><h6 class="dropdown-header">Admin User</h6></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/admin/logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="brands-container">
+                <div class="brands-header">
+                    <h1 class="brands-title">Products</h1>
+                    <button class="add-button">
+                        <a href="/admin/add-product">ADD PRODUCT +</a>
+                    </button>
+                </div>
+            </div>
+
+            <div class="container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Image</th>
+                            <th>Product Name</th>
+                            <th>Brand</th>
+                            <th>Piece</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><img src="phone-redmi-a4.jpg" alt="Redmi A4 5G" class="product-image"></td>
+                            <td class="product-name">Redmi A4 5G</td>
+                            <td class="brand">Redmi</td>
+                            <td>15</td>
+                            <td class="amount">₹8,999</td>
+                            <td>
+                                <div class="actions">
+                                    <button class="action-btn edit-btn" title="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn delete-btn" title="Delete">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <div class="pagination-info">SHOWING 1 OF 10</div>
+                    <button class="pagination-btn">←</button>
+                    <button class="pagination-btn">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn active">3</button>
+                    <button class="pagination-btn">4</button>
+                    <span class="pagination-dots">...</span>
+                    <button class="pagination-btn">8</button>
+                    <button class="pagination-btn">9</button>
+                    <button class="pagination-btn">→</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (confirm('Are you sure you want to delete this product?')) {
+                        console.log('Product deleted');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -148,7 +148,8 @@ const deleteProduct = async (req, res) => {
         // Delete the product images from the file system
         if (product.productImage && product.productImage.length > 0) {
             product.productImage.forEach(image => {
-                const imagePath = path.join('public', 'uploads', 'product-images', image);
+                // const imagePath = path.join('public', 'uploads', 'product-images', image);
+                const imagePath = path.join('uploads', 'product-images', image);
                 if (fs.existsSync(imagePath)) {
                     fs.unlinkSync(imagePath);
                 }
@@ -175,7 +176,8 @@ const updateProduct = async (req, res) => {
         if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 const originalImagePath = req.files[i].path;
-                const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
+                // const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
+                const resizedImagePath = path.join('uploads', 'product-images', req.files[i].filename);
 
                 await sharp(originalImagePath)
                     .resize({ width: 440, height: 440 })
@@ -237,6 +239,57 @@ const getProductEditPage = async (req, res) => {
     }
 };
 
+const getAllProducts = async (req,res)=>{
+    try {
+        
+        const search = req.query.search || "";
+        const page = req.query.page || 1;
+        const limit = 4;
+
+        const productData = await Product.find({
+            $or:[
+
+                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+                {brand:{$regex:new RegExp(".*"+search+".*","i")}},
+
+            ],
+        })
+        .limit(limit*1)
+        .skip((page-1)*limit)
+        .populate('category')
+        .exec();
+
+        const count = await Product.find({
+            $or:[
+                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+                {brand:{$regex:new RegExp(".*"+search+".*","i")}}
+            ],
+        })
+        .countDocuments();
+
+        const category = await Category.find({isListed:true});
+        const brand = await Brand.find({isBlocked:false});
+
+        if(category && brand){
+            res.render("product",{
+                data:productData,
+                currentPage:page,
+                totalPages:page,
+                totalPages:Math.ceil(count/limit),
+                cat:category,
+                brand:brand
+            })
+        }else{
+            res.render("admin-error")
+        }
+
+    } catch (error) {
+        
+        res.redirect("/pageerror")
+
+    }
+}
+
 
 module.exports = {
     getProductAddPage,
@@ -246,5 +299,6 @@ module.exports = {
     deleteProduct,
     getProductAddPage,
     updateProduct,
+    getAllProducts,
     getProductEditPage
 }

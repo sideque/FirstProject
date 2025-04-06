@@ -6,8 +6,6 @@
   <title>MobiVault Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/sideBar.css">
   <style>
@@ -400,6 +398,23 @@
         margin-left: 60px;
         width: calc(100% - 60px);
       }
+      
+      .header-container {
+        top: 10px;
+        right: 15px;
+      }
+      
+      .admin-name {
+        display: none;
+      }
+      
+      .search-input {
+        width: 160px;
+      }
+      
+      .search-input:focus {
+        width: 180px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -456,8 +471,8 @@
         <div class="admin-name">Admin User</div>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
           <li><h6 class="dropdown-header">Admin User</h6></li>
-          <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li> -->
-          <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li> -->
+          <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+          <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
         </ul>
@@ -468,13 +483,13 @@
     <div class="dashboard-container">
       <!-- Dashboard Header -->
       <div class="dashboard-header">
-        <h1 class="page-title">Dashboard</h1>
+        <h1 class="page-title">User Management</h1>
         <div class="download-section">
-          <span class="download-label"></span>
+          <span class="download-label">Export Report</span>
           <div class="download-btn">
-            <!-- <span class="file-format"></span> -->
-            <!-- <span class="download-icon"> -->
-              <!-- <i class="fas fa-download"></i> -->
+            <span class="file-format">PDF</span>
+            <span class="download-icon">
+              <i class="fas fa-download"></i>
             </span>
           </div>
         </div>
@@ -524,7 +539,7 @@
       </div>
       
       <!-- Products Section -->
-      <!-- <div class="products-section">
+      <div class="products-section">
         <div class="section-header">
           <div class="section-title">Top Sold Products</div>
         </div>
@@ -593,11 +608,11 @@
             </tr>
           </tbody>
         </table>
-      </div> -->
+      </div>
 
       <!-- Chart Container -->
       <div class="chart-container">
-        <!-- <div class="section-header">
+        <div class="section-header">
           <div class="section-title">Sales Analytics</div>
         </div>
         <div class="chart-placeholder">
@@ -605,7 +620,7 @@
         </div>
       </div>
     </div>
-  </div> -->
+  </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

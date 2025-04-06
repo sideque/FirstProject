@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MobiVault Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/css/sideBar.css">
   <style>
     /* General styling */
 body {
@@ -15,8 +20,97 @@ body {
     color: #333;
 }
 
+/* Header and Search Container */
+.header-container {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 90;
+    }
+
+    /* Search Bar */
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background-color: #2A2A2A;
+      border: 1px solid #333;
+      border-radius: 20px;
+      color: white;
+      padding: 8px 15px 8px 40px;
+      width: 250px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #9747FF;
+      width: 280px;
+      box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      color: #999;
+      pointer-events: none;
+    }
+
+    /* Admin Profile */
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 25px;
+      transition: background-color 0.3s;
+      background-color: #2A2A2A;
+      padding: 5px 15px;
+      border-radius: 30px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .admin-profile:hover {
+      background-color: #2A2A2A;
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #4778FF;
+      margin-right: 10px;
+    }
+
+    .admin-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .admin-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+      white-space: nowrap;
+    }
+
+
 .main-content {
     margin-left: 250px;
+    margin-top: 35px;
     padding: 20px;
     transition: margin-left 0.3s;
 }
@@ -92,19 +186,6 @@ h1 {
     display: block;
 }
 
-/* Search container */
-.search-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    margin-left: 250px;
-    padding: 10px 20px;
-}
-
-.search-icon {
-    margin-right: 10px;
-    color: #ccc;
-}
 
 /* Categories styling */
 .categories-container {
@@ -228,15 +309,17 @@ th.actions-column {
 
 /* Responsive Styles */
 @media (max-width: 992px) {
-    .sidebar {
-        width: 200px;
-    }
+   
     .main-content {
         margin-left: 200px;
     }
-    .search-container {
-        margin-left: 200px;
-    }
+    .search-input {
+        width: 200px;
+      }
+      
+      .search-input:focus {
+        width: 220px;
+      }
 }
 
 @media (max-width: 768px) {
@@ -262,35 +345,39 @@ th.actions-column {
         padding: 6px 8px;
         font-size: 11px;
     }
+    .search-input {
+        width: 160px;
+      }
+    .search-input:focus {
+        width: 180px;
+      }
 }
 
 @media (max-width: 480px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-    .sidebar-menu {
-        display: flex;
-        overflow-x: auto;
+
+    .header-container {
+        position: static;
+        justify-content: space-between;
         padding: 10px;
-    }
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .search-container {
+        width: 70%;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+      
+      .search-input:focus {
+        width: 100%;
+      }
     .main-content {
-        margin-left: 0;
-    }
-    .search-container {
         margin-left: 0;
     }
 }
   </style>
-  
-  <!-- External CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/sideBar.css">
-  
-  <!-- Custom CSS - Your main styles would go here -->
-  
   <!-- External JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -299,9 +386,17 @@ th.actions-column {
   <%-include("../../views/partials/admin/category-sidebar")%> 
 
   <!-- Top search bar -->
-  <div class="search-container">
-    <i class="fas fa-search search-icon"></i>
-    <i class="fa fa-user" style="font-size: 14px; margin-left: auto;"></i>
+  <div class="header-container">
+    <div class="search-container">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" placeholder="Search...">
+    </div>
+    <div class="admin-profile">
+      <div class="admin-avatar">
+        <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
+      </div>
+      <span class="admin-name">Admin User</span>
+    </div>
   </div>
 
   <!-- Main content area -->
