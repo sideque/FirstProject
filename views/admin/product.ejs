@@ -640,10 +640,17 @@
                                     <td><%= data[i].salePrice %></td>
                                     <td><%= data[i].stock %></td> <!-- you forgot stock value, added here -->
                                     <td>
-                                        <button class="btn btn-sm btn-unblock" onclick="toggleBlockStatus('<%= data[i]._id %>', this)">
+                                        <% if (data[i].isBlocked === false) { %>
+                                          <button class="btn btn-sm btn-block text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', true)">
+                                            <i class="fas fa-check-circle"></i> Block
+                                          </button>
+                                        <% } else { %>
+                                          <button class="btn btn-sm btn-unblock text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', false)">
                                             <i class="fas fa-check-circle"></i> Unblock
-                                        </button>
-                                    </td>
+                                          </button>
+                                        <% } %>
+                                      </td>
+                                      
                                     <td>
                                         <div class="action-btns">
                                             <a href="/edit-product/<%= data[i]._id %>" class="action-btn action-btn-edit">
@@ -779,6 +786,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+function toggleBlockStatus(productId, shouldBlock) {
+  const url = shouldBlock 
+    ? `/admin/blockProduct?id=${productId}`
+    : `/admin/unblockProduct?id=${productId}`;
+
+  fetch(url)
+    .then(response => {
+      if (response.ok) {
+        // Reload page or update the UI
+        location.reload();
+      } else {
+        console.error("Failed to update status");
+      }
+    })
+    .catch(err => console.error("Request error:", err));
+}
+
     </script>
 </body>
 </html>

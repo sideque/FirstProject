@@ -78,5 +78,7 @@ router.get("/add-product", adminAuth, productController.getProductPage);
 // Replace your current /addProduct route with this
 router.post("/addProduct", adminAuth, uploads.array("images", 3), productController.addProducts);
 router.get("/products",adminAuth,productController.getAllProducts);
+router.get("/blockProduct",adminAuth,productController.blockProduct);
+router.get("/unblockProduct",adminAuth,productController.unblockProduct);
 
 module.exports = router;
