@@ -1,520 +1,784 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MobiVault Admin - Products</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/css/sideBar.css">
-  <style>
-    /* General styling */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #161618;
-      color: #ffffff;
-    }
-    /* Header and Search Container */
-    .header-container {
-      position: fixed;
-      top: 20px;
-      right: 30px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      z-index: 90;
-    }
-
-    /* Search Bar */
-    .search-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .search-input {
-      background-color: #2A2A2A;
-      border: 1px solid #333;
-      border-radius: 20px;
-      color: white;
-      padding: 8px 15px 8px 40px;
-      width: 250px;
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #9747FF;
-      width: 280px;
-      box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 15px;
-      color: #999;
-      pointer-events: none;
-    }
-
-    /* Admin Profile */
-    .admin-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 25px;
-      transition: background-color 0.3s;
-      background-color: #2A2A2A;
-      padding: 5px 15px;
-      border-radius: 30px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .admin-profile:hover {
-      background-color: #2A2A2A;
-    }
-
-    .admin-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      overflow: hidden;
-      background-color: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #4778FF;
-      margin-right: 10px;
-    }
-
-    .admin-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .admin-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: white;
-      white-space: nowrap;
-    }
-
-    /* Main Content Styles */
-    .main-content {
-      margin-left: 250px;
-      margin-top: 60px;
-      padding: 20px;
-      transition: margin-left 0.3s;
-    }
-
-    .container {
-      max-width: 100%;
-      overflow-x: auto;
-    }
-
-    /* Brands/Products Header */
-    .brands-container {
-      background-color: #2a2a2a;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .brands-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brands-title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #fff;
-    }
-
-    .add-button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 15px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .add-button a {
-      color: white;
-      text-decoration: none;
-    }
-
-    /* Table Styling */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #1e1e24;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    th {
-      text-align: left;
-      padding: 12px 15px;
-      font-size: 14px;
-      color: #a0a0a0;
-      font-weight: 600;
-      text-transform: uppercase;
-      border-bottom: 1px solid #2c2c34;
-    }
-
-    td {
-      padding: 15px;
-      border-bottom: 1px solid #2c2c34;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-
-    tr:hover {
-      background-color: #25252d;
-    }
-
-    /* Product Style Elements */
-    .product-image {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 4px;
-      background-color: #333;
-    }
-
-    .product-name {
-      font-weight: 500;
-      color: #e0e0e0;
-    }
-
-    .brand {
-      color: #a0a0a0;
-    }
-
-    .status {
-      color: #4ade80;
-      font-size: 18px;
-    }
-
-    .amount {
-      font-weight: 600;
-    }
-
-    .color-options {
-      display: flex;
-      gap: 8px;
-    }
-
-    .color-option {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .color-red {
-      background-color: #ff0000;
-    }
-
-    .color-black {
-      background-color: #000000;
-    }
-
-    .color-blue {
-      background-color: #0000ff;
-    }
-
-
-    .actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 6px;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-btn:hover {
-  background-color: #2a2a30;
-}
-
-.edit-btn {
-  color: #ff9500;
-}
-
-.edit-btn:hover {
-  color: #ffac3a;
-}
-
-.delete-btn {
-  color: #ff3b30;
-}
-
-.delete-btn:hover {
-  color: #ff6961;
-}
-
-
-    /* Pagination */
-    .pagination {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin-top: 20px;
-      gap: 8px;
-    }
-
-    .pagination-info {
-      color: #a0a0a0;
-      font-size: 14px;
-      margin-right: 10px;
-    }
-
-    .pagination-btn {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: none;
-      border: none;
-      color: #ffffff;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .pagination-btn:hover {
-      background-color: #25252d;
-    }
-
-    .pagination-btn.active {
-      background-color: #4CAF50;
-    }
-
-    .pagination-dots {
-      color: #a0a0a0;
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 992px) {
-      .main-content {
-        margin-left: 200px;
-      }
-      .search-input {
-        width: 200px;
-      }
-      
-      .search-input:focus {
-        width: 220px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .main-content {
-        margin-left: 60px;
-      }
-      table {
-        font-size: 14px;
-      }
-      th, td {
-        padding: 8px 10px;
-      }
-      .action-btn {
-        padding: 4px;
-      }
-      .header-container {
-        top: 10px;
-        right: 15px;
-      }
-      
-      .admin-name {
-        display: none;
-      }
-      
-      .search-input {
-        width: 160px;
-      }
-      
-      .search-input:focus {
-        width: 180px;
-      }
-      
-    }
-
-    @media (max-width: 480px) {
-      .main-content {
-        margin-left: 0;
-      }
-      .header-container {
-        position: static;
-        justify-content: space-between;
-        padding: 10px;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      
-      .search-container {
-        width: 70%;
-      }
-      
-      .search-input {
-        width: 100%;
-      }
-      
-      .search-input:focus {
-        width: 100%;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/css/sideBar.css">
 </head>
 <body>
-
+    <style>
+        :root {
+            --primary-color: #4778FF;
+            --secondary-color: #2A2A2A;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #1E1E1E;
+            --accent-color: #9747FF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-color);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary-color);
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-menu {
+            margin-top: 20px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            gap: 15px;
+        }
+        
+        .sidebar-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .sidebar-link.active {
+            border-left: 5px solid white;
+            font-weight: 500;
+        }
+        
+        /* Header */
+        .header-container {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 90;
+        }
+        
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-input {
+            background-color: var(--secondary-color);
+            border: 1px solid #333;
+            border-radius: 20px;
+            color: white;
+            padding: 8px 15px 8px 40px;
+            width: 250px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            width: 280px;
+            box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: #999;
+            pointer-events: none;
+        }
+        
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            background-color: var(--secondary-color);
+            padding: 5px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .admin-profile:hover {
+            background-color: #333;
+        }
+        
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .admin-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .admin-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 80px 30px 30px;
+            transition: margin-left 0.3s;
+        }
+        
+        .page-title {
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Card */
+        .dashboard-card {
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: #ccc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #fff;
+            vertical-align: middle;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Buttons */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3565d8;
+            border-color: #3565d8;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d35400;
+            border-color: #d35400;
+            color: white;
+        }
+        
+        /* Product Image */
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-image:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+        
+        .status-active {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+        
+        .status-inactive {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+        
+        .status-blocked {
+            background-color: rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.6);
+        }
+        
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: white;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .action-btn-edit {
+            background-color: rgba(71, 120, 255, 0.2);
+        }
+        
+        .action-btn-edit:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .action-btn-delete {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+        
+        .action-btn-delete:hover {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-block {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            min-width: 80px;
+        }
+        
+        .btn-unblock {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            min-width: 80px;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 5px;
+        }
+        
+        .page-item .page-link {
+            background-color: var(--secondary-color);
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            padding: 8px 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .page-item .page-link:hover {
+            background-color: rgba(71, 120, 255, 0.5);
+        }
+        
+        /* Filter */
+        .filter-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-select {
+            background-color: var(--secondary-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: white;
+            padding: 8px 12px;
+            min-width: 150px;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+            
+            .search-input:focus {
+                width: 220px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 200;
+                background-color: var(--primary-color);
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+            
+            .header-container {
+                top: 20px;
+                right: 20px;
+            }
+            
+            .search-input {
+                width: 150px;
+            }
+            
+            .search-input:focus {
+                width: 180px;
+            }
+            
+            .admin-name {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .header-container {
+                width: 100%;
+                right: 0;
+                top: 70px;
+                padding: 0 20px;
+                justify-content: space-between;
+            }
+            
+            .search-container {
+                width: 70%;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .search-input:focus {
+                width: 100%;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th, .data-table td {
+                padding: 10px 8px;
+            }
+            
+            .action-btns {
+                flex-wrap: wrap;
+            }
+            
+            .main-content {
+                padding-top: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button (Mobile) -->
     <%-include("../../views/partials/admin/product-sidebar")%> 
-  <!-- Main content area -->
-  <div class="main-content">
-
+    <!-- Header Search and Profile -->
     <div class="header-container">
-      <!-- Search -->
-      <div class="search-container">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" class="search-input" placeholder="Search...">
-      </div>
-
-      <!-- Admin Profile Dropdown -->
-      <div class="admin-profile dropdown">
-        <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-          <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Search products, orders, customers...">
         </div>
-        <div class="admin-name">Admin User</div>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-          <li><h6 class="dropdown-header">Admin User</h6></li>
-          <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li> -->
-          <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li> -->
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-        </ul>
-      </div>
+        <div class="admin-profile dropdown">
+            <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
+            </div>
+            <div class="admin-name">Admin User</div>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+              <li><h6 class="dropdown-header">Admin User</h6></li>
+              <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li> -->
+              <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li> -->
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+            </ul>
+          </div>
     </div>
-    <!-- Products Header -->
-    <div class="brands-container">
-      <div class="brands-header">
-        <div class="brands-title">Products</div>
-        <button class="add-button">
-          <a href="/admin/add-product">ADD PRODUCT +</a>
-        </button>
-      </div>
-    </div>
-
-    <!-- Products Table -->
-    <div class="container">
-      <table>
-        <thead>
-          <tr>
-            <th>Product Image</th>
-            <th>Product Name</th>
-            <th>Brand</th>
-            <th>Piece</th>
-            <th>Status</th>
-            <th>Amount</th>
-            <th>Last Updated</th>
-            <th>Color Available</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><img src="phone-redmi-a4.jpg" alt="Redmi A4 5G" class="product-image"></td>
-            <td class="product-name">Redmi A4 5G</td>
-            <td class="brand">Redmi</td>
-            <td>15</td>
-            <td class="status">✓</td>
-            <td class="amount">₹8,999</td>
-            <td>05/01/2025</td>
-            <td>
-              <div class="color-options">
-                <span class="color-option color-red"></span>
-                <span class="color-option color-black"></span>
-                <span class="color-option color-blue"></span>
-              </div>
-            </td>
-            <td>
-                <div class="actions">
-                  <button class="action-btn edit-btn" title="Edit">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
-                  <button class="action-btn delete-btn" title="Delete">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                  </button>
-                </div>
-              </td>              
-          </tr>      
-          </tbody>
-      </table>
-      
-      <!-- Pagination -->
-      <div class="pagination">
-        <div class="pagination-info">SHOWING 1 OF 10</div>
-        <button class="pagination-btn">←</button>
-        <button class="pagination-btn">1</button>
-        <button class="pagination-btn">2</button>
-        <button class="pagination-btn active">3</button>
-        <button class="pagination-btn">4</button>
-        <span class="pagination-dots">...</span>
-        <button class="pagination-btn">8</button>
-        <button class="pagination-btn">9</button>
-        <button class="pagination-btn">→</button>
-      </div>
-    </div>
-  </div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- JavaScript for interactive features (optional) -->
-  <script>
-    // You could add JavaScript here for actions like delete confirmations,
-    // edit redirects, and other interactive features
     
-    document.addEventListener('DOMContentLoaded', function() {
-      // Example: Add confirmation for delete buttons
-      const deleteButtons = document.querySelectorAll('.action-btn:nth-child(2)');
-      deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-          if (confirm('Are you sure you want to delete this product?')) {
-            // Delete action would go here
-            console.log('Product deleted');
-          }
-        });
-      });
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-title">
+            <h1>Product Management</h1>
+            <button class="btn btn-primary">
+                <a class="fas fa-plus" href="/admin/add-product" style="text-decoration: none; color: white;"> Add New Product</a>
+            </button>
+        </div>
+        
+        <!-- Filters -->
+        <!-- Products Table -->
+        <div class="dashboard-card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Image</th>
+                                <th>Brand</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <!-- <th>Status</th> -->
+                                <th>Block Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+                            <% for(let i = data.length - 1; i >= 0; i--) { %>
+                                <tr>
+                                    <td><%= data[i].productName %></td>
+                                    <td>
+                                        <div class="product-image">
+                                            <% if (data[i].productImage && data[i].productImage.length > 0) { %>
+                                                <img src="/uploads/product-images/<%= data[i].productImage[0] %>" alt="<%= data[i].productImage %>" width="80" height="80">
+                                            <% } else { %>
+                                                <img src="/api/placeholder/80/80" alt="No image available" width="80" height="80">
+                                            <% } %>                                            
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- <td><%= data[i].brand ? data[i].brand.name : "No Brand" %></td>(Optional improvement: populate brand also) -->
+                                    <td><%= data[i].brand %></td> 
+                                    <td><%= data[i].category ? data[i].category.name : "No Category" %></td> 
+                                    <td><%= data[i].salePrice %></td>
+                                    <td><%= data[i].stock %></td> <!-- you forgot stock value, added here -->
+                                    <td>
+                                        <button class="btn btn-sm btn-unblock" onclick="toggleBlockStatus('<%= data[i]._id %>', this)">
+                                            <i class="fas fa-check-circle"></i> Unblock
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <a href="/edit-product/<%= data[i]._id %>" class="action-btn action-btn-edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="/delete-product/<%= data[i]._id %>" class="action-btn action-btn-delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Products pagination">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                <li class="page-item active">
+                    <a class="page-link" href="#">1</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">2</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">3</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <!-- JavaScript -->
+
+    <script>
+        // Toggle sidebar on mobile
+document.getElementById('menuToggle').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.toggle('active');
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+  const sidebar = document.getElementById('sidebar');
+  const menuToggle = document.getElementById('menuToggle');
+  
+  if (window.innerWidth <= 768) {
+    if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
+      sidebar.classList.remove('active');
+    }
+  }
+});
+
+// Confirm delete function
+function confirmDelete(id) {
+  if (confirm('Are you sure you want to delete this product?')) {
+    // Handle delete action
+    console.log('Deleting product ID:', id);
+    
+    // You would typically make an AJAX call to your backend here
+    fetch(`/api/products/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        // Remove the product element from the DOM
+        document.getElementById(`product-${id}`).remove();
+        showNotification('Product successfully deleted');
+      } else {
+        showNotification('Error deleting product', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Delete error:', error);
+      showNotification('Error deleting product', 'error');
     });
-  </script>
+  }
+}
+
+// Show notification function
+function showNotification(message, type = 'success') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // Display the notification
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 10);
+  
+  // Hide and remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 3000);
+}
+
+// Initialize tooltips (if using a library like Bootstrap)
+document.addEventListener('DOMContentLoaded', function() {
+  // If using Bootstrap tooltips
+  if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  }
+  
+  // Add event listeners to all delete buttons
+  document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const productId = this.getAttribute('data-product-id');
+      confirmDelete(productId);
+    });
+  });
+});
+    </script>
 </body>
 </html>

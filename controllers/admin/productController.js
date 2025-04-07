@@ -23,23 +23,33 @@ const getProductPage = async (req,res)=>{
 
     }
 }
+
 const getProductAddPage = async (req, res) => {
     try {
         const category = await Category.find({ isListed: true });
         const brand = await Brand.find({ isListed: true });
 
+        const productData = await Product.find().populate("category");  // 🆕 get all products
+
         console.log("Brands Retrieved:", JSON.stringify(brand, null, 2)); // Debugging  
 
         if (!brand || brand.length === 0) {
-            console.error(" No brands found in database!");
+            console.error("No brands found in database!");
         }
 
-        res.render("product", { cat: category, brand: brand });
+        res.render("product", {
+            cat: category,
+            brand: brand,
+            data: productData,   // ✅ Pass products as "data"
+            currentPage: 1,
+            totalPages: 1
+        });
     } catch (error) {
         console.error("Error fetching products:", error);
         res.redirect("/pageerror");
     }
 };
+
 
 const addProducts = async (req, res) => {
     try {
@@ -88,7 +98,7 @@ const addProducts = async (req, res) => {
                 regularPrice: product.regularPrice,
                 salePrice: product.salePrice,
                 createdOn: new Date(),
-                quantity: product.quantity,
+                stock: product.stock,
                 color: product.color,
                 // Add these fields if they're in your form:
                 processor: req.body.processor,
@@ -142,7 +152,7 @@ const deleteProduct = async (req, res) => {
         const product = await Product.findById(productId);
         
         if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
+            return res.status(404).json({ success: false, message: "Product not foundx`" });
         }
         
         // Delete the product images from the file system
@@ -199,7 +209,7 @@ const updateProduct = async (req, res) => {
             category: categoryId._id,
             regularPrice: productData.regularPrice,
             salePrice: productData.salePrice,
-            quantity: productData.quantity,
+            stock: productData.stock,
             size: productData.size,
             color: productData.color,
             ...(images.length > 0 && { productImage: images }) // Only update images if new ones are uploaded
@@ -246,18 +256,30 @@ const getAllProducts = async (req,res)=>{
         const page = req.query.page || 1;
         const limit = 4;
 
+        // const productData = await Product.find({
+        //     $or:[
+
+        //         {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+        //         {brand:{$regex:new RegExp(".*"+search+".*","i")}},
+
+        //     ],
+        // })
+        // .limit(limit*1)
+        // .skip((page-1)*limit)
+        // .populate('category')
+        // .exec();
         const productData = await Product.find({
-            $or:[
-
-                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
-                {brand:{$regex:new RegExp(".*"+search+".*","i")}},
-
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ],
         })
-        .limit(limit*1)
-        .skip((page-1)*limit)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
         .populate('category')
+        .populate('brand') // <-- added this line
         .exec();
+        
 
         const count = await Product.find({
             $or:[
@@ -274,7 +296,6 @@ const getAllProducts = async (req,res)=>{
             res.render("product",{
                 data:productData,
                 currentPage:page,
-                totalPages:page,
                 totalPages:Math.ceil(count/limit),
                 cat:category,
                 brand:brand
@@ -297,7 +318,6 @@ module.exports = {
     addProducts,
     listProducts,
     deleteProduct,
-    getProductAddPage,
     updateProduct,
     getAllProducts,
     getProductEditPage
