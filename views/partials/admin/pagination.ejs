@@ -1,0 +1,69 @@
+<!-- Pagination Component -->
+<% if (typeof totalPages !== 'undefined' && totalPages > 0) { %>
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    <!-- Previous Page Button -->
+    <% if (currentPage > 1) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage - 1 %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+    <% } else { %>
+      <li class="page-item disabled">
+        <a class="page-link" href="#" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+    <% } %>
+
+    <!-- First Page Button (if not in first group) -->
+    <% if (startPage > 1) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=1<%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>">1</a>
+      </li>
+      <% if (startPage > 2) { %>
+        <li class="page-item disabled">
+          <a class="page-link" href="#">...</a>
+        </li>
+      <% } %>
+    <% } %>
+
+    <!-- Page Numbers within Range -->
+    <% for(let i = startPage; i <= endPage; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>">
+          <%= i %>
+        </a>
+      </li>
+    <% } %>
+
+    <!-- Last Page Button (if not in last group) -->
+    <% if (endPage < totalPages) { %>
+      <% if (endPage < totalPages - 1) { %>
+        <li class="page-item disabled">
+          <a class="page-link" href="#">...</a>
+        </li>
+      <% } %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= totalPages %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>"><%= totalPages %></a>
+      </li>
+    <% } %>
+
+    <!-- Next Page Button -->
+    <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage + 1 %><%= typeof search !== 'undefined' && search ? '&search=' + search : '' %>" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    <% } else { %>
+      <li class="page-item disabled">
+        <a class="page-link" href="#" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    <% } %>
+  </ul>
+</nav>
+<% } %> 

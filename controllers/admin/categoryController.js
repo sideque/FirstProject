@@ -1,31 +1,61 @@
 const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
+const adminController = require('./adminController');
 
 const categoryInfo = async (req, res) => {
     try {
+        // Get admin user data
+        const adminUser = await adminController.getAdminData(req);
+        
+        // Get search and pagination parameters
+        const search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 4;
-        const skip = (page - 1) * limit;
-
-        const categoryData = await Category.find({})
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
-        const totalCategories = await Category.countDocuments();
+        const limit = 5; // 5 categories per page
+        
+        // Build search query
+        let query = {};
+        if (search) {
+            query = {
+                $or: [
+                    { name: { $regex: new RegExp(search, 'i') } },
+                    { description: { $regex: new RegExp(search, 'i') } }
+                ]
+            };
+        }
+        
+        // Get total count for pagination
+        const totalCategories = await Category.countDocuments(query);
         const totalPages = Math.ceil(totalCategories / limit);
-
+        
+        // Calculate pagination values
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+        
+        // Get categories with pagination and sorting
+        const categories = await Category.find(query)
+            .sort({ name: 1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+        
         res.render("category", {
-            categories: categoryData, 
-            currentPage: page,        
-            totalPages: totalPages,
-            totalCategories: totalCategories,
-            activePage: "category"
+            categories,
+            currentPage: page,
+            totalPages,
+            totalCategories,
+            search,
+            startPage,
+            endPage,
+            adminUser
         });
     } catch (error) {
-        console.error(error);
-        res.redirect("/pageerror");
+        console.log(error.message);
+        res.redirect('/pageerror');
     }
 };
     const addCategory = async (req,res) => {

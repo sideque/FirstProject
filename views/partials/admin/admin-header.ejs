@@ -1,0 +1,69 @@
+<!-- Admin Header with Search Bar and Profile -->
+<div class="header-container">
+  <!-- Search -->
+  <div class="search-container">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search..." value="<%= typeof search !== 'undefined' ? search : '' %>">
+  </div>
+
+  <!-- Admin Profile Dropdown -->
+  <div class="admin-profile dropdown">
+    <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+      <img src="<%= typeof adminUser !== 'undefined' && adminUser.profileImage ? adminUser.profileImage : 'https://i.pravatar.cc/150?img=12' %>" alt="Admin">
+    </div>
+    <div class="admin-name"><%= typeof adminUser !== 'undefined' && adminUser.name ? adminUser.name : 'Admin User' %></div>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+      <li><h6 class="dropdown-header"><%= typeof adminUser !== 'undefined' && adminUser.name ? adminUser.name : 'Admin User' %></h6></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Common search functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("Admin header loaded, search value:", '<%= typeof search !== "undefined" ? search : "" %>');
+    
+    // Ensure Bootstrap dropdown is initialized
+    if (typeof bootstrap !== 'undefined') {
+      // Initialize all dropdowns
+      var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+      var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl);
+      });
+    }
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      // Handle search on Enter key press
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const searchValue = this.value.trim();
+          const currentUrl = new URL(window.location.href);
+          
+          // Reset to first page on new search
+          currentUrl.searchParams.set('page', '1');
+          
+          if (searchValue) {
+            currentUrl.searchParams.set('search', searchValue);
+          } else {
+            currentUrl.searchParams.delete('search');
+          }
+          
+          window.location.href = currentUrl.toString();
+        }
+      });
+      
+      // Clear search when clicking the X icon
+      searchInput.addEventListener('search', function() {
+        if (this.value === '') {
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.delete('search');
+          window.location.href = currentUrl.toString();
+        }
+      });
+    }
+  });
+</script> 

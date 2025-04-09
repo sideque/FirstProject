@@ -67,11 +67,10 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="productName" class="form-label">Product Name:</label>
-                            <input type="text" class="form-control" id="productName" name="productName" placeholder="Enter product name">
+                            <input type="text" class="form-control" id="productName" name="productName" value="" placeholder="Enter product name">
                             <div id="productName-error" class="error-message"></div>
                         </div>
                         
@@ -94,7 +93,7 @@
 
                         <div class="mb-3">
                             <label for="regularPrice" class="form-label">Regular Price:</label>
-                            <input type="text" class="form-control" id="regularPrice" name="regularPrice" placeholder="0.00">
+                            <input value="" type="text" class="form-control" id="regularPrice" name="regularPrice" placeholder="0.00">
                             <div id="regularPrice-error" class="error-message"></div>
                         </div>
                     </div>
@@ -242,28 +241,61 @@
             // Set up form submission
             document.getElementById('productForm').addEventListener('submit', function(e) {
                 e.preventDefault();
+                
                 if (validateForm()) {
-                    // Convert base64 data to files for upload
-                    prepareImagesForUpload();
-                    
-                    // Submit the form and show success message
                     const form = this;
-                    const isEditing = document.getElementById('productId').value !== '';
+                    const formData = new FormData(form);
                     
-                    // Use actual form submission
-                    form.submit();
-                    
-                    // Show success message with SweetAlert
+                    // Show loading state
                     Swal.fire({
-                        title: isEditing ? 'Product Updated!' : 'Product Added!',
-                        text: isEditing ? 'The product has been successfully updated.' : 'The product has been successfully added.',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        // Optional: Redirect to products list after success
-                        // if (result.isConfirmed) {
-                        //     window.location.href = '/admin/products';
-                        // }
+                        title: 'Adding Product...',
+                        text: 'Please wait while we add your product',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Submit form using fetch API
+                    fetch('/admin/addProduct', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.message || 'Network response was not ok');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message || 'Product added successfully',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = '/admin/product';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Failed to add product',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Submission error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'An error occurred while adding the product. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     });
                 }
             });
@@ -532,14 +564,6 @@
             return isValid;
         }
         
-        // Function to prepare images for upload (convert base64 to files)
-        function prepareImagesForUpload() {
-            const formData = new FormData(document.getElementById('productForm'));
-            
-            // Add any processing needed for image upload here
-            // For now, we're letting the form handle the file inputs
-        }
-        
         // Function to show error message
         function showError(id, message) {
             const errorElement = document.getElementById(id);
@@ -588,21 +612,20 @@
                         
                         // Load product images
                         if (product.productImage && product.productImage.length > 0) {
-                            product.productImage.forEach((image, index) => {
-                                if (index < 3) {
-                                    previewElements[index].style.backgroundImage = `url('/uploads/product-images/${image}')`;
-                                    previewElements[index].classList.remove('image-preview-empty');
-                                    deleteButtons[index].style.display = 'flex';
-                                    
-                                    // Add image data or just keep the filename reference
-                                    const imagePath = `/uploads/product-images/${image}`;
-                                    deleteButtons[index].setAttribute('data-image', image);
-                                    deleteButtons[index].onclick = function(e) {
-                                        e.stopPropagation();
-                                        deleteServerImage(image, productId, index);
-                                    };
-                                }
-                            });
+                            for(let i = 0; i < product.productImage.length; i++) {
+                                const image = product.productImage[i];
+                                previewElements[i].style.backgroundImage = `url('/uploads/product-images/${image}')`;
+                                previewElements[i].classList.remove('image-preview-empty');
+                                deleteButtons[i].style.display = 'flex';
+                                
+                                // Add image data or just keep the filename reference
+                                const imagePath = `/uploads/product-images/${image}`;
+                                deleteButtons[i].setAttribute('data-image', image);
+                                deleteButtons[i].onclick = function(e) {
+                                    e.stopPropagation();
+                                    deleteServerImage(image, productId, i);
+                                };
+                            }
                         }
                     } else {
                         Swal.fire({

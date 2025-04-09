@@ -31,6 +31,16 @@
             margin: 0;
             padding: 0;
         }
+
+        .header-container {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 90;
+        }
         
         /* Sidebar */
         .sidebar {
@@ -85,25 +95,15 @@
             font-weight: 500;
         }
         
-        /* Header */
-        .header-container {
-            position: fixed;
-            top: 20px;
-            right: 30px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            z-index: 90;
-        }
-        
+        /* Search container */
         .search-container {
             position: relative;
             display: flex;
             align-items: center;
         }
-        
+            
         .search-input {
-            background-color: var(--secondary-color);
+            background-color: #2A2A2A;
             border: 1px solid #333;
             border-radius: 20px;
             color: white;
@@ -111,14 +111,14 @@
             width: 250px;
             transition: all 0.3s ease;
         }
-        
+            
         .search-input:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #9747FF;
             width: 280px;
             box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
         }
-        
+            
         .search-icon {
             position: absolute;
             left: 15px;
@@ -131,15 +131,18 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            background-color: var(--secondary-color);
+            padding: 5px;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            background-color: #2A2A2A;
             padding: 5px 15px;
+            margin-bottom: 15px;
             border-radius: 30px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
         }
         
         .admin-profile:hover {
-            background-color: #333;
+            background-color: #2A2A2A;
         }
         
         .admin-avatar {
@@ -147,7 +150,10 @@
             height: 40px;
             border-radius: 50%;
             overflow: hidden;
-            border: 2px solid var(--primary-color);
+            background-color: #333;
+            display: flex;
+                align-items: center;
+            margin-right: 10px;
         }
         
         .admin-avatar img {
@@ -160,14 +166,16 @@
             font-size: 14px;
             font-weight: 500;
             color: white;
+            white-space: nowrap;
         }
         
         /* Main Content */
         .main-content {
             margin-left: 250px;
-            padding: 80px 30px 30px;
+            margin-top: 60px;
+            padding: 20px;
             transition: margin-left 0.3s;
-        }
+        }   
         
         .page-title {
             font-weight: 600;
@@ -422,6 +430,35 @@
             background-color: rgba(71, 120, 255, 0.5);
         }
         
+        /* Pagination styling */
+        .pagination-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .pagination-container a,
+        .pagination-container span {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 4px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .pagination-container a {
+            background-color: #4a6da7;
+        }
+        
+        .pagination-container a:hover {
+            background-color: #385785;
+        }
+        
+        .pagination-container .current-page {
+            background-color: #2ecc71;
+            font-weight: bold;
+        }
+        
         /* Filter */
         .filter-container {
             display: flex;
@@ -443,6 +480,35 @@
             border-color: var(--primary-color);
         }
         
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+        
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -452,20 +518,11 @@
             .main-content {
                 margin-left: 200px;
             }
-            
-            .search-input {
-                width: 200px;
-            }
-            
-            .search-input:focus {
-                width: 220px;
-            }
         }
         
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
-                width: 250px;
             }
             
             .sidebar.active {
@@ -495,20 +552,16 @@
             }
             
             .header-container {
-                top: 20px;
-                right: 20px;
+                top: 10px;
+                right: 15px;
             }
             
             .search-input {
-                width: 150px;
+                width: 200px;
             }
             
             .search-input:focus {
-                width: 180px;
-            }
-            
-            .admin-name {
-                display: none;
+                width: 220px;
             }
         }
         
@@ -529,25 +582,13 @@
             }
             
             .header-container {
-                width: 100%;
-                right: 0;
-                top: 70px;
-                padding: 0 20px;
+                position: static;
                 justify-content: space-between;
-            }
-            
-            .search-container {
-                width: 70%;
-            }
-            
-            .search-input {
+                padding: 10px;
                 width: 100%;
+                box-sizing: border-box;
             }
-            
-            .search-input:focus {
-                width: 100%;
-            }
-            
+
             .data-table {
                 font-size: 12px;
             }
@@ -568,27 +609,9 @@
 </head>
 <body>
     <!-- Menu Toggle Button (Mobile) -->
-    <%-include("../../views/partials/admin/product-sidebar")%> 
-    <!-- Header Search and Profile -->
-    <div class="header-container">
-        <div class="search-container">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" class="search-input" placeholder="Search products, orders, customers...">
-        </div>
-        <div class="admin-profile dropdown">
-            <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
-            </div>
-            <div class="admin-name">Admin User</div>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-              <li><h6 class="dropdown-header">Admin User</h6></li>
-              <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li> -->
-              <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li> -->
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-            </ul>
-          </div>
-    </div>
+    <%-include("../../views/partials/admin/product-sidebar")%>
+    <%-include("../../views/partials/admin/admin-header")%>
+</div>
     
     <!-- Main Content -->
     <div class="main-content">
@@ -599,7 +622,6 @@
             </button>
         </div>
         
-        <!-- Filters -->
         <!-- Products Table -->
         <div class="dashboard-card">
             <div class="card-body">
@@ -613,13 +635,10 @@
                                 <th>Category</th>
                                 <th>Price</th>
                                 <th>Stock</th>
-                                <!-- <th>Status</th> -->
                                 <th>Block Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-
-
                         <tbody>
                             <% for(let i = data.length - 1; i >= 0; i--) { %>
                                 <tr>
@@ -627,36 +646,52 @@
                                     <td>
                                         <div class="product-image">
                                             <% if (data[i].productImage && data[i].productImage.length > 0) { %>
-                                                <img src="/uploads/product-images/<%= data[i].productImage[0] %>" alt="<%= data[i].productImage %>" width="80" height="80">
+                                                <% 
+                                                // Use formattedImages if available, otherwise fallback to manual path construction
+                                                let imagePath;
+                                                if (data[i].formattedImages && data[i].formattedImages.length > 0) {
+                                                    // Use the path from formattedImages
+                                                    imagePath = data[i].formattedImages[0].path;
+                                                } else {
+                                                    // Fallback to manual construction
+                                                    imagePath = data[i].productImage[0];
+                                                    if (imagePath && !imagePath.startsWith('/uploads/product-images/')) {
+                                                        imagePath = `/uploads/product-images/${imagePath}`;
+                                                    }
+                                                }
+                                                
+                                                // Ensure we have an image path
+                                                if (!imagePath) {
+                                                    imagePath = 'https://placehold.co/80x80/darkgray/white?text=No+Image';
+                                                }
+                                                %>
+                                                <img src="<%= imagePath %>" alt="<%= data[i].productName %>" width="80" height="80">
                                             <% } else { %>
-                                                <img src="/api/placeholder/80/80" alt="No image available" width="80" height="80">
+                                                <img src="https://placehold.co/80x80/darkgray/white?text=No+Image" alt="No image available" width="80" height="80">
                                             <% } %>                                            
                                         </div>
                                     </td>
-                                    
-                                    <!-- <td><%= data[i].brand ? data[i].brand.name : "No Brand" %></td>(Optional improvement: populate brand also) -->
                                     <td><%= data[i].brand %></td> 
                                     <td><%= data[i].category ? data[i].category.name : "No Category" %></td> 
                                     <td><%= data[i].salePrice %></td>
-                                    <td><%= data[i].stock %></td> <!-- you forgot stock value, added here -->
+                                    <td><%= data[i].stock %></td>
                                     <td>
                                         <% if (data[i].isBlocked === false) { %>
-                                          <button class="btn btn-sm btn-block text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', true)">
-                                            <i class="fas fa-check-circle"></i> Block
-                                          </button>
+                                            <button class="btn btn-sm btn-block text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', true)">
+                                                <i class="fas fa-ban"></i> Block
+                                            </button>
                                         <% } else { %>
-                                          <button class="btn btn-sm btn-unblock text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', false)">
-                                            <i class="fas fa-check-circle"></i> Unblock
-                                          </button>
+                                            <button class="btn btn-sm btn-unblock text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', false)">
+                                                <i class="fas fa-check-circle"></i> Unblock
+                                            </button>
                                         <% } %>
-                                      </td>
-                                      
+                                    </td>
                                     <td>
                                         <div class="action-btns">
-                                            <a href="/edit-product/<%= data[i]._id %>" class="action-btn action-btn-edit">
+                                            <a href="/admin/edit-product/<%= data[i]._id %>" class="action-btn action-btn-edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="/delete-product/<%= data[i]._id %>" class="action-btn action-btn-delete">
+                                            <a href="/admin/delete-product/<%= data[i]._id %>" class="action-btn action-btn-delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
@@ -664,146 +699,110 @@
                                 </tr>
                             <% } %>
                         </tbody>
-                        
                     </table>
                 </div>
             </div>
         </div>
-        
-        <!-- Pagination -->
-        <nav aria-label="Products pagination">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                </li>
-                <li class="page-item active">
-                    <a class="page-link" href="#">1</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">2</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">3</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
     </div>
     
-    <!-- JavaScript -->
-
-    <script>
-        // Toggle sidebar on mobile
-document.getElementById('menuToggle').addEventListener('click', function() {
-  document.getElementById('sidebar').classList.toggle('active');
-});
-
-// Close sidebar when clicking outside on mobile
-document.addEventListener('click', function(event) {
-  const sidebar = document.getElementById('sidebar');
-  const menuToggle = document.getElementById('menuToggle');
-  
-  if (window.innerWidth <= 768) {
-    if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
-      sidebar.classList.remove('active');
-    }
-  }
-});
-
-// Confirm delete function
-function confirmDelete(id) {
-  if (confirm('Are you sure you want to delete this product?')) {
-    // Handle delete action
-    console.log('Deleting product ID:', id);
+    <%-include("../../views/partials/admin/pagination")%>
     
-    // You would typically make an AJAX call to your backend here
-    fetch(`/api/products/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        // Remove the product element from the DOM
-        document.getElementById(`product-${id}`).remove();
-        showNotification('Product successfully deleted');
-      } else {
-        showNotification('Error deleting product', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Delete error:', error);
-      showNotification('Error deleting product', 'error');
-    });
-  }
-}
+    <script>
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     // Initialize Bootstrap features
+        //     if (typeof bootstrap !== 'undefined') {
+        //         // Initialize all dropdowns
+        //         var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+        //         var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+        //             return new bootstrap.Dropdown(dropdownToggleEl);
+        //         });
+                
+        //         // Initialize tooltips if used
+        //         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        //         tooltipTriggerList.map(function(tooltipTriggerEl) {
+        //             return new bootstrap.Tooltip(tooltipTriggerEl);
+        //         });
+        //     }
+            
+        //     // Handle search functionality
+        //     const searchInput = document.getElementById('searchInput');
+        //     if (searchInput) {
+        //         // Handle search on Enter key press
+        //         searchInput.addEventListener('keypress', function(e) {
+        //             if (e.key === 'Enter') {
+        //                 e.preventDefault();
+        //                 const searchValue = this.value.trim();
+        //                 const currentUrl = new URL(window.location.href);
+                        
+        //                 // Reset to first page on new search
+        //                 currentUrl.searchParams.set('page', '1');
+                        
+        //                 if (searchValue) {
+        //                     currentUrl.searchParams.set('search', searchValue);
+        //                 } else {
+        //                     currentUrl.searchParams.delete('search');
+        //                 }
+                        
+        //                 window.location.href = currentUrl.toString();
+        //             }
+        //         });
+                
+        //         // Also handle input clear event
+        //         searchInput.addEventListener('search', function() {
+        //             if (this.value === '') {
+        //                 const currentUrl = new URL(window.location.href);
+        //                 currentUrl.searchParams.delete('search');
+        //                 currentUrl.searchParams.set('page', '1');
+        //                 window.location.href = currentUrl.toString();
+        //             }
+        //         });
+        //     }
+        // });
 
-// Show notification function
-function showNotification(message, type = 'success') {
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.textContent = message;
-  
-  document.body.appendChild(notification);
-  
-  // Display the notification
-  setTimeout(() => {
-    notification.classList.add('show');
-  }, 10);
-  
-  // Hide and remove after 3 seconds
-  setTimeout(() => {
-    notification.classList.remove('show');
-    setTimeout(() => {
-      notification.remove();
-    }, 300);
-  }, 3000);
-}
+        // Toggle product block status
+        function toggleBlockStatus(productId, shouldBlock) {
+            const url = `/admin/toggle-product-status/${productId}`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification('Product status updated successfully');
+                    location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to update product status');
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                showNotification(err.message || 'Error updating product status', 'error');
+            });
+        }
 
-// Initialize tooltips (if using a library like Bootstrap)
-document.addEventListener('DOMContentLoaded', function() {
-  // If using Bootstrap tooltips
-  if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  }
-  
-  // Add event listeners to all delete buttons
-  document.querySelectorAll('.delete-btn').forEach(button => {
-    button.addEventListener('click', function() {
-      const productId = this.getAttribute('data-product-id');
-      confirmDelete(productId);
-    });
-  });
-});
-
-function toggleBlockStatus(productId, shouldBlock) {
-  const url = shouldBlock 
-    ? `/admin/blockProduct?id=${productId}`
-    : `/admin/unblockProduct?id=${productId}`;
-
-  fetch(url)
-    .then(response => {
-      if (response.ok) {
-        // Reload page or update the UI
-        location.reload();
-      } else {
-        console.error("Failed to update status");
-      }
-    })
-    .catch(err => console.error("Request error:", err));
-}
-
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            // Create SweetAlert2 notification
+            Swal.fire({
+                title: type === 'success' ? 'Success!' : 'Error!',
+                text: message,
+                icon: type,
+                toast: true,
+                position: 'bottom-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
     </script>
 </body>
 </html>

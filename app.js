@@ -63,8 +63,17 @@ app.set("views", [
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
-// app.use(express.static(path.join(__dirname, "uploads")))
-app.use('/uploads',express.static('uploads'))
+// Add debug middleware to log requested URLs
+app.use((req, res, next) => {
+    if (req.url.includes('/uploads/')) {
+        console.log(`Static file requested: ${req.url}`);
+        const absolutePath = path.join(__dirname, req.url);
+        console.log(`Absolute path: ${absolutePath}, exists: ${require('fs').existsSync(absolutePath)}`);
+    }
+    next();
+});
+// Ensure uploads directory is properly served as static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 // Routers

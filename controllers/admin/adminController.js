@@ -2,6 +2,23 @@ const User = require("../../models/userSchema");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const getAdminData = async (req) => {
+    try {
+        if (req.session.admin) {
+            return {
+                id: req.session.admin._id,
+                name: req.session.admin.name || 'Admin User',
+                email: req.session.admin.email,
+                profileImage: req.session.admin.profileImage || 'https://i.pravatar.cc/150?img=12'
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error("Error getting admin data:", error);
+        return null;
+    }
+};
+
 const pageerror = async (req,res)=>{
     res.render("admin-error")
 }
@@ -41,35 +58,43 @@ const login = async (req, res) => {
 };
 
 const loadDashboard = async (req, res) => {
-    if (req.session.admin) {
-        try {
-            const message = req.session.message;
-            req.session.message = null;
+    try {
+        const adminUser = await getAdminData(req);
+        
+        if (req.session.admin) {
+            try {
+                const message = req.session.message;
+                req.session.message = null;
 
-            const itemsPerPage = 5;
-            const currentPage = parseInt(req.query.page) || 1;
+                const itemsPerPage = 5;
+                const currentPage = parseInt(req.query.page) || 1;
 
-            const totalUsers = await User.countDocuments();
-            const totalPages = Math.ceil(totalUsers / itemsPerPage);
+                const totalUsers = await User.countDocuments();
+                const totalPages = Math.ceil(totalUsers / itemsPerPage);
 
-            const users = await User.find()
-                .skip((currentPage - 1) * itemsPerPage)
-                .limit(itemsPerPage);
+                const users = await User.find()
+                    .skip((currentPage - 1) * itemsPerPage)
+                    .limit(itemsPerPage);
 
-            res.render("dashboard", {
-                users,
-                message,
-                totalPages,
-                currentPage,
-                activePage: "dashboard"
-            });
+                res.render("dashboard", {
+                    users,
+                    message,
+                    totalPages,
+                    currentPage,
+                    activePage: "dashboard",
+                    adminUser
+                });
 
-        } catch (error) {
-            console.log("Dashboard Error:", error);
-            res.redirect("/pageerror");
+            } catch (error) {
+                console.log("Dashboard Error:", error);
+                res.redirect("/pageerror");
+            }
+        } else {
+            res.redirect("/admin/login");
         }
-    } else {
-        res.redirect("/admin/login");
+    } catch (error) {
+        console.log(error.message);
+        res.redirect("/pageerror");
     }
 };
 
@@ -94,5 +119,6 @@ module.exports = {
     login,
     loadDashboard,
     pageerror,
-    logout
+    logout,
+    getAdminData
 }

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MobiVault Brand</title>
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -117,16 +118,29 @@ h1 {
       color: white;
       white-space: nowrap;
     }
-/* Table styling */
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 30px;
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    overflow: hidden;
-}
+
+    .main-content {
+        margin-left: 250px;
+        margin-top: 60px;
+        padding: 20px;
+        transition: margin-left 0.3s;
+    }   
+
+    h1 {
+        margin-bottom: 20px;
+        color: #fff;
+    }
+
+    /* Table styling */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
 
 .data-table th {
     background-color: #4a6da7;
@@ -256,6 +270,31 @@ h1 {
     text-align: right;
 }
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 5px;
+}
+
+.page-item .page-link {
+    background-color: var(--secondary-color);
+    border: none;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 14px;
+    transition: all 0.3s ease;
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.page-item .page-link:hover {
+    background-color: rgba(71, 120, 255, 0.5);
+}
+
 /* Pagination styling */
 .pagination-container {
     margin-top: 20px;
@@ -382,33 +421,14 @@ th.actions-column {
    
 }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <!-- Sidebar Navigation -->
   <%-include("../../views/partials/admin/brand-sidebar")%> 
-  <div class="main-content">
-    <div class="header-container">
-        <!-- Search -->
-        <div class="search-container">
-          <i class="fas fa-search search-icon"></i>
-          <input type="text" class="search-input" placeholder="Search...">
-        </div>
   
-        <!-- Admin Profile Dropdown -->
-        <div class="admin-profile dropdown">
-          <div class="admin-avatar" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="https://i.pravatar.cc/150?img=12" alt="Admin">
-          </div>
-          <div class="admin-name">Admin User</div>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-            <li><h6 class="dropdown-header">Admin User</h6></li>
-            <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li> -->
-            <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li> -->
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-          </ul>
-        </div>
-      </div>
+    <%-include("../../views/partials/admin/admin-header")%> 
+    <div class="main-content">  
     <!-- Brands container -->
     <div class="brands-container">
         <div class="brands-header">
@@ -430,23 +450,13 @@ th.actions-column {
                 <% if (Array.isArray(brands) && brands.length > 0) { %>
                     <% brands.forEach((brand, index) => { %>
                         <tr>
-                            <td><%= (currentPage - 1) * 4 + index + 1 %></td>
+                            <td><%= (currentPage - 1) * 5 + index + 1 %></td>
                             <td class="brand-name"><%= brand.name %></td>
                             <td class="brand-description"><%= brand.description %></td>
                             <td>
                                 <%= brand.brandOffer ? `${brand.brandOffer}%` : '0%' %>
                             </td>
                             <td class="actions-column">
-                                <!-- <button class="action-btn <%= brand.brandOffer ? 'unblock-btn' : 'block-btn' %>">
-                                    <a href="#" onclick="addOffer('<%= brand._id %>')">
-                                        <%= brand.brandOffer ? 'Update Offer' : 'Add Offer' %>
-                                    </a>
-                                </button>
-                                <% if(brand.brandOffer > 0) { %>
-                                    <button class="action-btn unblock-btn">
-                                        <a href="#" onclick="removeOffer('<%= brand._id %>')">Remove Offer</a>
-                                    </button>
-                                <% } %> -->
                                 <% if (brand.isListed) { %>
                                     <button class="action-btn block-btn">
                                         <a href="/admin/listBrand?id=<%= brand._id %>">Unlist</a>
@@ -474,27 +484,10 @@ th.actions-column {
         </table>
     </div>
 
-    <!-- Pagination -->
-<div class="pagination-container">
-    <% if (currentPage > 1) { %>
-        <a href="?page=<%= currentPage - 1 %>" class="page-link">&laquo; Previous</a>
-    <% } %>
-
-    <% for (let i = 1; i <= totalPages; i++) { %>
-        <% if (i === currentPage) { %>
-            <span class="current-page"><%= i %></span> <!-- Highlight current page -->
-        <% } else { %>
-            <a href="?page=<%= i %>" class="page-link"><%= i %></a> <!-- Regular page link -->
-        <% } %>
-    <% } %>
-
-    <% if (currentPage < totalPages) { %>
-        <a href="?page=<%= currentPage + 1 %>" class="page-link">Next &raquo;</a>
-    <% } %>
-</div>
-
+    <!-- Include the Pagination Partial -->
+    <%-include("../../views/partials/admin/pagination")%>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
 
     async function addOffer(brandId) {
