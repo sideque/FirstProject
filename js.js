@@ -102,7 +102,7 @@ const addProducts = async (req, res) => {
                 salePrice: product.salePrice,
                 createdOn: new Date(),
                 stock: product.stock,
-                color: product.color,
+                // color: product.color,
                 // Add these fields if they're in your form:
                 processor: req.body.processor,
                 storage: req.body.storage,
@@ -304,7 +304,7 @@ const updateProduct = async (req, res) => {
             regularPrice: productData.regularPrice || product.regularPrice,
             salePrice: productData.salePrice || product.salePrice,
             stock: productData.quantity || product.stock,
-            color: productData.color || product.color,
+            // color: productData.color || product.color,
             processor: productData.processor || product.processor,
             storage: productData.storage || product.storage,
             ram: productData.ram || product.ram,

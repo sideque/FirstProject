@@ -552,205 +552,67 @@ th.actions-column {
 }
 
 
-    async function removeOffer(categoryId) {
-        try {
+    // async function removeOffer(categoryId) {
+    //     try {
 
-            const response = await fetch("/admin/removeCategoryOffer",{
-                method:"POST",
-                headers:{
-                    "content-type" : "application/json",
-                },
-                body:JSON.stringify({
-                    categoryId:categoryId,
-                })
-            })
+    //         const response = await fetch("/admin/removeCategoryOffer",{
+    //             method:"POST",
+    //             headers:{
+    //                 "content-type" : "application/json",
+    //             },
+    //             body:JSON.stringify({
+    //                 categoryId:categoryId,
+    //             })
+    //         })
 
-            const data = await response.json();
+    //         const data = await response.json();
 
-            if(response.ok && data.status === true){
-                Swal.fire(
-                    "Offer removed",
-                    "The offer has been removed",
-                    "success"
-                ).then(()=>{
-                    location.reload();
-                });
-            }else{
-                Swal.fire("Failed",data.message || "Removing offer failed","error");
-            }
+    //         if(response.ok && data.status === true){
+    //             Swal.fire(
+    //                 "Offer removed",
+    //                 "The offer has been removed",
+    //                 "success"
+    //             ).then(()=>{
+    //                 location.reload();
+    //             });
+    //         }else{
+    //             Swal.fire("Failed",data.message || "Removing offer failed","error");
+    //         }
 
-        } catch (error) {
+    //     } catch (error) {
 
-            Swal.fire(
-                "Error",
-                "An error occured while removing the offer",
-                "error"
-            );
+    //         Swal.fire(
+    //             "Error",
+    //             "An error occured while removing the offer",
+    //             "error"
+    //         );
 
-            console.error("Error removing offer",error);
+    //         console.error("Error removing offer",error);
 
-        }
-    }
+    //     }
+    // }
 
-    async function deleteCategory(categoryId) {
-    try {
-        // First check if category has products
-        const response = await fetch(`/admin/category-has-products/${categoryId}`);
-        const data = await response.json();
-        
-        if (data.hasProducts) {
-            // Ask what to do with products
-            const { value: action } = await Swal.fire({
-                title: 'Delete Category',
-                html: `This category has ${data.count} associated product(s). What would you like to do?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Delete anyway',
-                input: 'radio',
-                inputOptions: {
-                    'delete': 'Delete all associated products',
-                    'reassign': 'Reassign products to another category'
-                },
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'You need to choose an option!';
-                    }
-                }
-            });
-            
-            if (!action) return;
-            
-            if (action === 'reassign') {
-                // Get available categories
-                const catResponse = await fetch('/admin/get-categories');
-                const catData = await catResponse.json();
-                
-                if (!catData.success || catData.categories.length === 0) {
-                    return Swal.fire('Error', 'No other categories available for reassignment', 'error');
-                }
-                
-                // Create options for select dropdown
-                const categoryOptions = {};
-                catData.categories.forEach(cat => {
-                    categoryOptions[cat._id] = cat.name;
-                });
-                
-                // Ask which category to reassign to
-                const { value: targetCategoryId } = await Swal.fire({
-                    title: 'Select Target Category',
-                    input: 'select',
-                    inputOptions: categoryOptions,
-                    inputPlaceholder: 'Select a category',
-                    showCancelButton: true,
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return 'You need to select a category!';
-                        }
-                    }
-                });
-                
-                if (!targetCategoryId) return;
-                
-                // Perform deletion with reassignment
-                const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        fallbackCategory: targetCategoryId,
-                        deleteProducts: false
-                    })
-                });
-                
-                const deleteResult = await deleteResponse.json();
-                
-                if (deleteResult.success) {
-                    Swal.fire('Deleted!', 'Category deleted and products reassigned successfully.', 'success')
-                    .then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
-                }
-            } else {
-                // Confirm deletion with products
-                const confirmResult = await Swal.fire({
-                    title: 'Are you sure?',
-                    text: `This will permanently delete the category and all ${data.count} associated product(s)!`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete everything!'
-                });
-                
-                if (!confirmResult.isConfirmed) return;
-                
-                // Perform deletion with product deletion
-                const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        deleteProducts: true
-                    })
-                });
-                
-                const deleteResult = await deleteResponse.json();
-                
-                if (deleteResult.success) {
-                    Swal.fire('Deleted!', 'Category and all associated products deleted successfully.', 'success')
-                    .then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
-                }
-            }
+    async function deleteCategory(categorieId) {
+    const confirmDelete = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'This category will be deleted!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirmDelete.isConfirmed) {
+        const response = await fetch(`/admin/delete-category/${categorieId}`, { method: 'DELETE' });
+        const result = await response.json();
+
+        if (result.success) {
+            Swal.fire('Deleted!', 'Category deleted successfully.', 'success')
+            .then(() => location.reload());
         } else {
-            // Simple confirmation for category with no products
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to delete this category?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!'
-            });
-            
-            if (!result.isConfirmed) return;
-            
-            // Perform simple deletion
-            const deleteResponse = await fetch(`/admin/delete-category/${categoryId}`, {
-                method: 'DELETE'
-            });
-            
-            // Check if the response is JSON
-            const contentType = deleteResponse.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const deleteResult = await deleteResponse.json();
-                
-                if (deleteResult.success) {
-                    Swal.fire('Deleted!', 'Category deleted successfully.', 'success')
-                    .then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', deleteResult.message || 'Failed to delete category', 'error');
-                }
-            } else {
-                // Handle non-JSON response (redirect)
-                location.reload();
-            }
+            Swal.fire('Error!', result.message || 'Something went wrong.', 'error');
         }
-    } catch (error) {
-        console.error('Error in delete process:', error);
-        Swal.fire('Error', 'An unexpected error occurred', 'error');
     }
 }
 

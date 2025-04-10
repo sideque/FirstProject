@@ -33,7 +33,6 @@ router.get("/unlistCategory", adminAuth, categoryController.getUnlistCategory);
 router.get("/category-has-products/:id", adminAuth, categoryController.categoryHasProducts);
 router.get("/get-categories", adminAuth, categoryController.getCategories);
 router.delete("/delete-category/:id", adminAuth, categoryController.deleteCategory);
-router.post("/delete-category/:id", adminAuth, categoryController.deleteCategory);
 router.get("/edit-category/:id", adminAuth, categoryController.loadEditCategory);
 router.post("/edit-category/:id", adminAuth, categoryController.editCategory);
 
@@ -48,7 +47,6 @@ router.get("/unlistBrand", adminAuth, brandController.getUnlistBrand);
 router.get("/brand-has-products/:id", adminAuth, brandController.brandHasProducts);
 router.get("/get-brands", adminAuth, brandController.getBrands);
 router.delete("/delete-brand/:id", adminAuth, brandController.deleteBrand);
-router.post("/delete-brand/:id", adminAuth, brandController.deleteBrand);
 router.get("/edit-brand/:id", adminAuth, brandController.loadEditBrand);
 router.post("/edit-brand/:id", adminAuth, brandController.editBrand);
 
@@ -60,7 +58,7 @@ router.post("/addProduct", adminAuth, upload.array("images", 3), productControll
 router.get("/product/:id", adminAuth, productController.getProductData);
 router.get("/edit-product/:id", adminAuth, productController.getEditProduct);
 router.post("/updateProduct", adminAuth, upload.array("images", 3), productController.updateProduct);
-router.delete("/delete-product/:id", adminAuth, productController.deleteProduct);
+router.get("/delete-product/:id", adminAuth, productController.deleteProduct);
 router.post("/toggle-product-status/:id", adminAuth, productController.toggleProductStatus);
 router.delete("/delete-product-image/:productId/:imageName", adminAuth, productController.deleteProductImage);
 router.get("/remove-duplicate-products", adminAuth, productController.removeDuplicateProducts);

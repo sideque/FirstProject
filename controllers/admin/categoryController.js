@@ -170,103 +170,24 @@ const categoryInfo = async (req, res) => {
 
     // Functions to add to your categoryController.js
 
-const deleteCategory = async (req, res) => {
-    try {
-        const categoryId = req.params.id;
-        
-        // Handle both DELETE and POST methods
-        const fallbackCategoryId = req.body?.fallbackCategory;
-        const deleteProducts = req.body?.deleteProducts === true || req.body?.deleteProducts === 'true';
-        
-        // Find the category
-        const category = await Category.findById(categoryId);
-        
-        if (!category) {
-            if (req.xhr) {
-                return res.status(404).json({ success: false, message: 'Category not found' });
+    const deleteCategory = async (req, res) => {
+        try {
+            const categoryId = req.params.id;
+            
+            const category = await Category.findById(categoryId);
+            if (!category) {
+                return res.status(404).json({ success: false, message: "Category not found" });
             }
-            req.flash('error', 'Category not found');
-            return res.redirect('/admin/category');
+    
+            await Category.findByIdAndDelete(categoryId);
+    
+            return res.status(200).json({ success: true, message: "Category deleted successfully" });
+        } catch (error) {
+            console.log(error.message);
+            return res.status(500).json({ success: false, message: "Internal server error" });
         }
-        
-        // Find associated products
-        const associatedProducts = await Product.find({ category: categoryId });
-        
-        if (associatedProducts.length > 0) {
-            // If fallback category provided, reassign products
-            if (fallbackCategoryId && !deleteProducts) {
-                // Verify fallback category exists
-                const fallbackCategory = await Category.findById(fallbackCategoryId);
-                if (!fallbackCategory) {
-                    if (req.xhr) {
-                        return res.status(404).json({ success: false, message: 'Fallback category not found' });
-                    }
-                    req.flash('error', 'Fallback category not found');
-                    return res.redirect('/admin/category');
-                }
-                
-                // Reassign products to fallback category
-                await Product.updateMany(
-                    { category: categoryId },
-                    { $set: { category: fallbackCategoryId } }
-                );
-            } 
-            // If deleteProducts flag is true, delete all associated products
-            else if (deleteProducts) {
-                // for (const product of associatedProducts) {
-                //     // Delete the product
-                //     await Product.findByIdAndDelete(product._id);
-                // }
-                await Promise.all(
-                    associatedProducts.map(product => Product.findByIdAndDelete(product._id))
-                );
-                
-            } 
-            // If no fallback category and not deleting products, prevent deletion
-            else {
-                if (req.xhr) {
-                    return res.status(400).json({ 
-                        success: false, 
-                        message: 'Cannot delete category with associated products. Please reassign or delete products first.' 
-                    });
-                }
-                req.flash('error', 'Cannot delete category with associated products. Please reassign or delete products first.');
-                return res.redirect('/admin/category');
-            }
-        }
-        
-        // Remove any category offers (similar to your removeCategoryOffer function)
-        if (category.categoryOffer > 0) {
-            // Reset product prices if needed
-            for (const product of associatedProducts) {
-                if (!deleteProducts) { // Only update if not deleting products
-                    product.salePrice = product.regularPrice;
-                    await product.save();
-                }
-            }
-        }
-        
-        // Delete the category
-        await Category.findByIdAndDelete(categoryId);
-        
-        if (req.xhr) {
-            return res.json({ success: true, message: 'Category deleted successfully' });
-        }
-        
-        req.flash('success', 'Category deleted successfully');
-        res.redirect('/admin/category');
-        
-    } catch (error) {
-        console.error('Error deleting category:', error);
-        
-        if (req.xhr) {
-            return res.status(500).json({ success: false, message: 'Internal server error' });
-        }
-        
-        req.flash('error', 'Internal server error');
-        res.redirect('/admin/category');
-    }
-};
+    };
+    
 
 const categoryHasProducts = async (req, res) => {
     try {

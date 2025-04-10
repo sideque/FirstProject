@@ -31,7 +31,7 @@ const checkForDuplicateProducts = async () => {
         
         // Log any duplicates found
         if (duplicates.length > 0) {
-            console.log('⚠️ DUPLICATE PRODUCTS FOUND:');
+            console.log('DUPLICATE PRODUCTS FOUND:');
             duplicates.forEach(dup => {
                 console.log(`Product: "${dup.name}" has duplicates with IDs: ${dup.ids.join(', ')}`);
             });
@@ -190,11 +190,11 @@ const addProducts = async (req, res) => {
             stock,
             discount,
             isListed,
-            color
+            // color
         } = req.body;
 
         // Validate required fields
-        if (!productName || !description || !brand || !category || !regularPrice || !color) {
+        if (!productName || !description || !brand || !category || !regularPrice) {  //|| !color
             return res.status(400).json({
                 success: false,
                 message: "Please fill in all required fields"
@@ -262,7 +262,7 @@ const addProducts = async (req, res) => {
                 regularPrice: regularPriceValue,
                 salePrice: salePrice,
                 stock: parseInt(stock) || 0,
-                color: color || '#000000', // Set default color if not provided
+                // color: color || '#000000', // Set default color if not provided
                 productImage: images,
                 isListed: isListed === 'true',
                 createdOn: new Date()
@@ -626,12 +626,21 @@ const updateProduct = async (req, res) => {
             regularPrice: productData.regularPrice || existingProduct.regularPrice,
             salePrice: productData.salePrice || existingProduct.salePrice,
             stock: productData.quantity || productData.stock || existingProduct.stock,
-            color: productData.color || existingProduct.color,
             processor: productData.processor || existingProduct.processor,
             storage: productData.storage || existingProduct.storage,
             ram: productData.ram || existingProduct.ram,
-            camera: productData.camera || existingProduct.camera
+            camera: productData.camera || existingProduct.camera,
         };
+        
+        // 🌟 Important: Check if productImage exists in update, otherwise skip
+        if (productData.productImage && productData.productImage.length > 0) {
+            updatedProduct.productImage = productData.productImage;
+        } else {
+            updatedProduct.productImage = existingProduct.productImage;
+        }
+        
+        
+        
         
         // Normalize existing product images (remove any /uploads/product-images/ prefix)
         const normalizedExistingImages = existingProduct.productImage.map(img => {
@@ -671,10 +680,10 @@ const updateProduct = async (req, res) => {
         } 
         // Case 3: Existing images from the form's hidden input
         else if (productData.existingImages) {
-            console.log("Using existing images from the form:", productData.existingImages);
+            // console.log("Using existing images from the form:", productData.existingImages);
             try {
                 const parsedImages = JSON.parse(productData.existingImages);
-                console.log("Parsed existing images:", parsedImages);
+                // console.log("Parsed existing images:", parsedImages);
                 
                 if (Array.isArray(parsedImages) && parsedImages.length > 0) {
                     // Normalize paths (remove /uploads/product-images/ prefix if present)
@@ -687,8 +696,8 @@ const updateProduct = async (req, res) => {
                     
                     finalProductImages = normalizedParsedImages.filter(img => img !== null);
                 }
-            } catch (e) {
-                console.error("Error parsing existingImages:", e);
+            } catch (error) {
+                console.error("Error parsing existingImages:", error);
             }
         }
         
@@ -1045,32 +1054,36 @@ const getProductData = async (req, res) => {
 };
 
 const deleteProduct = async (req, res) => {
-    try {
-        const productId = req.params.id;
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).json({ success: false, message: "Product not found" });
-        }
+   try {
 
+        const productId = req.params.id;
+
+        const product = await Product.findById(productId);
+        if(!product) {
+            return res.status(404).json({ success: false, message: "Product not found"})
+        }
+            
         // Delete product images
         if (product.productImage && Array.isArray(product.productImage)) {
             for (const image of product.productImage) {
                 const imagePath = path.join(process.cwd(), 'uploads', 'product-images', image);
-                if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath);
-                }
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
             }
         }
-
-        // Delete the product
-        await product.remove();
-
-        return res.status(200).json({ success: true, message: "Product deleted successfully" });
-    } catch (error) {
-        console.error("Error deleting product:", error);
-        res.status(500).json({ success: false, message: "Error deleting product", error: error.message });
     }
+
+    await Product.findByIdAndDelete(productId);
+
+    return res.status(200).json({ success: true, message:"Product delete successfully"});
+
+   } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ success: false, message: "Internal server error"})
+   }
 };
+
+  
 
 const toggleProductStatus = async (req, res) => {
     try {

@@ -123,11 +123,11 @@
                             <div id="quantity-error" class="error-message"></div>
                         </div>
 
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label for="color" class="form-label">Color:</label>
                             <input type="color" class="form-control form-control-color" id="color" name="color">
                             <div id="color-error" class="error-message"></div>
-                        </div>                        
+                        </div>                         -->
 
                     </div>
 
@@ -598,7 +598,7 @@
                         document.getElementById('regularPrice').value = product.regularPrice;
                         document.getElementById('salePrice').value = product.salePrice || '';
                         document.getElementById('quantity').value = product.quantity;
-                        document.getElementById('color').value = product.color || '#000000';
+                        // document.getElementById('color').value = product.color || '#000000';
                         
                         // Set phone specifications
                         if (product.processor) document.getElementById('processor').value = product.processor;

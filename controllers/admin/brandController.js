@@ -124,8 +124,9 @@ const addBrandOffer = async (req, res) => {
             // Reset product-specific offer
             product.productOffer = 0;
             
-            // Apply brand discount to regular price
-            product.salePrice = product.regularPrice - Math.floor(product.regularPrice * (percentage/100));
+            const discountAmount = (product.regularPrice * percentage) / 100;
+            product.salePrice = parseFloat((product.regularPrice - discountAmount).toFixed(2));
+
             await product.save();
         }
 
@@ -172,97 +173,17 @@ const deleteBrand = async (req, res) => {
     try {
         const brandId = req.params.id;
         
-        // Handle both DELETE and POST methods
-        const fallbackBrandId = req.body?.fallbackBrand;
-        const deleteProducts = req.body?.deleteProducts === true || req.body?.deleteProducts === 'true';
-        
-        // Find the brand
         const brand = await Brand.findById(brandId);
-        
         if (!brand) {
-            if (req.xhr) {
-                return res.status(404).json({ success: false, message: 'Brand not found' });
-            }
-            req.flash('error', 'Brand not found');
-            return res.redirect('/admin/brand');
+            return res.status(404).json({ success: false, message: "Brand not found" });
         }
-        
-        // Find associated products
-        const associatedProducts = await Product.find({ brand: brandId });
-        
-        if (associatedProducts.length > 0) {
-            // If fallback brand provided, reassign products
-            if (fallbackBrandId && !deleteProducts) {
-                // Verify fallback brand exists
-                const fallbackBrand = await Brand.findById(fallbackBrandId);
-                if (!fallbackBrand) {
-                    if (req.xhr) {
-                        return res.status(404).json({ success: false, message: 'Fallback brand not found' });
-                    }
-                    req.flash('error', 'Fallback brand not found');
-                    return res.redirect('/admin/brand');
-                }
-                
-                // Reassign products to fallback brand
-                await Product.updateMany(
-                    { brand: brandId },
-                    { $set: { brand: fallbackBrandId } }
-                );
-            } 
-            // If deleteProducts flag is true, delete all associated products
-            else if (deleteProducts) {
-                // for (const product of associatedProducts) {
-                //     // Delete the product
-                //     await Product.findByIdAndDelete(product._id);
-                // }
-                await Promise.all(
-                    associatedProducts.map(product => Product.findByIdAndDelete(product._id))
-                );
-                
-            } 
-            // If no fallback category and not deleting products, prevent deletion
-            else {
-                if (req.xhr) {
-                    return res.status(400).json({ 
-                        success: false, 
-                        message: 'Cannot delete brnad with associated products. Please reassign or delete products first.' 
-                    });
-                }
-                req.flash('error', 'Cannot delete brand with associated products. Please reassign or delete products first.');
-                return res.redirect('/admin/brand');
-            }
-        }
-        
-        // Remove any brand offers (similar to your removeBrandOffer function)
-        if (brand.brandOffer > 0) {
-            // Reset product prices if needed
-            for (const product of associatedProducts) {
-                if (!deleteProducts) { // Only update if not deleting products
-                    product.salePrice = product.regularPrice;
-                    await product.save();
-                }
-            }
-        }
-        
-        // Delete the brand
+
         await Brand.findByIdAndDelete(brandId);
-        
-        if (req.xhr) {
-            return res.json({ success: true, message: 'Brand deleted successfully' });
-        }
-        
-        req.flash('success', 'Brand deleted successfully');
-        res.redirect('/admin/brand');
-        
+
+        return res.status(200).json({ success: true, message: "Brand deleted successfully" });
     } catch (error) {
-        console.error('Error deleting brand:', error);
-        
-        if (req.xhr) {
-            return res.status(500).json({ success: false, message: 'Internal server error' });
-        }
-        
-        req.flash('error', 'Internal server error');
-        res.redirect('/admin/brand');
+        console.log(error.message);
+        return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
 

@@ -14,7 +14,7 @@ const orderSchema = new Schema({
         ref:"Product",
         required:true
        },
-       quantity:{
+       stock:{
         type:Number,
         required:true
        },
