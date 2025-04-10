@@ -76,3 +76,14 @@
     font-size: 0.75rem;
     display: none;
   }
+
+  .forgot-password-link{
+    font-size: 0.875rem;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .forgot-password-link:hover{
+    color: #0056b3;
+    text-decoration: underline;
+  }

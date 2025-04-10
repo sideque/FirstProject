@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user/userController");
+const profileController = require("../controllers/user/profileController")
 const passport = require("passport");
 
 
@@ -33,6 +34,14 @@ router.get('/auth/google/callback',
 //Home page & Shopping page
 router.get('/',userController.loadHomePage);
 router.get("/logout",userController.logout);
+
+// Prodile Management 
+router.get("/forgot-password",profileController.getForgotPassPage);
+router.post("/forgot-email-valid",profileController.forgotEmailValid);
+router.post("/reset-password",profileController.verifyForgotPassOtp);
+router.get("/reset-password",profileController.getResetPassPage);
+router.post("/resend-forgot-otp",profileController.resendOtp);
+router.post("/new-password",profileController.postNewPassword);
 
   
 

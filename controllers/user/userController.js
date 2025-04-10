@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const nodemailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const profileController = require("./profileController");
 
 const pageNotFound = async (req,res) => {
     try {
