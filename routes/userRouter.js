@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user/userController");
-const profileController = require("../controllers/user/profileController")
+const profileController = require("../controllers/user/profileController");
+const { userAuth } = require("../middlewares/auth");
 const passport = require("passport");
 
 
@@ -28,12 +29,13 @@ router.get('/auth/google/callback',
 
   router.get("/login",userController.loadLogin);
   router.post('/login',userController.login)
-
+  router.get("/logout",userController.logout);
 
 
 //Home page & Shopping page
 router.get('/',userController.loadHomePage);
-router.get("/logout",userController.logout);
+router.get('/shop',userAuth,userController.loadShoppingPage);
+// router.get("/filter",userAuth,userController.filterProduct);
 
 // Prodile Management 
 router.get("/forgot-password",profileController.getForgotPassPage);

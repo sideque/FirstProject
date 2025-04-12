@@ -120,17 +120,10 @@
                         
                         <div class="mb-3">
                             <label for="quantity" class="form-label">Stock Count:</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" value="<%= product.stock %>" placeholder="0">
+                            <input type="number" class="form-control" id="quantity" name="quantity" value="<%= product.quantity || 0 %>" placeholder="0">
                             <div id="quantity-error" class="error-message"></div>
                         </div>
-
-                        <!-- <div class="mb-3">
-                            <label for="color" class="form-label">Color:</label>
-                            <input type="color" class="form-control form-control-color" id="color" name="color" value="<%= product.color || '#000000' %>">
-                            <div id="color-error" class="error-message"></div>
-                        </div>                         -->
-
-                    </div>
+                   </div>
 
                     <div class="col-12">
                         <h5 class="section-title">Phone Specifications</h5>

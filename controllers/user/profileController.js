@@ -3,6 +3,9 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
 const session = require("express-session");
+const Category = require("../../models/categorySchema");
+const Brand = require("../../models/brandSchema");
+const Product = require("../../models/productSchema");
 const saltaround = 10;
 
 function generateOtp(){
@@ -188,5 +191,6 @@ module.exports = {
     verifyForgotPassOtp,
     getResetPassPage,
     resendOtp,
-    postNewPassword
+    postNewPassword,
+    securePassword,
 }

@@ -647,20 +647,17 @@
                                         <div class="product-image">
                                             <% if (data[i].productImage && data[i].productImage.length > 0) { %>
                                                 <% 
-                                                // Use formattedImages if available, otherwise fallback to manual path construction
                                                 let imagePath;
                                                 if (data[i].formattedImages && data[i].formattedImages.length > 0) {
-                                                    // Use the path from formattedImages
                                                     imagePath = data[i].formattedImages[0].path;
                                                 } else {
-                                                    // Fallback to manual construction
                                                     imagePath = data[i].productImage[0];
                                                     if (imagePath && !imagePath.startsWith('/uploads/product-images/')) {
                                                         imagePath = `/uploads/product-images/${imagePath}`;
                                                     }
                                                 }
                                                 
-                                                // Ensure we have an image path
+
                                                 if (!imagePath) {
                                                     imagePath = 'https://placehold.co/80x80/darkgray/white?text=No+Image';
                                                 }
@@ -673,7 +670,8 @@
                                     </td>
                                     <td><%= data[i].brand %></td> 
                                     <td><%= data[i].category ? data[i].category.name : "No Category" %></td> 
-                                    <td><%= data[i].salePrice %></td>
+                                    <!-- <td><%= data[i].salePrice %></td> -->
+                                    <td><%= Number(data[i].salePrice).toLocaleString() %></td>
                                     <td><%= data[i].quantity %></td>
                                     <td>
                                         <% if (data[i].isBlocked === false) { %>
@@ -708,57 +706,6 @@
     <%-include("../../views/partials/admin/pagination")%>
     
     <script>
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     // Initialize Bootstrap features
-        //     if (typeof bootstrap !== 'undefined') {
-        //         // Initialize all dropdowns
-        //         var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
-        //         var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
-        //             return new bootstrap.Dropdown(dropdownToggleEl);
-        //         });
-                
-        //         // Initialize tooltips if used
-        //         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        //         tooltipTriggerList.map(function(tooltipTriggerEl) {
-        //             return new bootstrap.Tooltip(tooltipTriggerEl);
-        //         });
-        //     }
-            
-        //     // Handle search functionality
-        //     const searchInput = document.getElementById('searchInput');
-        //     if (searchInput) {
-        //         // Handle search on Enter key press
-        //         searchInput.addEventListener('keypress', function(e) {
-        //             if (e.key === 'Enter') {
-        //                 e.preventDefault();
-        //                 const searchValue = this.value.trim();
-        //                 const currentUrl = new URL(window.location.href);
-                        
-        //                 // Reset to first page on new search
-        //                 currentUrl.searchParams.set('page', '1');
-                        
-        //                 if (searchValue) {
-        //                     currentUrl.searchParams.set('search', searchValue);
-        //                 } else {
-        //                     currentUrl.searchParams.delete('search');
-        //                 }
-                        
-        //                 window.location.href = currentUrl.toString();
-        //             }
-        //         });
-                
-        //         // Also handle input clear event
-        //         searchInput.addEventListener('search', function() {
-        //             if (this.value === '') {
-        //                 const currentUrl = new URL(window.location.href);
-        //                 currentUrl.searchParams.delete('search');
-        //                 currentUrl.searchParams.set('page', '1');
-        //                 window.location.href = currentUrl.toString();
-        //             }
-        //         });
-        //     }
-        // });
-
         // Toggle product block status
         function toggleBlockStatus(productId, shouldBlock) {
             const url = `/admin/toggle-product-status/${productId}`;

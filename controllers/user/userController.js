@@ -1,8 +1,11 @@
-const User = require("../../models/userSchema");
-const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
+const User = require('../../models/userSchema');
+const Category = require('../../models/categorySchema');
+const Product = require('../../models/productSchema');
+const Brand = require('../../models/brandSchema');
 const env = require('dotenv').config();
+const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
-const profileController = require("./profileController");
 
 const pageNotFound = async (req,res) => {
     try {
@@ -12,22 +15,63 @@ const pageNotFound = async (req,res) => {
     }
 }
 
-const loadHomePage = async (req,res) =>{
-    try{
-        const user = req.session.user;
-        if(user){
-            const userData = await User.findOne({_id:user._id});
-            res.render("home",{user:userData})
-        }else{
-            // return res.render('home');
-            return res.render("home", { user: null });
-        }
-    }catch (error){
-        console.log("Home page not loading:",error);
-        res.status(500).send("Server Error")
-    }
-}  
+const loadHomePage = async (req,res) => {
 
+    try {
+        
+    const user = req.session.user;
+    const categories = await Category.find({ isListed: true });
+
+    let productData = await Product.find({
+        isBlocked: false,
+        category: { $in: categories.map((category) => category._id) },
+        quantity: { $gt: 0 },
+    })
+
+    .populate("category", "name") // Populate category name
+      .select(
+        "productName productImage regularPrice salePrice productOffer category rating createdOn"
+      )
+      .sort({ createdOn: -1 }) // Newest first
+      .limit(4);
+
+    // Format products to match template expectations
+    const formattedProducts = productData.map((product) => {
+      let images = [];
+      if (product.productImage && Array.isArray(product.productImage)) {
+        images = product.productImage.map((img) =>
+          img.startsWith("/uploads/product-images/")
+            ? img
+            : `/uploads/product-images/${img}`
+        );
+    }
+
+    return {
+        _id: product._id,
+        name: product.productName,
+        image: images[0] || "https://placehold.co/300x300/darkgray/white?text=No+Image",
+        price: product.regularPrice,
+        salePrice: product.salePrice || product.regularPrice,
+        discount: product.productOffer || 0,
+        category: product.category ? product.category.name : "Lifestyle", // Use populated category name
+        rating: product.rating || 0,
+      };
+    });
+
+    if (user) {
+      const userData = await User.findOne({ _id: user._id });
+      res.render("home", { user: userData, products: formattedProducts });
+    } else {
+      res.render("home", { products: formattedProducts });
+    }
+
+    } catch (error) {
+
+        console.log("Home page not loading:", error);
+    res.status(500).send("Server Error");
+        
+    }
+}
 
 const loadLogin = async (req, res) => {
     try {
@@ -132,10 +176,10 @@ async function sendVerificationEmail(email,otp){
   if(!emailSent){
     return res.json("email-error")
   }
-req.session.userOtp=otp;
-req.session.userData={name,phone,email,password};
-res.render('verify-otp');
-console.log("OTP Sent",otp);
+        req.session.userOtp=otp;
+        req.session.userData={name,phone,email,password};
+        res.render('verify-otp');
+        console.log("OTP Sent",otp);
 
     } catch (error) {
         console.log("sign up error",error);
@@ -165,15 +209,20 @@ console.log("OTP Sent",otp);
             return res.status(400).json({ success: false, message: "OTP is required" });
         }
 
-        // Optional: Use === if OTP is number, or convert both to string
-        if (otp == req.session.userOtp) {
-            const user = req.session.userData;
-            const passwordHash = await securePassword(user.password);
+        const { userOtp, otpExpires, userData } = req.session;
+
+        if (!userOtp || !otpExpires || Date.now() > otpExpires) {
+            return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
+        }
+
+        // check if OTP matches
+        if (otp == userOtp) {
+            const passwordHash = await securePassword(userData.password);
 
             const saveUserData = new User({
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
+                name: userData.name,
+                email: userData.email,
+                phone: userData.phone,
                 password: passwordHash,
             });
 
@@ -185,11 +234,12 @@ console.log("OTP Sent",otp);
                 name: saveUserData.name,
                 email: saveUserData.email,
                 isAdmin: saveUserData.isAdmin
-              };
-              
+            };
+
             // Clear OTP and temp user data
             req.session.userOtp = null;
             req.session.userData = null;
+            req.session.otpExpires = null;
 
             return res.json({ success: true, redirectUrl: "/" });
         } else {
@@ -203,6 +253,7 @@ console.log("OTP Sent",otp);
 
 
 
+
  const resendOtp = async (req,res)=>{
     try {
         
@@ -213,6 +264,7 @@ console.log("OTP Sent",otp);
 
         const otp = generateotp();
         req.session.userOtp = otp;
+        req.session.otpExpires = Date.now() + 50 *1000
 
         const emailSent = await sendVerificationEmail(email,otp);
         if(emailSent){
@@ -245,6 +297,125 @@ console.log("OTP Sent",otp);
     }
  }
 
+ const loadShoppingPage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const { category, brand, search, minPrice, maxPrice, page: pageQuery } = req.query;
+    const page = parseInt(pageQuery) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
+
+    // Validate category ObjectId
+    if (category && !mongoose.isValidObjectId(category)) {
+      return res.redirect('/pageNotFound');
+    }
+
+    // Query user data
+    let userData = null;
+    if (user) {
+      userData = await User.findOne({ _id: user._id || user }); // Handle session format
+    }
+
+    // Query categories
+    const categories = await Category.find({ isListed: true });
+    const categoriesWithIds = categories.map(category => ({
+      _id: category._id,
+      name: category.name,
+    }));
+
+    // Query brands
+    const brands = await Brand.find({ isBlocked: false });
+    // console.log('Brands:', brands.map(b => b.name));
+
+    // Build query
+    const query = {
+      isBlocked: false,
+      quantity: { $gt: 0 },
+    };
+
+    if (category) {
+      query.category = category;
+    } else {
+      const categoryIds = categories.map(category => category._id);
+      query.category = { $in: categoryIds };
+    }
+
+    if (brand) {
+      const validBrand = await Brand.findOne({ name: brand, isBlocked: false });
+      if (!validBrand) {
+        return res.redirect('/pageNotFound');
+      }
+      query.brand = brand;
+    }
+
+    if (search) {
+      query.productName = { $regex: search, $options: 'i' };
+    }
+
+    if (minPrice || maxPrice) {
+      query.salePrice = {};
+      if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
+      if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
+    }
+
+    // Find products
+    const productsData = await Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Format product images
+    const products = productsData.map((product) => {
+      const formattedImages = (product.productImage || []).map((img) =>
+        img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
+      );
+      return {
+        ...product.toObject(),
+        productImage: formattedImages,
+      };
+    });
+
+    // Count total products
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    // console.log('Products found:', products.length, 'Total:', totalProducts);
+
+    // Update user search history
+    if (userData && (category || brand || search || minPrice || maxPrice)) {
+      const searchEntry = {
+        category: category || null,
+        brand: brand || null,
+        searchQuery: search || null,
+        minPrice: minPrice ? parseFloat(minPrice) : null,
+        maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+        searchedOn: new Date(),
+      };
+      userData.searchHistory.push(searchEntry);
+      await userData.save();
+    }
+
+    // Render shop page
+    res.render('shop', {
+      user: userData,
+      products,
+      category: categoriesWithIds,
+      brand: brands,
+      totalProducts,
+      currentPage: page,
+      totalPages,
+      selectedCategory: category || null,
+      selectedBrand: brand || null,
+      search: search || '',
+      minPrice: minPrice || '',
+      maxPrice: maxPrice || '',
+    });
+  } catch (error) {
+    console.error('Load Shopping Page Error:', error.message, error.stack);
+    res.redirect('/pageNotFound');
+  }
+};
+
 
 module.exports = {
     loadHomePage,
@@ -255,5 +426,7 @@ module.exports = {
     verifyOtp,
     resendOtp,
     login,
-    logout
+    logout,
+    loadShoppingPage,
+
 }

@@ -15,6 +15,10 @@ const brandSchema = new mongoose.Schema({
         type:Boolean,
         default:true
     },
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     brandOffer:{
         type:Number,
         default:0

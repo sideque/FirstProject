@@ -11,7 +11,7 @@ const categoryInfo = async (req, res) => {
         // Get search and pagination parameters
         const search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 categories per page
+        const limit = 5; 
         
         // Build search query
         let query = {};
@@ -218,7 +218,7 @@ const loadEditCategory = async (req, res) => {
             req.flash('error', 'Category not found');
             return res.redirect('/admin/category');
         }
-        res.render('edit-category', {  // Remove 'admin/' prefix
+        res.render('edit-category', {  
             category, 
             title: 'Edit Category',
             error: req.flash('error'),
@@ -291,7 +291,7 @@ const getListCategory = async (req,res) =>{
 
         }
     }
-// Update your module.exports
+
 module.exports = {
     categoryInfo,
     addCategory,

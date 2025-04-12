@@ -37,7 +37,7 @@ const login = async (req, res) => {
 
         const admin = await User.findOne({ email });
 
-        if (!admin || !admin.isAdmin) {  // Ensure user is an admin
+        if (!admin || !admin.isAdmin) {  
             console.log("Admin Not Found or Not Authorized");
             return res.render("admin-login", { message: "Invalid email or password." });
         }

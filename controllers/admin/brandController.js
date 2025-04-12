@@ -8,7 +8,7 @@ const brandInfo = async (req, res) => {
         const adminUser = await adminController.getAdminData(req);
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 brands per page
+        const limit = 5; 
         
         // Build search query
         let query = {};

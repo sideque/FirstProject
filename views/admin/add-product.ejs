@@ -122,13 +122,6 @@
                             <input type="number" class="form-control" id="quantity" name="quantity" placeholder="0">
                             <div id="quantity-error" class="error-message"></div>
                         </div>
-
-                        <!-- <div class="mb-3">
-                            <label for="color" class="form-label">Color:</label>
-                            <input type="color" class="form-control form-control-color" id="color" name="color">
-                            <div id="color-error" class="error-message"></div>
-                        </div>                         -->
-
                     </div>
 
                     <div class="col-12">
@@ -458,111 +451,94 @@
         
         // Function to validate form
         function validateForm() {
-            let isValid = true;
-            
-            // Validate product images (all 3 required)
-            const imagesFilled = [
-                document.getElementById('croppedImage0').value !== '',
-                document.getElementById('croppedImage1').value !== '',
-                document.getElementById('croppedImage2').value !== ''
-            ];
-            
-            // Check if we're editing or adding a new product
-            const isEditing = document.getElementById('productId').value !== '';
-            
-            // For new products, require all 3 images
-            // For editing, we need to check if images are already present on the server
-            if (!isEditing && (!imagesFilled[0] || !imagesFilled[1] || !imagesFilled[2])) {
-                showError('images-error', 'Please upload all 3 required product images');
-                isValid = false;
-            } else if (isEditing) {
-                // For editing, we need to check if there are images on the preview
-                const hasImages = previewElements.every(preview => 
-                    !preview.classList.contains('image-preview-empty')
-                );
-                if (!hasImages) {
-                    showError('images-error', 'Please upload all 3 required product images');
-                    isValid = false;
-                } else {
-                    hideError('images-error');
-                }
-            } else {
-                hideError('images-error');
-            }
-            
-            // Validate product name
-            const productName = document.getElementById('productName').value;
-            if (!productName.trim()) {
-                showError('productName-error', 'Product name is required');
-                isValid = false;
-            } else {
-                hideError('productName-error');
-            }
-            
-            // Validate description
-            const description = document.getElementById('description').value;
-            if (!description.trim()) {
-                showError('description-error', 'Product description is required');
-                isValid = false;
-            } else {
-                hideError('description-error');
-            }
-            
-            // Validate brand
-            const brand = document.getElementById('brand').value;
-            if (!brand) {
-                showError('brand-error', 'Please select a brand');
-                isValid = false;
-            } else {
-                hideError('brand-error');
-            }
-            
-            // Validate category
-            const category = document.getElementById('category').value;
-            if (!category) {
-                showError('category-error', 'Please select a category');
-                isValid = false;
-            } else {
-                hideError('category-error');
-            }
-            
-            // Validate regular price
-            const regularPrice = document.getElementById('regularPrice').value;
-            if (!regularPrice.trim() || isNaN(parseFloat(regularPrice))) {
-                showError('regularPrice-error', 'Valid regular price is required');
-                isValid = false;
-            } else {
-                hideError('regularPrice-error');
-            }
-            
-            // Validate sale price (if provided)
-            const salePrice = document.getElementById('salePrice').value;
-            if (salePrice.trim() && isNaN(parseFloat(salePrice))) {
-                showError('salePrice-error', 'Sale price must be a valid number');
-                isValid = false;
-            } else {
-                hideError('salePrice-error');
-            }
-            
-            // Validate stock count
-            const quantity = document.getElementById('quantity').value;
-            if (!quantity.trim() || isNaN(parseInt(quantity))) {
-                showError('quantity-error', 'Valid stock count is required');
-                isValid = false;
-            } else {
-                hideError('quantity-error');
-            }
-            
-            // If form is not valid, scroll to first error
-            if (!isValid) {
-                const firstError = document.querySelector('.error-message[style="display: block;"]');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }
-            
-            return isValid;
+    let isValid = true;
+
+    // Validate product images (all 3 required)
+    const imagesFilled = [
+        document.getElementById('croppedImage0').value !== '',
+        document.getElementById('croppedImage1').value !== '',
+        document.getElementById('croppedImage2').value !== ''
+    ];
+    
+    const isEditing = document.getElementById('productId').value !== '';
+
+    if (!isEditing && (!imagesFilled[0] || !imagesFilled[1] || !imagesFilled[2])) {
+        showError('images-error', 'Please upload all 3 required product images');
+        isValid = false;
+    } else if (isEditing) {
+        const hasImages = previewElements.every(preview => 
+            !preview.classList.contains('image-preview-empty')
+        );
+        if (!hasImages) {
+            showError('images-error', 'Please upload all 3 required product images');
+            isValid = false;
+        } else {
+            hideError('images-error');
         }
+    } else {
+        hideError('images-error');
+    }
+
+    // Validate product name
+    const productName = document.getElementById('productName').value;
+    if (!productName.trim()) {
+        showError('productName-error', 'Product name is required');
+        isValid = false;
+    } else {
+        hideError('productName-error');
+    }
+
+    // Validate description
+    const description = document.getElementById('description').value;
+    if (!description.trim()) {
+        showError('description-error', 'Product description is required');
+        isValid = false;
+    } else {
+        hideError('description-error');
+    }
+
+    // Validate brand
+    const brand = document.getElementById('brand').value;
+    if (!brand) {
+        showError('brand-error', 'Please select a brand');
+        isValid = false;
+    } else {
+        hideError('brand-error');
+    }
+
+    // Validate category
+    const category = document.getElementById('category').value;
+    if (!category) {
+        showError('category-error', 'Please select a category');
+        isValid = false;
+    } else {
+        hideError('category-error');
+    }
+
+   // ✅ Validate regular price (Allow commas)
+    const regularPriceInput = document.getElementById('regularPrice').value;
+    const regularPrice = regularPriceInput; // no replace
+    if (!regularPrice.trim() || isNaN(Number(regularPrice.replace(/,/g, '')))) {
+        showError('regularPrice-error', 'Valid regular price is required');
+        isValid = false;
+    } else {
+        hideError('regularPrice-error');
+    }
+
+    // ✅ Validate sale price (Allow commas)
+    const salePriceInput = document.getElementById('salePrice').value;
+    const salePrice = salePriceInput; // no replace
+    if (salePrice.trim() && isNaN(Number(salePrice.replace(/,/g, '')))) {
+        showError('salePrice-error', 'Sale price must be a valid number');
+        isValid = false;
+    } else {
+        hideError('salePrice-error');
+    }
+
+
+        return isValid;
+    }
+
         
         // Function to show error message
         function showError(id, message) {
@@ -598,7 +574,6 @@
                         document.getElementById('regularPrice').value = product.regularPrice;
                         document.getElementById('salePrice').value = product.salePrice || '';
                         document.getElementById('quantity').value = product.quantity;
-                        // document.getElementById('color').value = product.color || '#000000';
                         
                         // Set phone specifications
                         if (product.processor) document.getElementById('processor').value = product.processor;
