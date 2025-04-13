@@ -4,6 +4,7 @@ const userController = require("../controllers/user/userController");
 const profileController = require("../controllers/user/profileController");
 const { userAuth } = require("../middlewares/auth");
 const passport = require("passport");
+const productController = require("../controllers/user/productController");
 
 
 router.get("/pageNotFound",userController.pageNotFound);
@@ -45,6 +46,14 @@ router.get("/reset-password",profileController.getResetPassPage);
 router.post("/resend-forgot-otp",profileController.resendOtp);
 router.post("/new-password",profileController.postNewPassword);
 
+
+//Product Management
+router.get("/product",userAuth,productController.productController);
   
+
+// Catch-all route for unmatched URLs
+// router.get("*", (req, res) => {
+//   res.status(404).redirect("/pageNotFound");
+// });
 
 module.exports = router

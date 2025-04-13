@@ -5,8 +5,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
-const fs = require('fs'); // Add for file checks
-const passport = require('./config/passport');
+const passport = require('./config/passport')
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +18,7 @@ mongoose.connect(mongoURI).then(() => {
     console.error("MongoDB connection error:", err);
 });
 
+
 // Express app setup
 const app = express();
 
@@ -26,16 +26,33 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session configuration with MongoDB storage
+// app.use(session({
+//     secret: process.env.SESSION_SECRET || "mySecret",
+//     resave: false,
+//     saveUninitialized: false,
+//     store: MongoStore.create({
+//         mongoUrl: mongoURI,
+//         collectionName: "sessions"
+//     }),
+//     cookie: {
+//         secure: false,  // Set to true in production (HTTPS)
+//         httpOnly: true,
+//         maxAge: 72 * 60 * 60 * 1000 // 72 hours
+//     }
+// }));
+
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || "mySecret",
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,
-        httpOnly: true,
+    secret:process.env.SESSION_SECRET || "mySecret",
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        secure:false,
+        httpOnly:true,
         maxAge: 1000 * 60 * 60 * 72 
     }
-}));
+}))
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -60,18 +77,6 @@ app.set("views", [
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/uploads', express.static(path.join(__dirname, 'Uploads'))); // Ensure 'Uploads' matches directory name
-
-// Debug middleware for static file requests
-app.use((req, res, next) => {
-    if (req.url.includes('/uploads/')) {
-        console.log(`Static file requested: ${req.url}`);
-        const relativePath = req.url.replace('/uploads/', '');
-        const absolutePath = path.join(__dirname, 'Uploads', relativePath);
-        console.log(`Absolute path: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
-    }
-    next();
-});
 
 // Routers
 const userRouter = require("./routes/userRouter");

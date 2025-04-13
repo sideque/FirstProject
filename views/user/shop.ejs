@@ -316,7 +316,7 @@
             <% products.forEach(function(product) { %>
               <div class="col-sm-12 col-md-6 col-lg-4 ftco-animate d-flex">
                 <div class="product d-flex flex-column" style="width: 100%;">
-                  <a href="/product/<%= product._id %>" class="img-prod">
+                  <a href="/product?id=<%= product._id %>" class="img-prod">
                     <img class="img-fluid"
                          src="<%= product.productImage[0] %>"
                          alt="<%= product.productName %> mobile phone"
