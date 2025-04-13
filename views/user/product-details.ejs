@@ -523,6 +523,52 @@
       color: #555;
     }
 
+          .zoom-container {
+        position: relative;
+        display: inline-block;
+      }
+
+      .zoom-image {
+        transition: transform 0.5s ease;
+      }
+
+      .zoom-lens {
+        position: absolute;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        cursor: crosshair;
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .zoom-container:hover .zoom-lens {
+        opacity: 1;
+      }
+
+      /* Existing thumbnail styles (assuming they exist, otherwise add as needed) */
+      .thumbnails {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        cursor: pointer;
+        opacity: 0.6;
+      }
+
+      .thumbnail.active {
+        opacity: 1;
+        border: 2px solid #000;
+      }
+
     /* Responsive */
     @media (max-width: 991px) {
       .product-images-col, .product-info-col {
@@ -584,19 +630,33 @@
   <section class="ftco-section bg-light">
     <div class="container">
       <div class="product-detail-row">
+
+        
         <!-- Product Images Column -->
         <div class="product-images-col">
-          <div class="product-gallery">
-            <img src="<%= product.productImage[0] %>" alt="<%= product.productName %>" class="main-image" id="mainImage">
+          <div class="product-gallery zoom-container">
+            <!-- Main image with zoom -->
+            <img src="/Uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : '/images/placeholder.jpg' %>" 
+                 alt="<%= product.productName || 'Product Image' %>" 
+                 class="main-image zoom-image" id="mainImage">
+            <div class="zoom-lens"></div>
+            
+            <!-- Thumbnails -->
             <div class="thumbnails">
-              <% product.productImage.forEach((image, index) => { %>
-                <img src="<%= image %>" alt="<%= product.productName %> thumbnail <%= index+1 %>" 
-                     class="thumbnail <%= index === 0 ? 'active' : '' %>" 
-                     onclick="changeMainImage(this.src)">
-              <% }) %>
+              <% if (product.productImage && Array.isArray(product.productImage) && product.productImage.length > 0) { %>
+                <% product.productImage.forEach((image, index) => { %>
+                  <img src="/Uploads/product-images/<%= image %>" 
+                       alt="<%= product.productName %> thumbnail <%= index+1 %>" 
+                       class="thumbnail <%= index === 0 ? 'active' : '' %>" 
+                       onclick="changeMainImage(this.src)">
+                <% }) %>
+              <% } else { %>
+                <p>No additional images available.</p>
+              <% } %>
             </div>
           </div>
         </div>
+
 
         <!-- Product Info Column -->
         <div class="product-info-col">
@@ -615,22 +675,41 @@
             <%= product.description %>
           </p>
 
-          <!-- Product Specifications -->
-          <div class="specifications">
-            <h3 class="spec-title">Specifications</h3>
-            <div class="spec-list">
-              <% if (product.specifications) { %>
-                <% Object.entries(product.specifications).forEach(([key, value]) => { %>
-                  <div class="spec-item">
-                    <span class="spec-name"><%= key %></span>
-                    <span class="spec-value"><%= value %></span>
-                  </div>
-                <% }) %>
-              <% } else { %>
-                <p>No specifications available.</p>
-              <% } %>
+
+         <!-- Product Specifications -->
+            <div class="specifications">
+              <h3 class="spec-title">Specifications</h3>
+              <div class="spec-list">
+                <% if (product.processor || product.ram || product.storage || product.camera) { %>
+                  <% if (product.processor) { %>
+                    <div class="spec-item">
+                      <span class="spec-name">Processor</span>
+                      <span class="spec-value"><%= product.processor %></span>
+                    </div>
+                  <% } %>
+                  <% if (product.ram) { %>
+                    <div class="spec-item">
+                      <span class="spec-name">RAM</span>
+                      <span class="spec-value"><%= product.ram %></span>
+                    </div>
+                  <% } %>
+                  <% if (product.storage) { %>
+                    <div class="spec-item">
+                      <span class="spec-name">Storage</span>
+                      <span class="spec-value"><%= product.storage %></span>
+                    </div>
+                  <% } %>
+                  <% if (product.camera) { %>
+                    <div class="spec-item">
+                      <span class="spec-name">Camera</span>
+                      <span class="spec-value"><%= product.camera %></span>
+                    </div>
+                  <% } %>
+                <% } else { %>
+                  <p>No specifications available.</p>
+                <% } %>
+              </div>
             </div>
-          </div>
 
           <!-- Quantity Selector -->
           <div class="quantity-container">
@@ -676,7 +755,7 @@
           <button class="tab-btn" onclick="openTab(event, 'specifications')">Specifications</button>
           <button class="tab-btn" onclick="openTab(event, 'reviews')">Reviews</button>
         </div>
-
+      
         <!-- Description Tab -->
         <div id="description" class="tab-content active">
           <p><%= product.description %></p>
@@ -689,23 +768,41 @@
             </ul>
           <% } %>
         </div>
-
+      
         <!-- Specifications Tab -->
         <div id="specifications" class="tab-content">
           <div class="spec-list" style="grid-template-columns: repeat(1, 1fr);">
-            <% if (product.specifications) { %>
-              <% Object.entries(product.specifications).forEach(([key, value]) => { %>
+            <% if (product.processor || product.ram || product.storage || product.camera) { %>
+              <% if (product.processor) { %>
                 <div class="spec-item" style="flex-direction: row; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
-                  <span class="spec-name" style="font-weight: 600;"><%= key %></span>
-                  <span class="spec-value"><%= value %></span>
+                  <span class="spec-name" style="font-weight: 600;">Processor</span>
+                  <span class="spec-value"><%= product.processor %></span>
                 </div>
-              <% }) %>
+              <% } %>
+              <% if (product.ram) { %>
+                <div class="spec-item" style="flex-direction: row; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                  <span class="spec-name" style="font-weight: 600;">RAM</span>
+                  <span class="spec-value"><%= product.ram %></span>
+                </div>
+              <% } %>
+              <% if (product.storage) { %>
+                <div class="spec-item" style="flex-direction: row; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                  <span class="spec-name" style="font-weight: 600;">Storage</span>
+                  <span class="spec-value"><%= product.storage %></span>
+                </div>
+              <% } %>
+              <% if (product.camera) { %>
+                <div class="spec-item" style="flex-direction: row; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                  <span class="spec-name" style="font-weight: 600;">Camera</span>
+                  <span class="spec-value"><%= product.camera %></span>
+                </div>
+              <% } %>
             <% } else { %>
               <p>No specifications available.</p>
             <% } %>
           </div>
         </div>
-
+      
         <!-- Reviews Tab -->
         <div id="reviews" class="tab-content">
           <% if (product.reviews && product.reviews.length > 0) { %>
@@ -737,7 +834,7 @@
           <% } %>
         </div>
       </div>
-
+      
       <!-- Related Products Section -->
       <div class="related-products">
         <h2 class="section-title">Related Products</h2>
@@ -746,8 +843,8 @@
             <% relatedProducts.forEach(relatedProduct => { %>
               <div class="product-item">
                 <div class="product">
-                  <a href="/product/<%= relatedProduct._id %>" class="img-prod">
-                    <img src="<%= relatedProduct.productImage[0] %>" alt="<%= relatedProduct.productName %>">
+                  <a href="/product?id=<%= relatedProduct._id %>" class="img-prod">
+                    <img src="/Uploads/product-images/<%= relatedProduct.productImage && relatedProduct.productImage.length > 0 ? relatedProduct.productImage[0] : '/images/placeholder.jpg' %>" alt="Related Products">
                     <% if (relatedProduct.productOffer && relatedProduct.productOffer > 0) { %>
                       <span class="status"><%= relatedProduct.productOffer %>% Off</span>
                     <% } %>
@@ -843,6 +940,42 @@
       document.getElementById(tabName).classList.add("active");
       evt.currentTarget.classList.add("active");
     }
+
+    
+  document.querySelectorAll('.zoom-container').forEach(container => {
+    const img = container.querySelector('.zoom-image');
+    const lens = container.querySelector('.zoom-lens');
+
+    container.addEventListener('mousemove', (e) => {
+      const { left, top, width, height } = container.getBoundingClientRect();
+
+      const posX = e.clientX - left;
+      const posY = e.clientY - top;
+
+      const lensX = posX - (lens.offsetWidth / 2);
+      const lensY = posY - (lens.offsetHeight / 2);
+      lens.style.left = `${lensX}px`;
+      lens.style.top = `${lensY}px`;
+
+      const zoomedImgUrl = img.src;
+      lens.style.backgroundImage = `url(${zoomedImgUrl})`;
+      lens.style.backgroundSize = `${img.width * 2}px ${img.height * 2}px`;
+      lens.style.backgroundPosition = `-${posX * 2}px -${posY * 2}px`;
+    });
+  });
+
+  // Existing function to change main image
+  function changeMainImage(src) {
+    const mainImage = document.getElementById('mainImage');
+    mainImage.src = src;
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+      thumb.classList.remove('active');
+      if (thumb.src === src) {
+        thumb.classList.add('active');
+      }
+    });
+  }
+
   </script>
 </body>
 </html>

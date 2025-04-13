@@ -49,24 +49,28 @@ const productSchema = new Schema({
         required: true,
         default: "Available"
     },
-    specifications: {
-        processor: {
-            type: String,
-            default: ""
-        },
-        storage: {
-            type: String,
-            default: ""
-        },
-        ram: {
-            type: String,
-            default: ""
-        },
-        camera: {
-            type: String,
-            default: ""
-        }
+    processor: { 
+        type: String,
+        default: '' 
+    }, // Add processor field
+    ram: { 
+        type: String, 
+        default: '' 
+    },      // Add ram field
+    storage: { 
+        type: String, 
+        default: '' 
+    },  // Add storage field
+    camera: { 
+        type: String, 
+        default: '' 
+    },   // Add camera field
+    createdOn: { 
+        type: Date, 
+        default: Date.now 
     }
+
+    
 }, { timestamps: true });
 
 const Product = mongoose.model("Product", productSchema);

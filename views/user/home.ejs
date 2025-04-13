@@ -97,7 +97,7 @@
         <% products.forEach(function(product) { %>
           <div class="col-sm-12 col-md-6 col-lg-3 ftco-animate d-flex">
             <div class="product d-flex flex-column">
-              <a href="/product/<%= product._id %>" class="img-prod">
+              <a href="/product?id=<%= product._id %>" class="img-prod">
                 <img class="img-fluid" 
                      src="<%= product.image || 'https://placehold.co/300x300/darkgray/white?text=No+Image' %>" 
                      alt="<%= product.name %> mobile phone">
