@@ -290,7 +290,7 @@ const getUnlistBrand = async (req,res) =>{
     }
 }
 
-// Update your module.exports
+
 module.exports = {
     brandInfo,
     addBrand,

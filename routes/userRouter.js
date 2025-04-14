@@ -52,8 +52,8 @@ router.get("/product",userAuth,productController.productController);
   
 
 // Catch-all route for unmatched URLs
-// router.get("*", (req, res) => {
-//   res.status(404).redirect("/pageNotFound");
-// });
+router.get("*", (req, res) => {
+  res.status(404).redirect("/pageNotFound");
+});
 
 module.exports = router

@@ -3,13 +3,13 @@ const adminController = require('./adminController');
 
 const customerInfo = async (req, res) => {
     try {
-        // Get admin user data
+        
         const adminUser = await adminController.getAdminData(req);
         
         // Get search and pagination parameters
         const search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
-        const limit = 5; // 5 users per page
+        const limit = 5; 
         
         // Build search query
         let query = {};

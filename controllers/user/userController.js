@@ -7,84 +7,76 @@ const env = require('dotenv').config();
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 
-const pageNotFound = async (req,res) => {
+const pageNotFound = async (req, res) => {
     try {
-        res.render("page-404")
+        res.render("page-404");
     } catch (error) {
-        res.redirect("/pageNotFound")
+        res.redirect("/pageNotFound");
     }
-}
+};
 
-const loadHomePage = async (req,res) => {
-
+const loadHomePage = async (req, res) => {
     try {
-        
-    const user = req.session.user;
-    const categories = await Category.find({ isListed: true });
+        const user = req.session.user;
+        const categories = await Category.find({ isListed: true });
 
-    let productData = await Product.find({
-        isBlocked: false,
-        category: { $in: categories.map((category) => category._id) },
-        quantity: { $gt: 0 },
-    })
+        let productData = await Product.find({
+            isBlocked: false,
+            category: { $in: categories.map((category) => category._id) },
+            quantity: { $gt: 0 },
+        })
+            .populate("category", "name")
+            .select(
+                "productName productImage regularPrice salePrice productOffer category rating createdOn"
+            )
+            .sort({ createdOn: -1 })
+            .limit(4);
 
-    .populate("category", "name") // Populate category name
-      .select(
-        "productName productImage regularPrice salePrice productOffer category rating createdOn"
-      )
-      .sort({ createdOn: -1 }) // Newest first
-      .limit(4);
+        const formattedProducts = productData.map((product) => {
+            let images = [];
+            if (product.productImage && Array.isArray(product.productImage)) {
+                images = product.productImage.map((img) =>
+                    img.startsWith("/uploads/product-images/")
+                        ? img
+                        : `/uploads/product-images/${img}`
+                );
+            }
+            return {
+                _id: product._id,
+                name: product.productName,
+                image: images[0] || "https://placehold.co/300x300/darkgray/white?text=No+Image",
+                price: product.regularPrice,
+                salePrice: product.salePrice || product.regularPrice,
+                discount: product.productOffer || 0,
+                category: product.category ? product.category.name : "Lifestyle",
+                rating: product.rating || 0,
+            };
+        });
 
-    // Format products to match template expectations
-    const formattedProducts = productData.map((product) => {
-      let images = [];
-      if (product.productImage && Array.isArray(product.productImage)) {
-        images = product.productImage.map((img) =>
-          img.startsWith("/uploads/product-images/")
-            ? img
-            : `/uploads/product-images/${img}`
-        );
-    }
-
-    return {
-        _id: product._id,
-        name: product.productName,
-        image: images[0] || "https://placehold.co/300x300/darkgray/white?text=No+Image",
-        price: product.regularPrice,
-        salePrice: product.salePrice || product.regularPrice,
-        discount: product.productOffer || 0,
-        category: product.category ? product.category.name : "Lifestyle", // Use populated category name
-        rating: product.rating || 0,
-      };
-    });
-
-    if (user) {
-      const userData = await User.findOne({ _id: user._id });
-      res.render("home", { user: userData, products: formattedProducts });
-    } else {
-      res.render("home", { products: formattedProducts });
-    }
-
+        if (user) {
+            const userData = await User.findOne({ _id: user._id });
+            res.render("home", { user: userData, products: formattedProducts });
+        } else {
+            res.render("home", { products: formattedProducts });
+        }
     } catch (error) {
-
         console.log("Home page not loading:", error);
-    res.status(500).send("Server Error");
-        
+        res.status(500).send("Server Error");
     }
-}
+};
 
 const loadLogin = async (req, res) => {
     try {
-      if (!req.session.user) {
-        return res.render("login", { message: "" }); 
-      } else {
-        res.redirect('/');
-      }
+        if (!req.session.user) {
+            return res.render("login", { message: "" });
+        } else {
+            res.redirect('/');
+        }
     } catch (error) {
-      res.redirect("/pageNotFound");
+        res.redirect("/pageNotFound");
     }
-  };
-  
+};
+
 
 const login = async (req,res)=>{
     try{
@@ -110,7 +102,7 @@ const login = async (req,res)=>{
             name: findUser.name,
             email: findUser.email,
             isAdmin: findUser.isAdmin
-          };
+        };
           
         res.redirect('/')
     } catch (error) {
@@ -131,6 +123,7 @@ const loadSignup = async (req,res)=>{
 function generateotp(){
     return Math.floor(100000 +Math.random()*900000).toString();
 }
+
 async function sendVerificationEmail(email,otp){
     try {
         const transporter=nodemailer.createTransport({
@@ -177,6 +170,7 @@ async function sendVerificationEmail(email,otp){
     return res.json("email-error")
   }
         req.session.userOtp=otp;
+        req.session.otpExpires = Date.now() + 60 *1000
         req.session.userData={name,phone,email,password};
         res.render('verify-otp');
         console.log("OTP Sent",otp);
@@ -210,6 +204,8 @@ async function sendVerificationEmail(email,otp){
         }
 
         const { userOtp, otpExpires, userData } = req.session;
+
+        console.log('//',otp,userOtp)
 
         if (!userOtp || !otpExpires || Date.now() > otpExpires) {
             return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
@@ -264,7 +260,7 @@ async function sendVerificationEmail(email,otp){
 
         const otp = generateotp();
         req.session.userOtp = otp;
-        req.session.otpExpires = Date.now() + 50 *1000
+        req.session.otpExpires = Date.now() + 60 *1000
 
         const emailSent = await sendVerificationEmail(email,otp);
         if(emailSent){
@@ -295,127 +291,115 @@ async function sendVerificationEmail(email,otp){
         console.log("Logout error",error);
         res.redirect("/pageNotFound")
     }
- }
-
- const loadShoppingPage = async (req, res) => {
-  try {
-    const user = req.session.user;
-    const { category, brand, search, minPrice, maxPrice, page: pageQuery } = req.query;
-    const page = parseInt(pageQuery) || 1;
-    const limit = 9;
-    const skip = (page - 1) * limit;
-
-    // Validate category ObjectId
-    if (category && !mongoose.isValidObjectId(category)) {
-      return res.redirect('/pageNotFound');
-    }
-
-    // Query user data
-    let userData = null;
-    if (user) {
-      userData = await User.findOne({ _id: user._id || user }); // Handle session format
-    }
-
-    // Query categories
-    const categories = await Category.find({ isListed: true });
-    const categoriesWithIds = categories.map(category => ({
-      _id: category._id,
-      name: category.name,
-    }));
-
-    // Query brands
-    const brands = await Brand.find({ isBlocked: false });
-    // console.log('Brands:', brands.map(b => b.name));
-
-    // Build query
-    const query = {
-      isBlocked: false,
-      quantity: { $gt: 0 },
-    };
-
-    if (category) {
-      query.category = category;
-    } else {
-      const categoryIds = categories.map(category => category._id);
-      query.category = { $in: categoryIds };
-    }
-
-    if (brand) {
-      const validBrand = await Brand.findOne({ name: brand, isBlocked: false });
-      if (!validBrand) {
-        return res.redirect('/pageNotFound');
-      }
-      query.brand = brand;
-    }
-
-    if (search) {
-      query.productName = { $regex: search, $options: 'i' };
-    }
-
-    if (minPrice || maxPrice) {
-      query.salePrice = {};
-      if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
-      if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
-    }
-
-    // Find products
-    const productsData = await Product.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    // Format product images
-    const products = productsData.map((product) => {
-      const formattedImages = (product.productImage || []).map((img) =>
-        img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
-      );
-      return {
-        ...product.toObject(),
-        productImage: formattedImages,
-      };
-    });
-
-    // Count total products
-    const totalProducts = await Product.countDocuments(query);
-    const totalPages = Math.ceil(totalProducts / limit);
-
-    // console.log('Products found:', products.length, 'Total:', totalProducts);
-
-    // Update user search history
-    if (userData && (category || brand || search || minPrice || maxPrice)) {
-      const searchEntry = {
-        category: category || null,
-        brand: brand || null,
-        searchQuery: search || null,
-        minPrice: minPrice ? parseFloat(minPrice) : null,
-        maxPrice: maxPrice ? parseFloat(maxPrice) : null,
-        searchedOn: new Date(),
-      };
-      userData.searchHistory.push(searchEntry);
-      await userData.save();
-    }
-
-    // Render shop page
-    res.render('shop', {
-      user: userData,
-      products,
-      category: categoriesWithIds,
-      brand: brands,
-      totalProducts,
-      currentPage: page,
-      totalPages,
-      selectedCategory: category || null,
-      selectedBrand: brand || null,
-      search: search || '',
-      minPrice: minPrice || '',
-      maxPrice: maxPrice || '',
-    });
-  } catch (error) {
-    console.error('Load Shopping Page Error:', error.message, error.stack);
-    res.redirect('/pageNotFound');
-  }
 };
 
+const loadShoppingPage = async (req, res) => {
+    console.log('Session:', req.session);
+    console.log('User:', req.session.user);
+    try {
+        const user = req.session.user;
+        const { category, brand, search, minPrice, maxPrice, page: pageQuery } = req.query;
+        const page = parseInt(pageQuery) || 1;
+        const limit = 9;
+        const skip = (page - 1) * limit;
+
+        if (category && !mongoose.isValidObjectId(category)) {
+            return res.redirect('/pageNotFound');
+        }
+
+        let userData = null;
+        if (user) {
+            userData = await User.findOne({ _id: user._id || user });
+        }
+
+        const categories = await Category.find({ isListed: true });
+        const categoriesWithIds = categories.map(category => ({
+            _id: category._id,
+            name: category.name,
+        }));
+
+        const brands = await Brand.find({ isBlocked: false });
+
+        const query = {
+            isBlocked: false,
+            quantity: { $gt: 0 },
+        };
+
+        if (category) {
+            query.category = category;
+        } else {
+            const categoryIds = categories.map(category => category._id);
+            query.category = { $in: categoryIds };
+        }
+
+        if (brand) {
+            const validBrand = await Brand.findOne({ name: brand, isBlocked: false });
+            if (!validBrand) {
+                return res.redirect('/pageNotFound');
+            }
+            query.brand = brand;
+        }
+
+        if (search) {
+            query.productName = { $regex: search, $options: 'i' };
+        }
+
+        if (minPrice || maxPrice) {
+            query.salePrice = {};
+            if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
+            if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
+        }
+
+        const productsData = await Product.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const products = productsData.map((product) => {
+            const formattedImages = (product.productImage || []).map((img) =>
+                img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
+            );
+            return {
+                ...product.toObject(),
+                productImage: formattedImages,
+            };
+        });
+
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        if (userData && (category || brand || search || minPrice || maxPrice)) {
+            const searchEntry = {
+                category: category || null,
+                brand: brand || null,
+                searchQuery: search || null,
+                minPrice: minPrice ? parseFloat(minPrice) : null,
+                maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+                searchedOn: new Date(),
+            };
+            userData.searchHistory.push(searchEntry);
+            await userData.save();
+        }
+
+        res.render('shop', {
+            user: userData,
+            products,
+            category: categoriesWithIds,
+            brand: brands,
+            totalProducts,
+            currentPage: page,
+            totalPages,
+            selectedCategory: category || null,
+            selectedBrand: brand || null,
+            search: search || '',
+            minPrice: minPrice || '',
+            maxPrice: maxPrice || '',
+        });
+    } catch (error) {
+        console.error('Load Shopping Page Error:', error.message, error.stack);
+        res.redirect('/pageNotFound');
+    }
+};
 
 module.exports = {
     loadHomePage,
@@ -428,5 +412,4 @@ module.exports = {
     login,
     logout,
     loadShoppingPage,
-
-}
+};

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Mobi World</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
   <link rel="stylesheet" href="/css/login.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -26,11 +28,19 @@
               <p id="emailerror" class="error-message" style="display: none"></p>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="position: relative; width: 100%;">
               <label for="password">Password</label>
-              <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password">
-              <p id="passworderror" class="error-message" style="display: none"></p>
+              <div style="position: relative;">
+                <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password"
+                  style="padding-right: 40px;"> 
+            
+                <i class="fa-solid fa-eye" id="togglePassword"
+                  style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+              </div>
+            
+              <div id="error4" class="error-message"></div>
             </div>
+
 
             <div class="form-group d-flex justify-content-end">
               <a href="/forgot-password" class="forgot-password-link ms-auto">Forgot Password</a>
@@ -131,6 +141,35 @@
     //   window.history.replaceState({}, document.title, url.pathname);
     // }
   }
+
+
+  const password = document.getElementById('password');
+
+    const togglePassword = document.getElementById('togglePassword');
+
+    // Show the eye icon when hovering over input
+    password.addEventListener('mouseover', function () {
+      togglePassword.style.display = 'block';
+    });
+
+    password.addEventListener('mouseout', function () {
+      togglePassword.style.display = 'none';
+    });
+
+    togglePassword.addEventListener('mouseover', function () {
+      togglePassword.style.display = 'block';
+    });
+
+    togglePassword.addEventListener('click', function () {
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+
+      // Change the icon too
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+
   </script>
 </body>
 </html>

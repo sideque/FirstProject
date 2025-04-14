@@ -523,51 +523,36 @@
       color: #555;
     }
 
-          .zoom-container {
-        position: relative;
-        display: inline-block;
-      }
+    /* Zoom Styles */
+    .zoom-container {
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+    }
 
-      .zoom-image {
-        transition: transform 0.5s ease;
-      }
+    .zoom-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
 
-      .zoom-lens {
-        position: absolute;
-        border: 2px solid #fff;
-        border-radius: 50%;
-        cursor: crosshair;
-        width: 300px;
-        height: 300px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-        background: rgba(255, 255, 255, 0.5);
-      }
+    .zoom-lens {
+      position: absolute;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      cursor: crosshair;
+      width: 150px;
+      height: 150px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
 
-      .zoom-container:hover .zoom-lens {
-        opacity: 1;
-      }
-
-      /* Existing thumbnail styles (assuming they exist, otherwise add as needed) */
-      .thumbnails {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-      }
-
-      .thumbnail {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        cursor: pointer;
-        opacity: 0.6;
-      }
-
-      .thumbnail.active {
-        opacity: 1;
-        border: 2px solid #000;
-      }
+    .zoom-container:hover .zoom-lens {
+      opacity: 1;
+    }
 
     /* Responsive */
     @media (max-width: 991px) {
@@ -619,7 +604,7 @@
     <div class="container">
       <div class="row no-gutters slider-text align-items-center justify-content-center">
         <div class="col-md-9 ftco-animate text-center">
-          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span class="mr-2"><a href="/shop">Shop</a></span> <span>productController</span></p>
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span class="mr-2"><a href="/shop">Shop</a></span> <span>Product</span></p>
           <h1 class="mb-0 bread">Product Details</h1>
         </div>
       </div>
@@ -630,25 +615,19 @@
   <section class="ftco-section bg-light">
     <div class="container">
       <div class="product-detail-row">
-
-        
         <!-- Product Images Column -->
         <div class="product-images-col">
           <div class="product-gallery zoom-container">
-            <!-- Main image with zoom -->
             <img src="/Uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : '/images/placeholder.jpg' %>" 
                  alt="<%= product.productName || 'Product Image' %>" 
                  class="main-image zoom-image" id="mainImage">
             <div class="zoom-lens"></div>
-            
-            <!-- Thumbnails -->
             <div class="thumbnails">
               <% if (product.productImage && Array.isArray(product.productImage) && product.productImage.length > 0) { %>
                 <% product.productImage.forEach((image, index) => { %>
                   <img src="/Uploads/product-images/<%= image %>" 
                        alt="<%= product.productName %> thumbnail <%= index+1 %>" 
-                       class="thumbnail <%= index === 0 ? 'active' : '' %>" 
-                       onclick="changeMainImage(this.src)">
+                       class="thumbnail <%= index === 0 ? 'active' : '' %>">
                 <% }) %>
               <% } else { %>
                 <p>No additional images available.</p>
@@ -657,59 +636,57 @@
           </div>
         </div>
 
-
         <!-- Product Info Column -->
         <div class="product-info-col">
           <h2 class="product-title"><%= product.productName %></h2>
           <span class="product-brand"><%= product.brand %></span>
-          
           <div class="product-price">
             ₹<%= product.salePrice.toLocaleString() %>
-            <% if (product.productOffer && product.productOffer > 0) { %>
+            <% if (product.regularPrice && product.salePrice < product.regularPrice) { %>
               <span class="old-price">₹<%= product.regularPrice.toLocaleString() %></span>
-              <span class="product-offer"><%= product.productOffer %>% Off</span>
+              <% if (product.productOffer && product.productOffer > 0) { %>
+                <span class="product-offer"><%= product.productOffer %>% Off</span>
+              <% } %>
             <% } %>
           </div>
-
           <p class="product-description">
             <%= product.description %>
           </p>
 
-
-         <!-- Product Specifications -->
-            <div class="specifications">
-              <h3 class="spec-title">Specifications</h3>
-              <div class="spec-list">
-                <% if (product.processor || product.ram || product.storage || product.camera) { %>
-                  <% if (product.processor) { %>
-                    <div class="spec-item">
-                      <span class="spec-name">Processor</span>
-                      <span class="spec-value"><%= product.processor %></span>
-                    </div>
-                  <% } %>
-                  <% if (product.ram) { %>
-                    <div class="spec-item">
-                      <span class="spec-name">RAM</span>
-                      <span class="spec-value"><%= product.ram %></span>
-                    </div>
-                  <% } %>
-                  <% if (product.storage) { %>
-                    <div class="spec-item">
-                      <span class="spec-name">Storage</span>
-                      <span class="spec-value"><%= product.storage %></span>
-                    </div>
-                  <% } %>
-                  <% if (product.camera) { %>
-                    <div class="spec-item">
-                      <span class="spec-name">Camera</span>
-                      <span class="spec-value"><%= product.camera %></span>
-                    </div>
-                  <% } %>
-                <% } else { %>
-                  <p>No specifications available.</p>
+          <!-- Product Specifications -->
+          <div class="specifications">
+            <h3 class="spec-title">Specifications</h3>
+            <div class="spec-list">
+              <% if (product.processor || product.ram || product.storage || product.camera) { %>
+                <% if (product.processor) { %>
+                  <div class="spec-item">
+                    <span class="spec-name">Processor</span>
+                    <span class="spec-value"><%= product.processor %></span>
+                  </div>
                 <% } %>
-              </div>
+                <% if (product.ram) { %>
+                  <div class="spec-item">
+                    <span class="spec-name">RAM</span>
+                    <span class="spec-value"><%= product.ram %></span>
+                  </div>
+                <% } %>
+                <% if (product.storage) { %>
+                  <div class="spec-item">
+                    <span class="spec-name">Storage</span>
+                    <span class="spec-value"><%= product.storage %></span>
+                  </div>
+                <% } %>
+                <% if (product.camera) { %>
+                  <div class="spec-item">
+                    <span class="spec-name">Camera</span>
+                    <span class="spec-value"><%= product.camera %></span>
+                  </div>
+                <% } %>
+              <% } else { %>
+                <p>No specifications available.</p>
+              <% } %>
             </div>
+          </div>
 
           <!-- Quantity Selector -->
           <div class="quantity-container">
@@ -737,16 +714,23 @@
             </form>
           </div>
 
-          <!-- Additional Info -->
-          <div class="additional-info">
-            <p><strong>Availability:</strong> <%= product.stock > 0 ? 'In Stock' : 'Out of Stock' %></p>
-            <p><strong>Category:</strong> <%= product.category.name %></p>
-            <% if (product.warranty) { %>
-              <p><strong>Warranty:</strong> <%= product.warranty %></p>
+         <!-- Inside the product-info-col div, update the additional-info section -->
+        <div class="additional-info">
+          <p><strong>Availability:</strong> 
+            <% if (product.status === "Available: false" || product.stock === false || (product.stock && product.stock <= 0)) { %>
+              Out of Stock
+            <% } else { %>
+              In Stock
             <% } %>
-          </div>
+          </p>
+          <p><strong>Category:</strong> <%= product.category.name %></p>
+          <% if (product.warranty) { %>
+            <p><strong>Warranty:</strong> <%= product.warranty %></p>
+          <% } %>
         </div>
+
       </div>
+    </div>
 
       <!-- Product Tabs (Description and Reviews) -->
       <div class="product-tabs">
@@ -755,7 +739,6 @@
           <button class="tab-btn" onclick="openTab(event, 'specifications')">Specifications</button>
           <button class="tab-btn" onclick="openTab(event, 'reviews')">Reviews</button>
         </div>
-      
         <!-- Description Tab -->
         <div id="description" class="tab-content active">
           <p><%= product.description %></p>
@@ -768,7 +751,6 @@
             </ul>
           <% } %>
         </div>
-      
         <!-- Specifications Tab -->
         <div id="specifications" class="tab-content">
           <div class="spec-list" style="grid-template-columns: repeat(1, 1fr);">
@@ -802,7 +784,6 @@
             <% } %>
           </div>
         </div>
-      
         <!-- Reviews Tab -->
         <div id="reviews" class="tab-content">
           <% if (product.reviews && product.reviews.length > 0) { %>
@@ -834,7 +815,7 @@
           <% } %>
         </div>
       </div>
-      
+
       <!-- Related Products Section -->
       <div class="related-products">
         <h2 class="section-title">Related Products</h2>
@@ -874,22 +855,90 @@
   <%- include("../../views/partials/user/footer") %>
 
   <script>
-    // Function to change main image when clicking thumbnails
-    function changeMainImage(src) {
-      document.getElementById('mainImage').src = src;
-      
-      // Update active thumbnail
-      const thumbnails = document.querySelectorAll('.thumbnail');
-      thumbnails.forEach(thumb => {
-        if (thumb.src === src) {
-          thumb.classList.add('active');
+    // Zoom Functionality
+    function initializeZoom() {
+      const containers = document.querySelectorAll('.zoom-container');
+      containers.forEach(container => {
+        const img = container.querySelector('.zoom-image');
+        const lens = container.querySelector('.zoom-lens');
+
+        if (!img.complete) {
+          img.addEventListener('load', () => setupZoom(container, img, lens));
         } else {
-          thumb.classList.remove('active');
+          setupZoom(container, img, lens);
         }
+
+        container.addEventListener('mousemove', (e) => {
+          moveLens(e, container, img, lens);
+        });
+
+        container.addEventListener('mouseleave', () => {
+          lens.style.opacity = '0';
+        });
+
+        container.addEventListener('mouseenter', () => {
+          lens.style.opacity = '1';
+        });
       });
     }
 
-    // Function to increase quantity
+    function setupZoom(container, img, lens) {
+      const zoomFactor = 2;
+      const lensSize = { width: parseInt(getComputedStyle(lens).width), height: parseInt(getComputedStyle(lens).height) };
+
+      lens.style.backgroundImage = `url(${img.src})`;
+      lens.style.backgroundRepeat = 'no-repeat';
+
+      const imgRect = img.getBoundingClientRect();
+      lens.style.backgroundSize = `${imgRect.width * zoomFactor}px ${imgRect.height * zoomFactor}px`;
+    }
+
+    function moveLens(e, container, img, lens) {
+      const zoomFactor = 2;
+      const lensSize = { width: parseInt(getComputedStyle(lens).width), height: parseInt(getComputedStyle(lens).height) };
+      const imgRect = img.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      let posX = e.clientX - containerRect.left;
+      let posY = e.clientY - containerRect.top;
+
+      let lensX = posX - lensSize.width / 2;
+      let lensY = posY - lensSize.height / 2;
+
+      lensX = Math.max(0, Math.min(lensX, imgRect.width - lensSize.width));
+      lensY = Math.max(0, Math.min(lensY, imgRect.height - lensSize.height));
+
+      lens.style.left = `${lensX}px`;
+      lens.style.top = `${lensY}px`;
+
+      const bgPosX = -(lensX * zoomFactor);
+      const bgPosY = -(lensY * zoomFactor);
+      lens.style.backgroundPosition = `${bgPosX}px ${bgPosY}px`;
+    }
+
+    // Image Switching
+    function changeMainImage(src) {
+      const mainImage = document.getElementById('mainImage');
+      mainImage.src = src;
+
+      document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+        if (thumb.src === src) {
+          thumb.classList.add('active');
+        }
+      });
+
+      initializeZoom();
+    }
+
+    // Attach click events to thumbnails
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        changeMainImage(thumb.src);
+      });
+    });
+
+    // Quantity Handling
     function increaseQuantity() {
       const quantityInput = document.getElementById('quantity');
       const currentValue = parseInt(quantityInput.value);
@@ -897,7 +946,6 @@
       updateHiddenQuantityInputs();
     }
 
-    // Function to decrease quantity
     function decreaseQuantity() {
       const quantityInput = document.getElementById('quantity');
       const currentValue = parseInt(quantityInput.value);
@@ -907,75 +955,34 @@
       }
     }
 
-    // Update hidden quantity inputs for forms
     function updateHiddenQuantityInputs() {
       const quantity = document.getElementById('quantity').value;
       document.getElementById('cartQuantity').value = quantity;
       document.getElementById('buyQuantity').value = quantity;
     }
 
-    // Add event listener to main quantity input
     document.getElementById('quantity').addEventListener('change', function() {
       updateHiddenQuantityInputs();
     });
 
-    // Tab functionality
+    // Tab Functionality
     function openTab(evt, tabName) {
-      // Declare variables
-      let i, tabcontent, tablinks;
-
-      // Get all elements with class="tab-content" and hide them
-      tabcontent = document.getElementsByClassName("tab-content");
-      for (i = 0; i < tabcontent.length; i++) {
+      let tabcontent = document.getElementsByClassName("tab-content");
+      for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].classList.remove("active");
       }
 
-      // Get all elements with class="tab-btn" and remove the class "active"
-      tablinks = document.getElementsByClassName("tab-btn");
-      for (i = 0; i < tablinks.length; i++) {
+      let tablinks = document.getElementsByClassName("tab-btn");
+      for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].classList.remove("active");
       }
 
-      // Show the current tab, and add an "active" class to the button that opened the tab
       document.getElementById(tabName).classList.add("active");
       evt.currentTarget.classList.add("active");
     }
 
-    
-  document.querySelectorAll('.zoom-container').forEach(container => {
-    const img = container.querySelector('.zoom-image');
-    const lens = container.querySelector('.zoom-lens');
-
-    container.addEventListener('mousemove', (e) => {
-      const { left, top, width, height } = container.getBoundingClientRect();
-
-      const posX = e.clientX - left;
-      const posY = e.clientY - top;
-
-      const lensX = posX - (lens.offsetWidth / 2);
-      const lensY = posY - (lens.offsetHeight / 2);
-      lens.style.left = `${lensX}px`;
-      lens.style.top = `${lensY}px`;
-
-      const zoomedImgUrl = img.src;
-      lens.style.backgroundImage = `url(${zoomedImgUrl})`;
-      lens.style.backgroundSize = `${img.width * 2}px ${img.height * 2}px`;
-      lens.style.backgroundPosition = `-${posX * 2}px -${posY * 2}px`;
-    });
-  });
-
-  // Existing function to change main image
-  function changeMainImage(src) {
-    const mainImage = document.getElementById('mainImage');
-    mainImage.src = src;
-    document.querySelectorAll('.thumbnail').forEach(thumb => {
-      thumb.classList.remove('active');
-      if (thumb.src === src) {
-        thumb.classList.add('active');
-      }
-    });
-  }
-
+    // Initialize Zoom on Page Load
+    document.addEventListener('DOMContentLoaded', initializeZoom);
   </script>
 </body>
 </html>

@@ -29,9 +29,9 @@ const checkForDuplicateProducts = async () => {
             }
         });
 
-        // Log any duplicates found
+       
         if (duplicates.length > 0) {
-            console.log('DUPLICATE PRODUCTS FOUND:');
+            console.log('DUPLICATE PRODUCTS FOUND:');  // Checking any duplicates found
             duplicates.forEach(dup => {
                 console.log(`Product: "${dup.name}" has duplicates with IDs: ${dup.ids.join(', ')}`);
             });
@@ -110,7 +110,7 @@ const getProductAddPage = async (req, res) => {
                 product.formattedImages = normalizedImages.map(image => {
                     let path = `/uploads/product-images/${image}`;
                     const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                    console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
+                    // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                     return { filename: image, path: path };
                 });
 
@@ -385,7 +385,7 @@ const listProducts = async (req, res) => {
                 product.formattedImages = normalizedImages.map(image => {
                     let path = `/uploads/product-images/${image}`;
                     const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                    console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
+                    // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                     return { filename: image, path: path };
                 });
 
@@ -494,7 +494,7 @@ const deleteProductImage = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         console.log("Request body:", req.body);
-        console.log("Files received:", req.files ? req.files.length : 'No files');
+        console.log("Files received:", req.files ? req.files.length : "No files");
 
         const productId = req.body.productId;
         if (!productId) {
@@ -510,16 +510,54 @@ const updateProduct = async (req, res) => {
 
         console.log("Existing product images:", existingProduct.productImage);
 
+        // Process new images (from file uploads or base64 cropped images)
         const newImages = [];
+
+        // Handle base64 cropped images
+        const croppedImages = [
+            productData.croppedImage0,
+            productData.croppedImage1,
+            productData.croppedImage2,
+        ].filter((img) => img && img.startsWith("data:image")); // Only valid base64 images
+
+        if (croppedImages.length > 0) {
+            console.log("Processing cropped images:", croppedImages.length);
+            for (let i = 0; i < croppedImages.length; i++) {
+                try {
+                    // Extract base64 data (remove "data:image/jpeg;base64," prefix)
+                    const base64Data = croppedImages[i].replace(/^data:image\/\w+;base64,/, "");
+                    const buffer = Buffer.from(base64Data, "base64");
+
+                    // Generate unique filename
+                    const filename = `cropped-${Date.now()}-${i}.jpg`;
+                    const filePath = path.join("uploads", "product-images", filename);
+
+                    // Ensure directory exists
+                    const dir = path.join("uploads", "product-images");
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir, { recursive: true });
+                    }
+
+                    // Resize and save image using sharp
+                    await sharp(buffer).resize(440, 440).toFile(filePath);
+
+                    newImages.push(filename);
+                } catch (error) {
+                    console.error(`Error processing cropped image ${i}:`, error);
+                }
+            }
+        }
+
+        // Handle file uploads (if any)
         if (req.files && req.files.length > 0) {
             console.log("Processing new uploaded images:", req.files.length);
             for (let i = 0; i < req.files.length; i++) {
                 try {
                     const originalImagePath = req.files[i].path;
                     const filename = `${Date.now()}-${req.files[i].originalname}`;
-                    const resizedImagePath = path.join('uploads', 'product-images', filename);
+                    const resizedImagePath = path.join("uploads", "product-images", filename);
 
-                    const dir = path.join('uploads', 'product-images');
+                    const dir = path.join("uploads", "product-images");
                     if (!fs.existsSync(dir)) {
                         fs.mkdirSync(dir, { recursive: true });
                     }
@@ -532,11 +570,12 @@ const updateProduct = async (req, res) => {
 
                     newImages.push(filename);
                 } catch (error) {
-                    console.error("Error processing image:", error);
+                    console.error("Error processing uploaded image:", error);
                 }
             }
         }
 
+        // Get category ID
         let categoryId;
         if (productData.category) {
             const categoryDoc = await Category.findOne({ name: productData.category });
@@ -548,6 +587,7 @@ const updateProduct = async (req, res) => {
             categoryId = existingProduct.category;
         }
 
+        // Prepare updated product data
         const updatedProduct = {
             productName: productData.productName || existingProduct.productName,
             description: productData.description || existingProduct.description,
@@ -555,87 +595,89 @@ const updateProduct = async (req, res) => {
             category: categoryId,
             regularPrice: productData.regularPrice || existingProduct.regularPrice,
             salePrice: productData.salePrice || existingProduct.salePrice,
-            stock: productData.quantity || productData.stock || existingProduct.stock,
+            quantity: productData.quantity || existingProduct.quantity,
             processor: productData.processor || existingProduct.processor,
             storage: productData.storage || existingProduct.storage,
             ram: productData.ram || existingProduct.ram,
             camera: productData.camera || existingProduct.camera,
         };
 
-        if (productData.productImage && productData.productImage.length > 0) {
-            updatedProduct.productImage = productData.productImage;
-        } else {
-            updatedProduct.productImage = existingProduct.productImage;
-        }
-
-        const normalizedExistingImages = existingProduct.productImage.map(img => {
-            if (img && img.startsWith('/uploads/product-images/')) {
-                return img.substring('/uploads/product-images/'.length);
-            }
-            return img;
-        });
-
-        let finalProductImages = normalizedExistingImages;
+        // Handle images
+        let finalProductImages = existingProduct.productImage; // Default to existing images
 
         if (newImages.length > 0) {
-            console.log("Using newly uploaded images");
+            console.log("Using newly uploaded or cropped images");
             finalProductImages = newImages;
 
+            // Delete old images if new ones are uploaded
             if (existingProduct.productImage && existingProduct.productImage.length > 0) {
-                for (const oldImage of normalizedExistingImages) {
+                for (const oldImage of existingProduct.productImage) {
                     if (!oldImage) continue;
-                    const oldImagePath = path.join(process.cwd(), 'uploads', 'product-images', oldImage);
+                    const oldImagePath = path.join(process.cwd(), "uploads", "product-images", oldImage);
                     if (fs.existsSync(oldImagePath)) {
                         fs.unlinkSync(oldImagePath);
                     }
                 }
             }
-        } else if (productData.croppedImages && (Array.isArray(productData.croppedImages) || typeof productData.croppedImages === 'string')) {
-            console.log("Using cropped images from the form");
-            if (Array.isArray(productData.croppedImages)) {
-                finalProductImages = productData.croppedImages;
-            } else {
-                finalProductImages = [productData.croppedImages];
-            }
         } else if (productData.existingImages) {
             try {
-                const parsedImages = JSON.parse(productData.existingImages);
-                if (Array.isArray(parsedImages) && parsedImages.length > 0) {
-                    const normalizedParsedImages = parsedImages.map(img => {
-                        if (img && img.startsWith('/uploads/product-images/')) {
-                            return img.substring('/uploads/product-images/'.length);
+                const parsedImages = JSON.parse(productData.existingImages || "[]");
+                if (Array.isArray(parsedImages)) {
+                    // Filter out null or empty values and normalize paths
+                    finalProductImages = parsedImages
+                        .filter((img) => img && typeof img === "string")
+                        .map((img) => {
+                            if (img.startsWith("/uploads/product-images/")) {
+                                return img.substring("/uploads/product-images/".length);
+                            }
+                            return img;
+                        });
+
+                    // Remove any deleted images from the existing array
+                    const imagesToDelete = existingProduct.productImage.filter(
+                        (img) => img && !finalProductImages.includes(img)
+                    );
+                    for (const oldImage of imagesToDelete) {
+                        const oldImagePath = path.join(process.cwd(), "Uploads", "product-images", oldImage);
+                        if (fs.existsSync(oldImagePath)) {
+                            fs.unlinkSync(oldImagePath);
                         }
-                        return img;
-                    });
-                    finalProductImages = normalizedParsedImages.filter(img => img !== null);
+                    }
                 }
             } catch (error) {
                 console.error("Error parsing existingImages:", error);
+                // Fallback to existing images if parsing fails
+                finalProductImages = existingProduct.productImage;
             }
+        }
+
+        // Validate image count
+        if (finalProductImages.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "At least one product image is required",
+            });
         }
 
         updatedProduct.productImage = finalProductImages;
         console.log("Final product images:", updatedProduct.productImage);
 
-        const result = await Product.findByIdAndUpdate(
-            productId,
-            updatedProduct,
-            { new: true }
-        );
+        // Update the product
+        const result = await Product.findByIdAndUpdate(productId, updatedProduct, { new: true });
 
         console.log("Product updated successfully:", result);
 
         return res.status(200).json({
             success: true,
             message: "Product updated successfully",
-            product: result
+            product: result,
         });
     } catch (error) {
         console.error("Error updating product:", error);
         return res.status(500).json({
             success: false,
             message: "Error updating product",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -669,7 +711,7 @@ const getProductEditPage = async (req, res) => {
             product.formattedImages = product.productImage.map(image => {
                 let path = `/uploads/product-images/${image}`;
                 const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
+                // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                 return { filename: image, path: path };
             });
         }
@@ -834,7 +876,7 @@ const getEditProduct = async (req, res) => {
             product.formattedImages = product.productImage.map(image => {
                 let path = `/uploads/product-images/${image}`;
                 const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
+                // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                 return { filename: image, path: path };
             });
         }
