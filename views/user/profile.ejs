@@ -129,6 +129,31 @@
   </div>
 
   <section class="ftco-section bg-light">
+    <!-- Email Change Modal -->
+<div id="emailModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Change Email</h3>
+      <span class="modal-close" onclick="closeEmailModal()">×</span>
+    </div>
+    <form id="email-form" action="/editemail" method="POST">
+      <div class="form-group">
+        <label class="form-label" for="current-email">Current Email</label>
+        <input type="email" class="form-control" id="current-email" name="currentEmail" value="<%= user.email %>" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-email">New Email</label>
+        <input type="email" class="form-control" id="new-email" name="email" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Send OTP</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
     <div class="container">
       <div class="profile-container">
         <!-- Profile Sidebar -->
@@ -169,10 +194,6 @@
                 <div class="detail-item">
                   <div class="detail-label">Username</div>
                   <div class="detail-value"><%= user.username || 'Not set' %></div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Gender</div>
-                  <div class="detail-value"><%= user.gender || 'Not specified' %></div>
                 </div>
                 <div class="detail-item">
                   <div class="detail-label">Account Created</div>
@@ -323,23 +344,14 @@
                     <label class="form-label" for="username">Username</label>
                     <input type="text" class="form-control" id="username" name="username" value="<%= user.username || '' %>">
                   </div>
-                  <div class="form-group">
-                    <label class="form-label" for="gender">Gender</label>
-                    <select class="form-control" id="gender" name="gender">
-                      <option value="" <%= !user.gender ? 'selected' : '' %>>Select Gender</option>
-                      <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
-                      <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
-                      <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
-                    </select>
-                  </div>
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="email">Email Address</label>
                   <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
                   <!-- Email change modal disabled until /editemail route is implemented -->
-                  <!-- <small class="form-text text-muted">
+                  <small class="form-text text-muted">
                     To change your email, <a href="#" data-bs-toggle="modal" data-bs-target="#emailModal">click here</a>.
-                  </small> -->
+                  </small>
                 </div>
                 <div class="edit-buttons">
                   <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
@@ -464,35 +476,9 @@
         </div>
       </form>
     </div>
-  </div>
+   </div>
 
-  <!-- Email Change Modal (Disabled until /editemail route is implemented) -->
-  <!--
-  <div class="modal fade" id="emailModal">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Change Email</h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form action="/editemail" method="POST">
-            <div class="form-group">
-              <label for="modalemail" class="form-label">New Email</label>
-              <input type="email" class="form-control" name="email" id="modalemail" placeholder="Enter new email" required>
-              <small class="form-text text-muted">A verification link will be sent to this email.</small>
-            </div>
-            <hr>
-            <button type="submit" class="btn btn-primary">Update</button>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  -->
+  <!-- Email Change Modal (Disabled until /editemail route is implemented) -->x
 
   <%- include("../../views/partials/user/footer") %>
 
@@ -645,6 +631,12 @@
         }
       });
     }
+
+    // Close Email Modal
+function closeEmailModal() {
+  document.getElementById('emailModal').style.display = 'none';
+  document.getElementById('email-form').reset();
+}
   
     // Close modals when clicking outside
     window.onclick = function(event) {
@@ -748,6 +740,10 @@
         });
       }
     });
+
+
+    // Open Email Modal
+
   </script>
 </body>
 </html>

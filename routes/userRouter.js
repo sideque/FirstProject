@@ -50,15 +50,17 @@ router.post("/profileUpdate", userAuth, upload.single("profileImage"), profileCo
 router.post("/profile/change-password", userAuth, profileController.postUserNewPassword);
 
 // Address routes
-// router.get("/addAddress", userAuth, profileController.loadAddress);
+router.get("/addAddress", userAuth, profileController.loadAddress);
 router.post("/addAddress", userAuth, profileController.addAddress);
 router.post("/profile/address/default", userAuth, profileController.setDefaultAddress);
 router.post("/profile/address/delete", userAuth, profileController.deleteAddress);
 router.post("/profile/address/edit", userAuth, profileController.editAddress);
 router.get("/profile/address/:addressIndex", userAuth, profileController.getAddressForEdit);
 router.post('/order/cancel', userAuth, profileController.cancelOrder);
+
 router.post('/editemail', userAuth, profileController.editEmail);
 router.post('/verify-email-otp', userAuth, profileController.verifyEmailOtp);
+router.post('/resend-email-otp', userAuth, profileController.resendOtp)
 
 // Product Management
 router.get("/product", userAuth, productController.productController);

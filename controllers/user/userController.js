@@ -164,6 +164,9 @@ async function sendVerificationEmail(email,otp){
             return res.render('signup',({message:"User with this email already exist"}));
 
         }
+
+
+        
   const otp = generateotp()
   const emailSent= await sendVerificationEmail(email,otp);
   if(!emailSent){
@@ -194,6 +197,9 @@ async function sendVerificationEmail(email,otp){
         
     }
  }
+
+
+
 
  const verifyOtp = async (req, res) => {
     try {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Email Verification</title>
   <style>
-    :root {
+     :root {
       --primary-color: #4f46e5;
       --primary-light: #e0e7ff;
       --success-color: #10b981;
@@ -170,98 +170,70 @@
 </head>
 <body>
   <div class="verification-container">
-    <h2 class="verification-title">Forgot-password</h2>
-
+    <h2 class="verification-title">Email Verification</h2>
     <p class="verification-description">
-        Enter the 6-digit verification code that was sent to your email
+      Enter the 6-digit verification code that was sent to your new email
     </p>
-      
-    <form
-    id="otpForm"
-    action="/forgotPass-otp"
-    method="post"
-    onsubmit="return validateOTPForm(event)">
+    <form id="otpForm" action="/verify-email-otp" method="post" onsubmit="return validateOTPForm()">
       <div class="code-input-container">
-        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" name="otp1" required>
-        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" name="otp2" required>
-        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" name="otp3" required>
-        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" name="otp4" required>
-        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" name="otp5" required>
-        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" name="otp6" required>
+        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
+        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
+        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
+        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
+        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
+        <input type="text" maxlength="1" class="code-input" pattern="\d*" inputmode="numeric" required>
       </div>
       <button type="submit" class="submit-btn">Verify</button>
     </form>
-
-   <p class="countdown-text">
-    Please wait <span id="timerValue">39</span> seconds before requesting another code
-  </p>
-  <p>
-    Didn't receive the code?
-    <a href="javascript:void(0)" onclick="resendOTP()" class="resend-link" id="resendLink" style="pointer-events: none; opacity: 0.5;" role="button" aria-disabled="true">
-      Resend
-    </a>
-  </p>
-  
+    <p class="countdown-text">
+      Please wait <span id="timerValue">39</span> seconds before requesting another code
+    </p>
+    <p>
+      Didn't receive the code?
+      <a href="javascript:void(0)" onclick="resendOTP()" class="resend-link" id="resendLink" style="pointer-events: none; opacity: 0.5;" role="button" aria-disabled="true">
+        Resend
+      </a>
+    </p>
   </div>
 
   <script>
-    let timer = 39; // Starting from 39 as shown in your HTML
+    let timer = 39;
     let countdown;
     const timerValue = document.getElementById("timerValue");
     const resendLink = document.getElementById("resendLink");
     const inputs = document.querySelectorAll(".code-input");
-  
-    // Setup auto-focus for OTP inputs
+
+    // Auto-focus and paste logic (remains the same)
     inputs.forEach((input, index) => {
       input.addEventListener("keyup", function(e) {
-        // Add filled class when input has value
-        if (this.value) {
-          this.classList.add("filled");
-        } else {
-          this.classList.remove("filled");
-        }
-        
-        // Move to next input if current is filled
-        if (this.value.length === 1 && index < inputs.length - 1) {
-          inputs[index + 1].focus();
-        }
-        
-        // Handle backspace
-        if (e.key === "Backspace" && index > 0 && this.value.length === 0) {
-          inputs[index - 1].focus();
-        }
+        if (this.value) this.classList.add("filled");
+        else this.classList.remove("filled");
+        if (this.value.length === 1 && index < inputs.length - 1) inputs[index + 1].focus();
+        if (e.key === "Backspace" && index > 0 && this.value.length === 0) inputs[index - 1].focus();
       });
-      
       input.addEventListener("paste", function(e) {
         e.preventDefault();
         const pastedData = e.clipboardData.getData("text").trim();
-        
         if (/^\d+$/.test(pastedData) && pastedData.length === inputs.length) {
-          // Fill all inputs with pasted data
           inputs.forEach((input, i) => {
             input.value = pastedData[i];
             input.classList.add("filled");
           });
-          // Focus last input
           inputs[inputs.length - 1].focus();
         }
       });
     });
-  
+
     function startTimer() {
-      timer = 60;
-  
+      timer = 39;
       resendLink.style.pointerEvents = "none";
       resendLink.style.opacity = "0.5";
       resendLink.style.color = "#6b7280";
       resendLink.style.textDecoration = "none";
-  
-      clearInterval(countdown); // Stop previous timer
-  
+      clearInterval(countdown);
       countdown = setInterval(() => {
         timer--;
         timerValue.textContent = timer;
-  
         if (timer <= 0) {
           clearInterval(countdown);
           timerValue.textContent = "0";
@@ -272,20 +244,12 @@
         }
       }, 1000);
     }
-  
-    // Start countdown on page load
-    startTimer();
-  
-    function validateOTPForm(event) {
-      event.preventDefault(); // Prevent default form submission
-      
-      let otp = "";
-      const inputs = document.querySelectorAll(".code-input");
-      
-      inputs.forEach(input => {
-        otp += input.value;
-      });
 
+    startTimer();
+
+    function validateOTPForm() {
+      let otp = "";
+      inputs.forEach(input => (otp += input.value));
       if (otp.length !== 6 || isNaN(otp)) {
         Swal.fire({
           icon: "error",
@@ -295,16 +259,13 @@
         });
         return false;
       }
-
-      // Add loading effect to button
       const submitBtn = document.querySelector(".submit-btn");
       const originalText = submitBtn.innerText;
       submitBtn.innerText = "Verifying...";
       submitBtn.disabled = true;
-      
       $.ajax({
         type: "POST",
-        url: "/reset-password",
+        url: "/verify-email-otp",
         data: { otp: otp },
         success: function(response) {
           if (response.success) {
@@ -314,14 +275,14 @@
               text: "Your email has been successfully verified",
               confirmButtonColor: "var(--success-color)",
               showConfirmButton: false,
-              timer: 1500,
+              timer: 1500
             }).then(() => {
-              window.location.href = response.redirectUrl;
+              window.location.href = response.redirectUrl || "/userProfile?emailChanged=true";
             });
           } else {
             Swal.fire({
               icon: "error",
-              title: "Verification Failed",
+              title: "Verification Failed This is email",
               text: response.message || "Please try again",
               confirmButtonColor: "var(--primary-color)"
             });
@@ -333,62 +294,63 @@
           Swal.fire({
             icon: "error",
             title: "Invalid Code",
-            text: "The verification code you entered is incorrect //",
+            text: "The verification code you entered is incorrect",
             confirmButtonColor: "var(--primary-color)"
           });
           submitBtn.innerText = originalText;
           submitBtn.disabled = false;
         }
       });
-
       return false;
     }
-  
+
     function resendOTP() {
-      resendLink.classList.remove("pulse");
-      clearInterval(countdown);
-      startTimer();
-  
-      $.ajax({
-        type: "POST",
-        url: "/resend-forgot-otp",
-        success: function(response) {
-          if (response.success) {
-            // Clear all inputs
-            inputs.forEach(input => {
-              input.value = "";
-              input.classList.remove("filled");
-            });
-            inputs[0].focus();
-            
-            Swal.fire({
-              icon: "success",
-              title: "Code Resent",
-              text: "A new verification code has been sent to your email",
-              confirmButtonColor: "var(--success-color)",
-              showConfirmButton: false,
-              timer: 1500,
-            });
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: "An error occurred while resending the code. Please try again.",
-              confirmButtonColor: "var(--primary-color)"
-            });
-          }
-        },
-        error: function() {
-          Swal.fire({
-            icon: "error",
-            title: "Server Error",
-            text: "Could not resend verification code. Please try again later.",
-            confirmButtonColor: "var(--primary-color)"
-          });
-        }
+  console.log('hi');
+  resendLink.classList.remove("pulse");
+  clearInterval(countdown);
+  startTimer();
+  $.ajax({
+    type: "POST",
+    url: "/resend-email-otp",
+    // headers: {
+    //   "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+    // },
+    success: function(response) {
+      console.log("Resend OTP Response:", response);
+      if (response.success) {
+        inputs.forEach(input => {
+          input.value = "";
+          input.classList.remove("filled");
+        });
+        inputs[0].focus();
+        Swal.fire({
+          icon: "success",
+          title: "Code Resent",
+          text: "A new verification code has been sent to your email",
+          confirmButtonColor: "var(--success-color)",
+          showConfirmButton: false,
+          timer: 1500
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.message || "An error occurred while resending the code. Please try again.",
+          confirmButtonColor: "var(--primary-color)"
+        });
+      }
+    },
+    error: function(xhr, status, error) {
+      console.log("Resend OTP Error:", xhr.responseText, status, error);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: xhr.responseJSON?.message || "Could not resend verification code. Please try again later.",
+        confirmButtonColor: "var(--primary-color)"
       });
     }
+  });
+}
   </script>
-  
 </body>
 </html>
