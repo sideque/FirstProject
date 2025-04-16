@@ -53,7 +53,7 @@ const categoryInfo = async (req, res) => {
             endPage,
             adminUser
         });
-    } catch (error) {
+    } catch (error) { 
         console.log(error.message);
         res.redirect('/pageerror');
     }
@@ -68,7 +68,7 @@ const categoryInfo = async (req, res) => {
 
             const existingCategory = await Category.findOne({ name:{$regex:new RegExp(`^${name}$`,'i')}});
             if (existingCategory) {
-                return res.status(409).json({ error: "Category already exists" });
+                return res.status(400).json({ error: "Category already exists" });
             }
 
             const newCategory = new Category({

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <!-- Ensure your CSS file includes styles for modal, address-grid, profile-sidebar, etc. -->
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<style>
+  .modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+.modal-content {
+  background-color: white;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-close {
+  cursor: pointer;
+  font-size: 24px;
+}
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+.form-group {
+  flex: 1;
+  margin-bottom: 15px;
+}
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+}
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+.address-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.address-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  position: relative;
+}
+.address-type {
+  background-color: #28a745;
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.address-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+.profile-sidebar {
+  width: 250px;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+}
+.profile-content {
+  flex: 1;
+  padding: 20px;
+}
+.profile-tab {
+  display: none;
+}
+.profile-tab.active {
+  display: block;
+}
+</style>
+<body>
+  <%- include("../../views/partials/user/header") %>
+
+  <div class="hero-wrap hero-bread" style="background-image: url('/images/p41.jpg');">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 ftco-animate text-center">
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Profile</span></p>
+          <h1 class="mb-0 bread">Profile</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ftco-section bg-light">
+    <div class="container">
+      <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+          <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" class="profile-pic">
+          <h3 class="profile-name"><%= user.name %></h3>
+          <ul class="profile-nav">
+            <li><a href="#" class="active" onclick="showTab('profile-details')"><i class="fa fa-user"></i> My Details</a></li>
+            <li><a href="#" onclick="showTab('profile-addresses')"><i class="fa fa-map-marker"></i> My Addresses</a></li>
+            <li><a href="#" onclick="showTab('profile-orders')"><i class="fa fa-shopping-bag"></i> Order History</a></li>
+            <li><a href="#" onclick="showTab('profile-edit')"><i class="fa fa-pencil"></i> Edit Profile</a></li>
+            <li><a href="#" onclick="showTab('profile-security')"><i class="fa fa-lock"></i> Change Password</a></li>
+            <li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Profile Content Area -->
+        <div class="profile-content">
+          <!-- Profile Details Tab -->
+          <div id="profile-details" class="profile-tab" style="display: block;">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Personal Information</h3>
+              </div>
+              <div class="user-details">
+                <div class="detail-item">
+                  <div class="detail-label">Full Name</div>
+                  <div class="detail-value"><%= user.name %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Email Address</div>
+                  <div class="detail-value"><%= user.email %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Phone Number</div>
+                  <div class="detail-value"><%= user.phone || 'Not added yet' %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Username</div>
+                  <div class="detail-value"><%= user.username || 'Not set' %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Gender</div>
+                  <div class="detail-value"><%= user.gender || 'Not specified' %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Account Created</div>
+                  <div class="detail-value"><%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Addresses Tab -->
+          <div id="profile-addresses" class="profile-tab" style="display: none;">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">My Addresses</h3>
+                <button class="btn btn-primary" onclick="openAddressModal()">Add New Address</button>
+              </div>
+
+
+              <div class="address-grid">
+                <% if (addresses && addresses.length > 0) { %>
+                  <% addresses.forEach(function(address, index) { %>
+                    <div class="address-card">
+                      <% if (address.isDefault) { %>
+                        <span class="address-type">Default</span>
+                      <% } %>
+                      <h4><%= address.name %> (<%= address.addressType %>)</h4>
+                      <p><%= address.addressLine1 %></p>
+                      <% if (address.addressLine2) { %>
+                        <p><%= address.addressLine2 %></p>
+                      <% } %>
+                      <% if (address.landMark) { %>
+                        <p>Landmark: <%= address.landMark %></p>
+                      <% } %>
+                      <p><%= address.city %>, <%= address.state %> <%= address.pincode %></p>
+                      <p>Phone: <%= address.phone %></p>
+                      <% if (address.altPhone) { %>
+                        <p>Alt Phone: <%= address.altPhone %></p>
+                      <% } %>
+                      <div class="address-actions">
+                        <button onclick="editAddress('<%= index %>')">Edit</button>
+                        <% if (!address.isDefault) { %>
+                          <form action="/profile/address/default" method="POST" style="display:inline;">
+                            <input type="hidden" name="addressIndex" value="<%= index %>">
+                            <button type="submit">Set as Default</button>
+                          </form>
+                        <% } %>
+                        <form action="/profile/address/delete" method="POST" style="display:inline;">
+                          <input type="hidden" name="addressIndex" value="<%= index %>">
+                          <button type="submit" class="delete">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="add-address" onclick="openAddressModal()">
+                    <span><i class="fa fa-plus"></i> Add New Address</span>
+                  </div>
+                <% } %>
+              </div>
+
+
+            </div>
+          </div>
+
+          <!-- Orders Tab -->
+          <div id="profile-orders" class="profile-tab" style="display: none;">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Order History</h3>
+              </div>
+              <div class="order-list">
+                <% if (orders && orders.length > 0) { %>
+                  <% orders.forEach(function(order) { %>
+                    <div class="order-card">
+                      <div class="order-header">
+                        <div class="order-id">Order #<%= order.orderId %></div>
+                        <div class="order-date"><%= new Date(order.createdOn).toLocaleDateString('en-US') %></div>
+                        <div class="order-status status-<%= order.status.toLowerCase() %>"><%= order.status %></div>
+                      </div>
+                      <div class="order-body">
+                        <% order.orderItems.slice(0, 1).forEach(function(item) { %>
+                          <% if (item.product) { %>
+                            <div class="order-product">
+                              <img src="<%= item.product.image || '/Uploads/default.jpg' %>" alt="<%= item.product.name || 'Product' %>" class="product-img">
+                              <div class="product-details">
+                                <div class="product-name"><%= item.product.name || 'Unknown' %></div>
+                                <div class="product-meta">Qty: <%= item.stock %></div>
+                                <div class="product-price">₹<%= item.price %></div>
+                              </div>
+                            </div>
+                          <% } %>
+                        <% }); %>
+                        <% if (order.orderItems.length > 1) { %>
+                          <div class="more-products">+<%= order.orderItems.length - 1 %> more products</div>
+                        <% } %>
+                      </div>
+                      <div class="order-footer">
+                        <div class="order-total">Total: ₹<%= order.finalAmount %></div>
+                        <div class="order-actions">
+                          <a href="/order/<%= order._id %>" class="btn-details">View Details</a>
+                          <% if (order.status === 'Processing') { %>
+                            <a href="#" onclick="cancelOrder('<%= order._id %>')" class="btn-cancel">Cancel Order</a>
+                          <% } %>
+                          <% if (order.status === 'Shipped') { %>
+                            <a href="/order/<%= order._id %>/track" class="btn-track">Track Order</a>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="no-orders">
+                    <p>You haven't placed any orders yet.</p>
+                    <a href="/shop" class="btn btn-primary">Start Shopping</a>
+                  </div>
+                <% } %>
+              </div>  
+            </div>
+          </div>
+
+          <!-- Edit Profile Tab -->
+          <div id="profile-edit" class="profile-tab" style="display: none;">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Edit Profile</h3>
+              </div>
+              <form id="edit-profile-form" action="/profileUpdate" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                  <label class="form-label">Profile Picture</label>
+                  <div class="profile-pic-upload">
+                    <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" id="profile-preview">
+                    <input type="file" id="profile-image" name="profileImage" accept="image/*" style="display: none;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile-image').click()">Change Picture</button>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="<%= user.username || '' %>">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="gender">Gender</label>
+                    <select class="form-control" id="gender" name="gender">
+                      <option value="" <%= !user.gender ? 'selected' : '' %>>Select Gender</option>
+                      <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                      <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                      <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Email Address</label>
+                  <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
+                  <!-- Email change modal disabled until /editemail route is implemented -->
+                  <!-- <small class="form-text text-muted">
+                    To change your email, <a href="#" data-bs-toggle="modal" data-bs-target="#emailModal">click here</a>.
+                  </small> -->
+                </div>
+                <div class="edit-buttons">
+                  <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Change Password Tab -->
+          <div id="profile-security" class="profile-tab" style="display: none;">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Change Password</h3>
+              </div>
+              <form id="change-password-form" action="/profile/change-password" method="POST">
+                <div class="form-group">
+                  <label class="form-label" for="current-password">Current Password</label>
+                  <div style="position: relative;">
+                    <input type="password" class="form-control" id="current-password" name="currentPassword" style="padding-right: 40px;" required>
+                    <i class="fa-solid fa-eye" id="toggleCurrentPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="new-password">New Password</label>
+                  <div style="position: relative;">
+                    <input type="password" class="form-control" id="new-password" name="newPassword" style="padding-right: 40px;" required>
+                    <i class="fa-solid fa-eye" id="toggleNewPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="confirm-password">Confirm New Password</label>
+                  <div style="position: relative;">
+                    <input type="password" class="form-control" id="confirm-password" name="confirmPassword" style="padding-right: 40px;" required>
+                    <i class="fa-solid fa-eye" id="toggleConfirmPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+                  </div>
+                </div>
+                <div class="edit-buttons">
+                  <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+              </form>
+              <div class="forgot-password">
+                <p>Forgot your password?</p>
+                <a href="/forgot-password" class="btn btn-secondary">Reset Password</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Address Modal -->
+  <div id="addressModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="addressModalTitle">Add New Address</h3>
+        <span class="modal-close" onclick="closeAddressModal()">×</span>
+      </div>
+      <form id="address-form" action="/addAddress" method="POST">
+        <input type="hidden" id="address-index" name="addressIndex" value="">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="address-type">Address Type</label>
+            <select class="form-control" id="address-type" name="addressType" required>
+              <option value="Home">Home</option>
+              <option value="Work">Work</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="address-name">Full Name</label>
+            <input type="text" class="form-control" id="address-name" name="name" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="address-phone">Phone Number</label>
+            <input type="tel" class="form-control" id="address-phone" name="phone" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="address-altPhone">Alternate Phone (Optional)</label>
+            <input type="tel" class="form-control" id="address-altPhone" name="altPhone">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address-line1">Address Line 1</label>
+          <input type="text" class="form-control" id="address-line1" name="addressLine1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address-line2">Address Line 2 (Optional)</label>
+          <input type="text" class="form-control" id="address-line2" name="addressLine2">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address-landMark">Landmark (Optional)</label>
+          <input type="text" class="form-control" id="address-landMark" name="landMark">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="address-city">City</label>
+            <input type="text" class="form-control" id="address-city" name="city" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="address-state">State</label>
+            <input type="text" class="form-control" id="address-state" name="state" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address-pincode">Pincode</label>
+          <input type="text" class="form-control" id="address-pincode" name="pincode" required>
+        </div>
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" id="address-default" name="isDefault">
+            Set as default address
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeAddressModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Email Change Modal (Disabled until /editemail route is implemented) -->
+  <!--
+  <div class="modal fade" id="emailModal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Change Email</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/editemail" method="POST">
+            <div class="form-group">
+              <label for="modalemail" class="form-label">New Email</label>
+              <input type="email" class="form-control" name="email" id="modalemail" placeholder="Enter new email" required>
+              <small class="form-text text-muted">A verification link will be sent to this email.</small>
+            </div>
+            <hr>
+            <button type="submit" class="btn btn-primary">Update</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  -->
+
+  <%- include("../../views/partials/user/footer") %>
+
+  <!-- JavaScript Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    // Tab switching
+    function showTab(tabId) {
+      document.querySelectorAll('.profile-tab').forEach(tab => tab.style.display = 'none');
+      document.getElementById(tabId).style.display = 'block';
+      document.querySelectorAll('.profile-nav a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick').includes(tabId)) link.classList.add('active');
+      });
+    }
+  
+    // Profile image preview
+    document.getElementById('profile-image').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('profile-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  
+    // Address modal functions
+    function openAddressModal() {
+      document.getElementById('addressModal').style.display = 'block';
+      document.getElementById('addressModalTitle').textContent = 'Add New Address';
+      document.getElementById('address-form').reset();
+      document.getElementById('address-index').value = '';
+      document.getElementById('address-form').action = '/addAddress';
+    }
+  
+    function closeAddressModal() {
+      document.getElementById('addressModal').style.display = 'none';
+      document.getElementById('address-form').reset();
+      document.getElementById('address-index').value = '';
+      document.getElementById('address-form').action = '/addAddress';
+      document.getElementById('addressModalTitle').textContent = 'Add New Address';
+    }
+  
+    async function editAddress(index) {
+      try {
+        const response = await fetch(`/profile/address/${index}`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Address not found');
+        const address = await response.json();
+        document.getElementById('addressModal').style.display = 'block';
+        document.getElementById('addressModalTitle').textContent = 'Edit Address';
+        document.getElementById('address-index').value = index;
+        document.getElementById('address-type').value = address.addressType || 'Home';
+        document.getElementById('address-name').value = address.name;
+        document.getElementById('address-phone').value = address.phone;
+        document.getElementById('address-altPhone').value = address.altPhone || '';
+        document.getElementById('address-line1').value = address.addressLine1;
+        document.getElementById('address-line2').value = address.addressLine2 || '';
+        document.getElementById('address-landMark').value = address.landMark || '';
+        document.getElementById('address-city').value = address.city;
+        document.getElementById('address-state').value = address.state;
+        document.getElementById('address-pincode').value = address.pincode;
+        document.getElementById('address-default').checked = address.isDefault;
+        document.getElementById('address-form').action = '/profile/address/edit';
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to load address: ' + error.message,
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+  
+    function setDefaultAddress(index) {
+      Swal.fire({
+        title: 'Set as default address?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#82ae46',
+        cancelButtonColor: '#e63946',
+        confirmButtonText: 'Yes'
+      }).then(result => {
+        if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/profile/address/default';
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = 'addressIndex';
+          hiddenField.value = index;
+          form.appendChild(hiddenField);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    }
+  
+    function deleteAddress(index) {
+      Swal.fire({
+        title: 'Delete this address?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#82ae46',
+        cancelButtonColor: '#e63946',
+        confirmButtonText: 'Yes, delete it'
+      }).then(result => {
+        if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/profile/address/delete';
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = 'addressIndex';
+          hiddenField.value = index;
+          form.appendChild(hiddenField);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    }
+  
+    // Order cancellation
+    function cancelOrder(orderId) {
+      Swal.fire({
+        title: 'Cancel this order?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#82ae46',
+        cancelButtonColor: '#e63946',
+        confirmButtonText: 'Yes, cancel it'
+      }).then(result => {
+        if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/order/cancel';
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = 'orderId';
+          hiddenField.value = orderId;
+          form.appendChild(hiddenField);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    }
+  
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+      if (event.target.className === 'modal') {
+        event.target.style.display = 'none';
+      }
+    };
+  
+    // Password toggle logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('change-password-form');
+  
+      function setupPasswordToggle(inputId, toggleId) {
+        const input = document.getElementById(inputId);
+        const toggle = document.getElementById(toggleId);
+        if (input && toggle) {
+          input.addEventListener('input', () => {
+            toggle.style.display = input.value ? 'block' : 'none';
+          });
+          toggle.addEventListener('click', () => {
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            toggle.className = `fa-solid fa-${isPassword ? 'eye-slash' : 'eye'}`;
+          });
+        }
+      }
+  
+      setupPasswordToggle('current-password', 'toggleCurrentPassword');
+      setupPasswordToggle('new-password', 'toggleNewPassword');
+      setupPasswordToggle('confirm-password', 'toggleConfirmPassword');
+  
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const data = {
+            currentPassword: formData.get('currentPassword'),
+            newPassword: formData.get('newPassword'),
+            confirmPassword: formData.get('confirmPassword')
+          };
+  
+          try {
+            const response = await fetch('/profile/change-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            const result = await response.json();
+  
+            if (result.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: result.message,
+                confirmButtonColor: '#3085d6'
+              }).then(() => {
+                showTab('profile-details');
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: result.message,
+                confirmButtonColor: '#3085d6'
+              });
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'An unexpected error occurred',
+              confirmButtonColor: '#3085d6'
+            });
+          }
+        });
+      }
+    });
+  
+    // Client-side validation for address form
+    document.getElementById('address-form').addEventListener('submit', function(event) {
+      const requiredFields = ['address-type', 'address-name', 'address-phone', 'address-line1', 'address-city', 'address-state', 'address-pincode'];
+      let isValid = true;
+  
+      requiredFields.forEach(id => {
+        const field = document.getElementById(id);
+        if (!field.value.trim()) {
+          isValid = false;
+          field.style.borderColor = 'red';
+        } else {
+          field.style.borderColor = '';
+        }
+      });
+  
+      if (!isValid) {
+        event.preventDefault();
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Please fill in all required fields',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    });
+  </script>
+</body>
+</html>

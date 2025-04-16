@@ -56,8 +56,9 @@ const orderSchema = new Schema({
         couponApplied:{
             type:Boolean,
             default:false
-        }
-})
+        },
+        
+}, {timestamps:true});
 
 const Order = mongoose.model("Order",orderSchema);
 module.exports = Order;

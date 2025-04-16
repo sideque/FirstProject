@@ -6,6 +6,10 @@ const userSchema = new Schema({
         type:String,
         required:true
     },
+    username:{
+        type:String,
+        unique:true
+    },
     email:{
         type : String,
         required:true,
@@ -18,6 +22,7 @@ const userSchema = new Schema({
         sparse:true, //single sinup cheyumbool phone number wenda
         default:null
     },
+    gender: { type: String, enum: ["Male", "Female", "Other"] },
     googleId :{
         type:String,
         unique:true,
@@ -76,7 +81,17 @@ const userSchema = new Schema({
             type:Date,
             default:Date.now
         }
-    }]
+    }],
+
+    profileImage: { // Add this field
+        type: String,
+        required: false,
+        default: null
+    },
+    createdAt:{
+        type:Date,
+        default:Date.now
+    },
 },{
     timestamps: true
 });
