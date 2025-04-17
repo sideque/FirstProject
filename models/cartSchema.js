@@ -21,7 +21,7 @@ const cartSchema = new Schema({
             type:Number,
             required:true
         },
-        totoalPrice:{
+        totalPrice:{
             type:Number,
             required:true
         },

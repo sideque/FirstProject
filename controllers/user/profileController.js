@@ -536,5 +536,6 @@ module.exports = {
   getAddressForEdit,
   cancelOrder,
   editEmail,
-  verifyEmailOtp
+  verifyEmailOtp,
+  
 };

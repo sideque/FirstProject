@@ -310,6 +310,9 @@
           </form>
         </div>
       </div>
+
+
+      
       <div class="products-column">
         <div class="row">
           <% if (products && products.length > 0) { %>
@@ -345,10 +348,10 @@
                       <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
                     </div>
                     <p class="bottom-area d-flex px-3">
-                      <a href="/cart/add/<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
-                        <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
+                      <a href="/product?id=<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
+                        <span>View <i class="ion-ios-add ml-1"></i></span>
                       </a>
-                      <a href="/buy/<%= product._id %>" class="buy-now text-center py-2">
+                      <a href="/product?id=<%= product._id %>" class="buy-now text-center py-2">
                         <span>Buy now <i class="ion-ios-cart ml-1"></i></span>
                       </a>
                     </p>
@@ -376,6 +379,10 @@
           </div>
         <% } %>
       </div>
+
+
+
+
     </div>
   </div>
 </section>

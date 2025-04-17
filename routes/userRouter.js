@@ -6,6 +6,8 @@ const { userAuth } = require("../middlewares/auth");
 const passport = require("passport");
 const productController = require("../controllers/user/productController");
 const upload = require("../middlewares/multerConfig");
+const cartController = require("../controllers/user/cartController");
+const { loadCart, addToCart } = require('../controllers/user/cartController');
 
 router.get("/pageNotFound", userController.pageNotFound);
 
@@ -64,5 +66,14 @@ router.post('/resend-email-otp', userAuth, profileController.resendOtp)
 
 // Product Management
 router.get("/product", userAuth, productController.productController);
+
+
+
+//cart 
+router.get('/cart', userAuth, cartController.loadCart);
+router.post('/cart/add/:id', userAuth,cartController.addToCart);
+
+
+
 
 module.exports = router;

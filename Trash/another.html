@@ -1,438 +1,705 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile</title>
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet">
+    <style>
+        /* Main Layout Adjustments */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+        
+        /* Cart Layout */
+        .cart-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .cart-items {
+            flex: 1 1 65%;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+        }
+        
+        .order-summary {
+            flex: 1 1 30%;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            align-self: flex-start;
+        }
+        
+        /* Cart Item Styling */
+        .cart-item {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            position: relative;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-image {
+            flex: 0 0 150px;
+            margin-right: 20px;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .item-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 5px;
+        }
+        
+        .item-seller {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .item-delivery {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .item-stock {
+            font-size: 14px;
+            color: #82ae46;
+            margin-bottom: 10px;
+        }
+        
+        .item-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #82ae46;
+            margin-bottom: 10px;
+        }
+        
+        .item-original-price {
+            font-size: 16px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 10px;
+        }
+        
+        .item-actions {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border-radius: 25px;
+            overflow: hidden;
+            margin-right: 20px;
+        }
+        
+        .quantity-btn {
+            background: #f1f3f5;
+            border: none;
+            padding: 8px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: none;
+            background: #f8f9fa;
+            font-size: 16px;
+            padding: 8px 0;
+        }
+        
+        .remove-btn {
+            color: #e63946;
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .remove-btn:hover {
+            color: #cc2e3a;
+            transform: scale(1.02);
+        }
+        
+        /* Order Summary Styling */
+        .summary-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .summary-row.discount {
+            color: #e63946;
+        }
+        
+        .summary-row.total {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 20px;
+            font-weight: 600;
+            color: #82ae46;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 30px;
+            background: #82ae46;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .checkout-btn:hover {
+            background: #6d9338;
+            transform: scale(1.02);
+        }
+        
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .empty-cart h3 {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .shop-now-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 30px;
+            background: #82ae46;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .shop-now-btn:hover {
+            background: #6d9338;
+            transform: scale(1.02);
+        }
+        
+        /* Hero Section */
+        .hero-wrap {
+            height: 300px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .hero-wrap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+        
+        .slider-text {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .breadcrumbs {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .breadcrumbs a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .bread {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 991px) {
+            .cart-container {
+                flex-direction: column;
+            }
+            
+            .cart-items, .order-summary {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .cart-item {
+                flex-direction: column;
+            }
+            
+            .item-image {
+                margin-right: 0;
+                margin-bottom: 15px;
+                flex: none;
+                width: 120px;
+            }
+            
+            .remove-btn {
+                position: absolute;
+                top: 20px;
+                right: 0;
+            }
+            
+            .item-actions {
+                margin-top: 20px;
+            }
+            
+            .hero-wrap {
+                height: 200px;
+            }
+            
+            .bread {
+                font-size: 32px;
+            }
+        }
+        
+        /* Header and Footer Placeholders */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #82ae46;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 20px;
+        }
+        
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: #82ae46;
+        }
+        
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 40px 0 20px;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .footer-section {
+            flex: 1;
+            margin: 0 20px 20px 0;
+            min-width: 200px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-section a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-section a:hover {
+            color: #82ae46;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #555;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <!-- Hero Banner Section -->
-  <div class="hero-wrap hero-bread">
-    <div class="container">
-      <div class="row no-gutters slider-text align-items-center justify-content-center">
-        <div class="col-md-9 ftco-animate text-center">
-          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Profile</span></p>
-          <h1 class="mb-0 bread">My Profile</h1>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="/" class="logo">Vegefoods</a>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/cart">Cart</a></li>
+                    <li><a href="/account">Account</a></li>
+                </ul>
+            </nav>
         </div>
-      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero-wrap hero-bread" style="background-image: url('/images/p28.jpg');">
+        <div class="container">
+            <div class="row no-gutters slider-text align-items-center justify-content-center">
+                <div class="col-md-9 ftco-animate text-center">
+                    <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Cart</span></p>
+                    <h1 class="mb-0 bread">My Cart</h1>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Main Profile Section -->
-  <section class="ftco-section bg-light">
-    <div class="container">
-      <div class="profile-container">
-        <!-- Profile Sidebar -->
-        <div class="profile-sidebar">
-          <img src="<%= user.profileImage || '/images/default-avatar.png' %>" alt="Profile Picture" class="profile-pic">
-          <h3 class="profile-name"><%= user.name %></h3>
-          <ul class="profile-nav">
-            <li><a href="#" class="active" onclick="showTab('profile-details')"><i class="fa fa-user"></i> My Details</a></li>
-            <li><a href="#" onclick="showTab('profile-addresses')"><i class="fa fa-map-marker"></i> My Addresses</a></li>
-            <li><a href="#" onclick="showTab('profile-orders')"><i class="fa fa-shopping-bag"></i> Order History</a></li>
-            <li><a href="#" onclick="showTab('profile-edit')"><i class="fa fa-pencil"></i> Edit Profile</a></li>
-            <li><a href="#" onclick="showTab('profile-security')"><i class="fa fa-lock"></i> Change Password</a></li>
-            <li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
-          </ul>
-        </div>
-
-        <!-- Profile Content Area -->
-        <div class="profile-content">
-          <!-- Profile Details Tab -->
-          <div id="profile-details" class="profile-tab active">
-            <div class="content-card">
-              <div class="content-header">
-                <h3 class="content-title">Personal Information</h3>
-              </div>
-              <div class="user-details">
-                <div class="detail-item">
-                  <div class="detail-label">Full Name</div>
-                  <div class="detail-value"><%= user.name %></div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Email Address</div>
-                  <div class="detail-value"><%= user.email %></div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Phone Number</div>
-                  <div class="detail-value"><%= user.phone || 'Not added yet' %></div>
-                </div>
-                <div class="detail-item">
-                  <div class="detail-label">Account Created</div>
-                  <div class="detail-value"><%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Addresses Tab -->
-          <div id="profile-addresses" class="profile-tab" style="display: none;">
-            <div class="content-card">
-              <div class="content-header">
-                <h3 class="content-title">My Addresses</h3>
-                <button class="btn btn-primary" onclick="openAddressModal()">Add New Address</button>
-              </div>
-              <div class="address-grid">
-                <% if (user.addresses && user.addresses.length > 0) { %>
-                  <% user.addresses.forEach(function(address, index) { %>
-                    <div class="address-card">
-                      <% if (address.isDefault) { %>
-                        <span class="address-type">Default</span>
-                      <% } %>
-                      <h4><%= address.name %></h4>
-                      <p><%= address.addressLine1 %></p>
-                      <p><%= address.addressLine2 %></p>
-                      <p><%= address.city %>, <%= address.state %> <%= address.pincode %></p>
-                      <p>Phone: <%= address.phone %></p>
-                      <div class="address-actions">
-                        <button onclick="editAddress('<%= index %>')">Edit</button>
-                        <% if (!address.isDefault) { %>
-                          <button onclick="setDefaultAddress('<%= index %>')">Set as Default</button>
-                        <% } %>
-                        <button class="delete" onclick="deleteAddress('<%= index %>')">Delete</button>
-                      </div>
-                    </div>
-                  <% }); %>
-                <% } else { %>
-                  <div class="add-address" onclick="openAddressModal()">
-                    <span><i class="fa fa-plus"></i> Add New Address</span>
-                  </div>
-                <% } %>
-              </div>
-            </div>
-          </div>
-
-          <!-- Orders Tab -->
-          <div id="profile-orders" class="profile-tab" style="display: none;">
-            <div class="content-card">
-              <div class="content-header">
-                <h3 class="content-title">Order History</h3>
-              </div>
-              <div class="order-list">
-                <% if (orders && orders.length > 0) { %>
-                  <% orders.forEach(function(order) { %>
-                    <div class="order-card">
-                      <div class="order-header">
-                        <div class="order-id">Order #<%= order._id %></div>
-                        <div class="order-date"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
-                        <div class="order-status status-<%= order.status.toLowerCase() %>"><%= order.status %></div>
-                      </div>
-                      <div class="order-body">
-                        <% order.products.slice(0, 2).forEach(function(product) { %>
-                          <div class="order-product">
-                            <img src="<%= product.image %>" alt="<%= product.name %>" class="product-img">
-                            <div class="product-details">
-                              <div class="product-name"><%= product.name %></div>
-                              <div class="product-meta">Qty: <%= product.quantity %></div>
-                              <div class="product-price">₹<%= product.price.toLocaleString() %></div>
-                            </div>
-                          </div>
-                        <% }); %>
-                        <% if (order.products.length > 2) { %>
-                          <div class="more-products">+ <%= order.products.length - 2 %> more products</div>
-                        <% } %>
-                      </div>
-                      <div class="order-footer">
-                        <div class="order-total">Total: ₹<%= order.totalAmount.toLocaleString() %></div>
-                        <div class="order-actions">
-                          <a href="/order/<%= order._id %>" class="btn-details">View Details</a>
-                          <% if (order.status === 'Processing' || order.status === 'Confirmed') { %>
-                            <a href="#" onclick="cancelOrder('<%= order._id %>')" class="btn-cancel">Cancel Order</a>
-                          <% } %>
-                          <% if (order.status === 'Shipped') { %>
-                            <a href="/order/track/<%= order._id %>" class="btn-track">Track Order</a>
-                          <% } %>
+    <!-- Cart Section -->
+    <section class="ftco-section bg-light">
+        <div class="container">
+            <!-- Cart with items -->
+            <div class="cart-container">
+                <div class="cart-items">
+                    <!-- Example cart item 1 -->
+                    <div class="cart-item" data-id="prod123" data-max="6">
+                        <div class="item-image">
+                            <img src="https://via.placeholder.com/150x150.png?text=Organic+Tomato" alt="Organic Tomato">
                         </div>
-                      </div>
+                        <div class="item-details">
+                            <div>
+                                <h3 class="item-title">Organic Tomato</h3>
+                                <p class="item-seller">Seller: Fresh Farms</p>
+                                <p class="item-delivery">Delivery by Mon Apr 22 | Free</p>
+                                <p class="item-stock">In Stock (6 available)</p>
+                            </div>
+                            <div>
+                                <p class="item-price">₹150 
+                                    <span class="item-original-price">₹180</span>
+                                </p>
+                                <div class="item-actions">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn decrease-btn">-</button>
+                                        <input type="text" class="quantity-input" value="2" readonly>
+                                        <button class="quantity-btn increase-btn">+</button>
+                                    </div>
+                                    <button class="remove-btn">Remove</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  <% }); %>
-                <% } else { %>
-                  <div class="no-orders">
-                    <p>You haven't placed any orders yet.</p>
-                    <a href="/shop" class="btn btn-primary">Start Shopping</a>
-                  </div>
-                <% } %>
-              </div>
+                    
+                    <!-- Example cart item 2 -->
+                    <div class="cart-item" data-id="prod456" data-max="4">
+                        <div class="item-image">
+                            <img src="https://via.placeholder.com/150x150.png?text=Bell+Pepper" alt="Bell Pepper">
+                        </div>
+                        <div class="item-details">
+                            <div>
+                                <h3 class="item-title">Bell Pepper</h3>
+                                <p class="item-seller">Seller: Organic Greens</p>
+                                <p class="item-delivery">Delivery by Mon Apr 22 | Free</p>
+                                <p class="item-stock">In Stock (4 available)</p>
+                            </div>
+                            <div>
+                                <p class="item-price">₹120</p>
+                                <div class="item-actions">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn decrease-btn">-</button>
+                                        <input type="text" class="quantity-input" value="1" readonly>
+                                        <button class="quantity-btn increase-btn">+</button>
+                                    </div>
+                                    <button class="remove-btn">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-summary">
+                    <h2 class="summary-title">Order Summary</h2>
+                    <div class="summary-row">
+                        <span>Subtotal (3 items)</span>
+                        <span>₹420</span>
+                    </div>
+                    <div class="summary-row discount">
+                        <span>Offer Discount</span>
+                        <span>-₹60</span>
+                    </div>
+                    <div class="summary-row discount">
+                        <span>Coupon Discount</span>
+                        <span>-₹0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Delivery</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span>₹360</span>
+                    </div>
+                    <button class="checkout-btn" onclick="window.location.href='/checkout'">Proceed to Checkout</button>
+                </div>
             </div>
-          </div>
 
-          <!-- Edit Profile Tab -->
-          <div id="profile-edit" class="profile-tab" style="display: none;">
-            <div class="content-card">
-              <div class="content-header">
-                <h3 class="content-title">Edit Profile</h3>
-              </div>
-              <form id="edit-profile-form" action="/profile/update" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                  <label class="form-label">Profile Picture</label>
-                  <div class="profile-pic-upload">
-                    <img src="<%= user.profileImage || '/images/default-avatar.png' %>" alt="Profile Picture" id="profile-preview">
-                    <input type="file" id="profile-image" name="profileImage" accept="image/*" style="display: none;">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile-image').click()">Change Picture</button>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label" for="name">Full Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="phone">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="email">Email Address</label>
-                  <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required>
-                  <small class="form-text text-muted">Changing your email will require verification.</small>
-                </div>
-                <div class="edit-buttons">
-                  <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
-                  <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-              </form>
+            <!-- Empty cart (hidden by default, uncomment to show) -->
+            <!--
+            <div class="empty-cart">
+                <h3>Your cart is empty</h3>
+                <p>Looks like you haven't added any products to your cart yet.</p>
+                <a href="/shop" class="shop-now-btn">Shop Now</a>
             </div>
-          </div>
+            -->
+        </div>
+    </section>
 
-          <!-- Change Password Tab -->
-          <div id="profile-security" class="profile-tab" style="display: none;">
-            <div class="content-card">
-              <div class="content-header">
-                <h3 class="content-title">Change Password</h3>
-              </div>
-              <form id="change-password-form" action="/profile/change-password" method="POST">
-                <div class="form-group">
-                  <label class="form-label" for="current-password">Current Password</label>
-                  <input type="password" class="form-control" id="current-password" name="currentPassword" required>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Vegefoods</h3>
+                    <p>Far far away, behind the word mountains, far from the countries.</p>
                 </div>
-                <div class="form-group">
-                  <label class="form-label" for="new-password">New Password</label>
-                  <input type="password" class="form-control" id="new-password" name="newPassword" required>
+                <div class="footer-section">
+                    <h3>Information</h3>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Products</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
                 </div>
-                <div class="form-group">
-                  <label class="form-label" for="confirm-password">Confirm New Password</label>
-                  <input type="password" class="form-control" id="confirm-password" name="confirmPassword" required>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Shipping</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
                 </div>
-                <div class="edit-buttons">
-                  <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
-                  <button type="submit" class="btn btn-primary">Update Password</button>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul>
+                        <li>Address: 123 Vegetable Road, Green City</li>
+                        <li>Phone: +1 123 456 7890</li>
+                        <li>Email: info@vegefoods.com</li>
+                    </ul>
                 </div>
-              </form>
-
-              <div class="forgot-password">
-                <p>Forgot your password?</p>
-                <button type="button" class="btn btn-secondary" onclick="openForgotPasswordModal()">Reset Password</button>
-              </div>
             </div>
-          </div>
+            <div class="footer-bottom">
+                <p>Copyright &copy; 2025 Vegefoods. All rights reserved.</p>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </footer>
 
-  <!-- Address Modal -->
-  <div id="addressModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="addressModalTitle">Add New Address</h3>
-        <span class="modal-close" onclick="closeAddressModal()">&times;</span>
-      </div>
-      <form id="address-form" action="/profile/address/add" method="POST">
-        <input type="hidden" id="address-index" name="addressIndex" value="">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="address-name">Full Name</label>
-            <input type="text" class="form-control" id="address-name" name="name" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="address-phone">Phone Number</label>
-            <input type="tel" class="form-control" id="address-phone" name="phone" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="address-line1">Address Line 1</label>
-          <input type="text" class="form-control" id="address-line1" name="addressLine1" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="address-line2">Address Line 2 (Optional)</label>
-          <input type="text" class="form-control" id="address-line2" name="addressLine2">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="address-city">City</label>
-            <input type="text" class="form-control" id="address-city" name="city" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="address-state">State</label>
-            <input type="text" class="form-control" id="address-state" name="state" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="address-pincode">Pincode</label>
-          <input type="text" class="form-control" id="address-pincode" name="pincode" required>
-        </div>
-        <div class="form-group">
-          <label class="form-checkbox">
-            <input type="checkbox" id="address-default" name="isDefault">
-            Set as default address
-          </label>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeAddressModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Address</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Forgot Password Modal (this would be needed since it's referenced in the code) -->
-  <div id="forgotPasswordModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Reset Password</h3>
-        <span class="modal-close" onclick="closeForgotPasswordModal()">&times;</span>
-      </div>
-      <form id="forgot-password-form" action="/profile/forgot-password" method="POST">
-        <div class="form-group">
-          <label class="form-label" for="reset-email">Email Address</label>
-          <input type="email" class="form-control" id="reset-email" name="email" value="<%= user.email %>" required>
-          <small class="form-text text-muted">We will send a password reset link to this email address.</small>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeForgotPasswordModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Send Reset Link</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- JavaScript for tab switching and modal functionality -->
-  <script>
-    // Tab switching functionality
-    function showTab(tabId) {
-      // Hide all tabs
-      const tabs = document.querySelectorAll('.profile-tab');
-      tabs.forEach(tab => {
-        tab.style.display = 'none';
-      });
-      
-      // Show the selected tab
-      document.getElementById(tabId).style.display = 'block';
-      
-      // Update active class in navigation
-      const navLinks = document.querySelectorAll('.profile-nav a');
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('onclick').includes(tabId)) {
-          link.classList.add('active');
-        }
-      });
-    }
-    
-    // Address modal functions
-    function openAddressModal() {
-      document.getElementById('addressModal').style.display = 'block';
-      document.getElementById('addressModalTitle').textContent = 'Add New Address';
-      document.getElementById('address-form').reset();
-      document.getElementById('address-index').value = '';
-    }
-    
-    function closeAddressModal() {
-      document.getElementById('addressModal').style.display = 'none';
-    }
-    
-    function editAddress(index) {
-      // This function would be implemented to populate the modal with address data
-      document.getElementById('addressModal').style.display = 'block';
-      document.getElementById('addressModalTitle').textContent = 'Edit Address';
-      document.getElementById('address-index').value = index;
-      
-      // Here you would add code to populate the form fields with the address data
-      // This would typically involve fetching the address data via JavaScript
-    }
-    
-    function setDefaultAddress(index) {
-      // This would send a request to set the address as default
-      if (confirm('Set this address as your default?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/profile/address/default';
-        
-        const hiddenField = document.createElement('input');
-        hiddenField.type = 'hidden';
-        hiddenField.name = 'addressIndex';
-        hiddenField.value = index;
-        
-        form.appendChild(hiddenField);
-        document.body.appendChild(form);
-        form.submit();
-      }
-    }
-    
-    function deleteAddress(index) {
-      // This would send a request to delete the address
-      if (confirm('Are you sure you want to delete this address?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/profile/address/delete';
-        
-        const hiddenField = document.createElement('input');
-        hiddenField.type = 'hidden';
-        hiddenField.name = 'addressIndex';
-        hiddenField.value = index;
-        
-        form.appendChild(hiddenField);
-        document.body.appendChild(form);
-        form.submit();
-      }
-    }
-    
-    function cancelOrder(orderId) {
-      // This would send a request to cancel the order
-      if (confirm('Are you sure you want to cancel this order?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/order/cancel';
-        
-        const hiddenField = document.createElement('input');
-        hiddenField.type = 'hidden';
-        hiddenField.name = 'orderId';
-        hiddenField.value = orderId;
-        
-        form.appendChild(hiddenField);
-        document.body.appendChild(form);
-        form.submit();
-      }
-    }
-    
-    function openForgotPasswordModal() {
-      document.getElementById('forgotPasswordModal').style.display = 'block';
-    }
-    
-    function closeForgotPasswordModal() {
-      document.getElementById('forgotPasswordModal').style.display = 'none';
-    }
-    
-    // Profile image preview
-    document.getElementById('profile-image').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('profile-preview').src = e.target.result;
-        }
-        reader.readAsDataURL(file);
-      }
-    });
-    
-    // Close modals when clicking outside
-    window.onclick = function(event) {
-      if (event.target.className === 'modal') {
-        event.target.style.display = 'none';
-      }
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Helper function to format dates
+            function getDeliveryDate(daysFromNow) {
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                
+                const date = new Date();
+                date.setDate(date.getDate() + daysFromNow);
+                
+                return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
+            }
+            
+            // Handle quantity changes
+            const decreaseBtns = document.querySelectorAll('.decrease-btn');
+            const increaseBtns = document.querySelectorAll('.increase-btn');
+            const removeBtns = document.querySelectorAll('.remove-btn');
+            
+            // Add event listeners to decrease buttons
+            decreaseBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const cartItem = this.closest('.cart-item');
+                    const productId = cartItem.dataset.id;
+                    const input = cartItem.querySelector('.quantity-input');
+                    let value = parseInt(input.value);
+                    
+                    if (value > 1) {
+                        value -= 1;
+                        input.value = value;
+                        updateCartQuantity(productId, value);
+                    }
+                });
+            });
+            
+            // Add event listeners to increase buttons
+            increaseBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const cartItem = this.closest('.cart-item');
+                    const productId = cartItem.dataset.id;
+                    const maxStock = parseInt(cartItem.dataset.max);
+                    const input = cartItem.querySelector('.quantity-input');
+                    let value = parseInt(input.value);
+                    
+                    if (value < maxStock) {
+                        value += 1;
+                        input.value = value;
+                        updateCartQuantity(productId, value);
+                    }
+                });
+            });
+            
+            // Add event listeners to remove buttons
+            removeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const cartItem = this.closest('.cart-item');
+                    const productId = cartItem.dataset.id;
+                    
+                    if (confirm('Are you sure you want to remove this item from your cart?')) {
+                        removeFromCart(productId);
+                    }
+                });
+            });
+            
+            // Function to update cart quantity
+            function updateCartQuantity(productId, quantity) {
+                fetch('/cart/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId, quantity }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh the page to show updated cart
+                        window.location.reload();
+                    } else {
+                        alert('Failed to update cart: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating cart:', error);
+                    alert('An error occurred while updating your cart.');
+                });
+            }
+            
+            // Function to remove item from cart
+            function removeFromCart(productId) {
+                fetch('/cart/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh the page to show updated cart
+                        window.location.reload();
+                    } else {
+                        alert('Failed to remove item: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing item:', error);
+                    alert('An error occurred while removing the item from your cart.');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
