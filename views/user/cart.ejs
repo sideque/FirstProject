@@ -242,6 +242,30 @@
         transform: scale(1.02);
     }
     
+    /* Pagination */
+    .pagination {
+        width: 100%;
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .pagination .btn {
+        margin: 0 5px;
+        padding: 8px 12px;
+        border: 1px solid #82ae46;
+        border-radius: 20px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination .btn.active,
+    .pagination .btn:hover {
+        background: #82ae46;
+        color: white;
+    }
+    
     /* Responsive */
     @media (max-width: 991px) {
         .cart-container {
@@ -285,71 +309,69 @@
     }
 </style>
 
-                    <div class="hero-wrap hero-bread" style="background-image: url('/images/p28.jpg');">
-                        <div class="container">
-                            <div class="row no-gutters slider-text align-items-center justify-content-center">
-                                <div class="col-md-9 ftco-animate text-center">
-                                    <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Cart</span></p>
-                                    <h1 class="mb-0 bread">My Cart</h1>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<div class="hero-wrap hero-bread" style="background-image: url('/images/p28.jpg');">
+    <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Cart</span></p>
+                <h1 class="mb-0 bread">My Cart</h1>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    <section class="ftco-section bg-light">
-                        <div class="container">
-                            <% if (cartItems && cartItems.length > 0) { %>
-                                <div class="cart-container">
-
-
-                                <div class="cart-items">
+<section class="ftco-section bg-light">
+    <div class="container">
+        <% if (cartItems && cartItems.length > 0) { %>
+            <div class="cart-container">
+                <div class="cart-items">
                     <% let subtotal = 0; %>
                     <% let discount = 0; %>
                     <% cartItems.forEach(function(item) { %>
                         <% if (item.productId && item.productId.salePrice !== undefined && item.stock !== undefined) { %>
-                        <% const itemTotal = item.productId.salePrice * item.stock; %>
-                        <% const itemOriginalTotal = item.productId.originalPrice ? item.productId.originalPrice * item.stock : itemTotal; %>
-                        <% subtotal += itemTotal; %>
-                        <div class="cart-item">
-                            <img class="img-fluid"
-                                src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
-                                alt="<%= item.productId.productName || 'mobile phone' %>"
-                                style="height: 320px; width: 100%; object-fit: contain; padding: 10px;">
-                            <div class="item-details">
-                            <div>
-                                <h3 class="item-title"><%= item.productId.productName || 'Unnamed Product' %></h3>
-                                <p class="item-seller">Seller: <%= item.productId.brand || 'Brand' %></p>
-                                <p class="item-delivery">Delivery by <%= getDeliveryDate(5) %> | Free</p>
-                                <p class="item-stock">In Stock (<%= item.productId.stock || 4 %> available)</p>
-                            </div>
-                            <div>
-                                <p class="item-price">₹<%= item.productId.salePrice.toLocaleString() %> 
-                                <% if (item.productId.originalPrice && item.productId.originalPrice > item.productId.salePrice) { %>
-                                    <span class="item-original-price">₹<%= item.productId.originalPrice.toLocaleString() %></span>
-                                <% } %>
-                                </p>
-                                <div class="item-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn decrease-btn">-</button>
-                                    <input type="text" class="quantity-input" value="<%= item.stock %>" readonly>
-                                    <button class="quantity-btn increase-btn">+</button>
+                            <% const itemTotal = item.productId.salePrice * item.stock; %>
+                            <% const itemOriginalTotal = item.productId.originalPrice ? item.productId.originalPrice * item.stock : itemTotal; %>
+                            <% subtotal += itemTotal; %>
+                            <div class="cart-item" data-id="<%= item.productId._id %>" data-max="<%= item.productId.stock %>">
+                                <img class="img-fluid"
+                                     src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
+                                     alt="<%= item.productId.productName || 'mobile phone' %>"
+                                     style="height: 320px; width: 100%; object-fit: contain; padding: 10px;">
+                                <div class="item-details">
+                                    <div>
+                                        <h3 class="item-title"><%= item.productId.productName || 'Unnamed Product' %></h3>
+                                        <p class="item-seller">Seller: <%= item.productId.brand || 'Brand' %></p>
+                                        <p class="item-delivery">Delivery by <%= getDeliveryDate(5) %> | Free</p>
+                                        <p class="item-stock">In Stock (<%= item.productId.stock || 4 %> available)</p>
+                                    </div>
+                                    <div>
+                                        <p class="item-price">₹<%= item.productId.salePrice.toLocaleString() %> 
+                                            <% if (item.productId.originalPrice && item.productId.originalPrice > item.productId.salePrice) { %>
+                                                <span class="item-original-price">₹<%= item.productId.originalPrice.toLocaleString() %></span>
+                                            <% } %>
+                                        </p>
+                                        <div class="item-actions">
+                                            <div class="quantity-control">
+                                                <button class="quantity-btn decrease-btn">-</button>
+                                                <input type="text" class="quantity-input" value="<%= item.stock %>" readonly>
+                                                <button class="quantity-btn increase-btn">+</button>
+                                            </div>
+                                            <button class="remove-btn">Remove</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button class="remove-btn">Remove</button>
-                                </div>
                             </div>
-                            </div>
-                        </div>
                         <% } else { %>
-                        <% console.log('Skipping invalid item:', item); %>
+                            <% console.log('Skipping invalid item:', item); %>
                         <% } %>
                     <% }); %>
-                    </div>
+                </div>
                 
                 <div class="order-summary">
                     <h2 class="summary-title">Order Summary</h2>
                     <div class="summary-row">
                         <span>Subtotal (<%= cartItems.reduce((acc, item) => acc + (item.stock || 0), 0) %> items)</span>
-                        <span>₹<%= subtotal.toLocaleString() %></span>
+                        <span id="subtotal">₹<%= subtotal.toLocaleString() %></span>
                     </div>
                     <% if (discount > 0) { %>
                         <div class="summary-row discount">
@@ -357,31 +379,43 @@
                             <span>-₹<%= discount.toLocaleString() %></span>
                         </div>
                     <% } %>
-                   
-                        <div class="summary-row discount">
-                            <span>Coupon Discount</span>
-                            <span>-₹0</span>
-                        </div>
-                   
-                        <div class="summary-row discount">
-                            <span>Coupon Discount</span>
-                            <span>-₹0</span>
-                        </div>
-               
+                    <div class="summary-row discount">
+                        <span>Coupon Discount</span>
+                        <span>-₹0</span>
+                    </div>
+                    <div class="summary-row discount">
+                        <span>Coupon Discount</span>
+                        <span>-₹0</span>
+                    </div>
                     <div class="summary-row">
                         <span>Delivery</span>
                         <span>Free</span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span>₹0</span>
+                        <span id="total">₹<%= (subtotal - discount).toLocaleString() %></span>
                     </div>
                     <button class="checkout-btn" onclick="window.location.href='/checkout'">Proceed to Checkout</button>
                 </div>
             </div>
-        
+            
+            <% if (totalPages > 1) { %>
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                        <a class="btn" href="/cart?page=<%= currentPage - 1 %>">Previous</a>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <a class="btn <%= i === currentPage ? 'active' : '' %>" href="/cart?page=<%= i %>"><%= i %></a>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <a class="btn" href="/cart?page=<%= currentPage + 1 %>">Next</a>
+                    <% } %>
+                </div>
+            <% } %>
+            
+        <% } else { %>
             <div class="empty-cart">
-                
+                <h3>Your cart is empty!</h3>
                 <p>More phone is here</p>
                 <a href="/shop" class="shop-now-btn">Shop Now</a>
             </div>
@@ -446,9 +480,19 @@
                 const cartItem = this.closest('.cart-item');
                 const productId = cartItem.dataset.id;
                 
-                if (confirm('Are you sure you want to remove this item from your cart?')) {
-                    removeFromCart(productId);
-                }
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to remove this item from your cart?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#82ae46',
+                    cancelButtonColor: '#e63946',
+                    confirmButtonText: 'Yes, remove it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        removeFromCart(productId);
+                    }
+                });
             });
         });
         
@@ -464,15 +508,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Refresh the page to show updated cart
-                    window.location.reload();
+                    document.getElementById('subtotal').textContent = `₹${data.total.toLocaleString()}`;
+                    document.getElementById('total').textContent = `₹${data.total.toLocaleString()}`;
                 } else {
-                    alert('Failed to update cart: ' + data.message);
+                    Swal.fire('Error', 'Failed to update cart: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error updating cart:', error);
-                alert('An error occurred while updating your cart.');
+                Swal.fire('Error', 'An error occurred while updating your cart.', 'error');
             });
         }
         
@@ -488,15 +532,20 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Refresh the page to show updated cart
-                    window.location.reload();
+                    Swal.fire(
+                        'Removed!',
+                        'The item has been removed from your cart.',
+                        'success'
+                    ).then(() => {
+                        window.location.reload();
+                    });
                 } else {
-                    alert('Failed to remove item: ' + data.message);
+                    Swal.fire('Error', 'Failed to remove item: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error removing item:', error);
-                alert('An error occurred while removing the item from your cart.');
+                Swal.fire('Error', 'An error occurred while removing the item from your cart.', 'error');
             });
         }
     });
@@ -511,27 +560,6 @@
         
         return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
     }
-
-
-    document.querySelectorAll('.quantity-btn').forEach(button => {
-  button.addEventListener('click', async () => {
-    const cartItem = button.closest('.cart-item');
-    const productId = cartItem.dataset.id;
-    const input = cartItem.querySelector('.quantity-input');
-    let stock = parseInt(input.value);
-    if (button.classList.contains('increase-btn')) stock++;
-    if (button.classList.contains('decrease-btn')) stock--;
-    if (stock < 1) stock = 1;
-    input.value = stock;
-
-    // Send update to server
-    await fetch('/cart/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, stock })
-    });
-  });
-});
 </script>
 
 <%- include("../../views/partials/user/footer") %>

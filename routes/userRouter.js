@@ -72,7 +72,8 @@ router.get("/product", userAuth, productController.productController);
 //cart 
 router.get('/cart', userAuth, cartController.loadCart);
 router.post('/cart/add/:id', userAuth,cartController.addToCart);
-
+router.post('cart/update', userAuth,cartController.updateCartItem);
+router.post('/cart/remove',userAuth ,cartController.removeCartItem);
 
 
 

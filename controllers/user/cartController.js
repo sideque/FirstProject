@@ -5,7 +5,7 @@ const Address = require("../../models/addressSchema");
 const Order = require('../../models/orderSchema');
 const env = require("dotenv").config();
 const Cart = require("../../models/cartSchema");
-const upload = require("../../middlewares/multerConfig");
+const Product = require("../../models/productSchema"); 
 const saltRounds = 10;
 
 // const loadCart = async (req, res) => {
@@ -15,15 +15,25 @@ const saltRounds = 10;
 //       return res.redirect('/login');
 //     }
 
-//     let cart = await Cart.findOne({ userId: user._id }).populate('items.productId');
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = 5; 
+//     const skip = (page - 1) * limit;
+
+//     let cart = await Cart.findOne({ userId: user._id }).populate({
+//       path: 'items.productId',
+//       select: 'productName productImage salePrice stock'
+//     });
+
 //     if (cart) {
 //       cart.items = cart.items.filter(item => item.productId && item.productId.salePrice !== undefined);
 //       await cart.save();
 //     }
 
 //     const cartItems = cart ? cart.items : [];
+//     const totalItems = cartItems.length;
+//     const totalPages = Math.ceil(totalItems / limit);
+//     const paginatedItems = cartItems.slice(skip, skip + limit);
 
-//     // Define getDeliveryDate function
 //     const getDeliveryDate = (days) => {
 //       const today = new Date();
 //       const deliveryDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
@@ -35,12 +45,18 @@ const saltRounds = 10;
 //       });
 //     };
 
-//     res.render('cart', { cartItems, getDeliveryDate });
+//     res.render('cart', {
+//       cartItems: paginatedItems,
+//       getDeliveryDate,
+//       totalPages,
+//       currentPage: page,
+//       totalItems
+//     });
 //   } catch (error) {
 //     console.error('Error loading cart:', error);
 //     res.redirect('/pageNotFound');
 //   }
-// };  
+// };
 
 
 const loadCart = async (req, res) => {
@@ -50,16 +66,24 @@ const loadCart = async (req, res) => {
         return res.redirect('/login');
       }
   
+      const page = parseInt(req.query.page) || 1;
+      const limit = 3; // Limit to 5 items per page
+      const skip = (page - 1) * limit;
+  
       let cart = await Cart.findOne({ userId: user._id }).populate({
         path: 'items.productId',
-        select: 'productName productImage salePrice stock' // Include productImage
+        select: 'productName productImage salePrice originalPrice brand stock'
       });
+  
       if (cart) {
         cart.items = cart.items.filter(item => item.productId && item.productId.salePrice !== undefined);
         await cart.save();
       }
   
       const cartItems = cart ? cart.items : [];
+      const totalItems = cartItems.length;
+      const totalPages = Math.ceil(totalItems / limit);
+      const paginatedItems = cartItems.slice(skip, skip + limit);
   
       const getDeliveryDate = (days) => {
         const today = new Date();
@@ -72,7 +96,13 @@ const loadCart = async (req, res) => {
         });
       };
   
-      res.render('cart', { cartItems, getDeliveryDate });
+      res.render('cart', {
+        cartItems: paginatedItems,
+        getDeliveryDate,
+        totalPages,
+        currentPage: page,
+        totalItems
+      });
     } catch (error) {
       console.error('Error loading cart:', error);
       res.redirect('/pageNotFound');
@@ -89,22 +119,18 @@ const addToCart = async (req, res) => {
     }
 
     const productId = req.params.id;
-    const quantity = req.body.quantity ? parseInt(req.body.quantity) : 1; // Default to 1 if not provided
+    const quantity = req.body.quantity ? parseInt(req.body.quantity) : 1;
 
-    // Find or create the user's cart
     let cart = await Cart.findOne({ userId: user._id });
     if (!cart) {
       cart = new Cart({ userId: user._id, items: [] });
     }
 
-    // Check if the product already exists in the cart
     const existingItem = cart.items.find(item => item.productId.toString() === productId);
     if (existingItem) {
-      existingItem.stock += quantity; // Update quantity (assuming 'stock' is quantity)
-      existingItem.totalPrice = existingItem.price * existingItem.stock; // Recalculate total price
+      existingItem.stock += quantity;
+      existingItem.totalPrice = existingItem.price * existingItem.stock;
     } else {
-      // Fetch product details to get price (assuming a Product model)
-      const Product = require('../../models/productSchema'); // Adjust path
       const product = await Product.findById(productId);
       if (!product) {
         return res.status(404).json({ success: false, message: 'Product not found' });
@@ -128,20 +154,69 @@ const addToCart = async (req, res) => {
   }
 };
 
+const updateCartItem = async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || !user._id) {
+        return res.status(401).json({ success: false, message: 'Please log in' });
+      }
+  
+      const { productId, quantity } = req.body;
+      const cart = await Cart.findOne({ userId: user._id });
+  
+      if (!cart) {
+        return res.status(404).json({ success: false, message: 'Cart not found' });
+      }
+  
+      const item = cart.items.find(item => item.productId.toString() === productId);
+      if (!item) {
+        return res.status(404).json({ success: false, message: 'Item not found' });
+      }
+  
+      if (quantity <= 0) {
+        cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+      } else {
+        item.stock = parseInt(quantity);
+        item.totalPrice = item.price * item.stock;
+      }
+  
+      await cart.save();
+      const total = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+      res.json({ success: true, total });
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  };
 
-// const loadShoppingPage = async (req, res) => {
-//     try {
-//       const products = await Product.find().select('productName productImage salePrice brand productOffer stock'); // Adjust fields as needed
-//       res.render('shop', { products, totalPages: 1, currentPage: 1 }); // Update pagination logic as per your implementation
-//     } catch (error) {
-//       console.error('Error loading shopping page:', error);
-//       res.redirect('/pageNotFound');
-//     }
-//   };
-
-
+  const removeCartItem = async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || !user._id) {
+            return res.status(401).json({ success: false, message: 'Please log in' });
+        }
+        const { productId } = req.body;
+        console.log('Removing item with productId:', productId);
+        const cart = await Cart.findOne({ userId: user._id });
+        if (!cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+        const itemExists = cart.items.some(item => item.productId.toString() === productId);
+        if (!itemExists) {
+            return res.status(404).json({ success: false, message: 'Item not found in cart' });
+        }
+        cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+        await cart.save();
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error in removeCartItem:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
 
 module.exports = {
   loadCart,
   addToCart,
+  updateCartItem,
+  removeCartItem
 };
