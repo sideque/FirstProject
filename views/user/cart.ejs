@@ -309,7 +309,7 @@
     }
 </style>
 
-<div class="hero-wrap hero-bread" style="background-image: url('/images/p28.jpg');">
+<div class="hero-wrap hero-bread" style="background-image: url('/images/p554.jpg');">
     <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
             <div class="col-md-9 ftco-animate text-center">
@@ -324,6 +324,7 @@
     <div class="container">
         <% if (cartItems && cartItems.length > 0) { %>
             <div class="cart-container">
+                
                 <div class="cart-items">
                     <% let subtotal = 0; %>
                     <% let discount = 0; %>
@@ -332,7 +333,7 @@
                             <% const itemTotal = item.productId.salePrice * item.stock; %>
                             <% const itemOriginalTotal = item.productId.originalPrice ? item.productId.originalPrice * item.stock : itemTotal; %>
                             <% subtotal += itemTotal; %>
-                            <div class="cart-item" data-id="<%= item.productId._id %>" data-max="<%= item.productId.stock %>">
+                            <div class="cart-item" data-id="<%= item.productId._id %>" data-max="<%= item.productId.stock || 0 %>">
                                 <img class="img-fluid"
                                      src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
                                      alt="<%= item.productId.productName || 'mobile phone' %>"
@@ -425,61 +426,114 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Helper function to format dates
-        function getDeliveryDate(daysFromNow) {
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            
-            const date = new Date();
-            date.setDate(date.getDate() + daysFromNow);
-            
-            return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
-        }
-        
-        // Handle quantity changes
         const decreaseBtns = document.querySelectorAll('.decrease-btn');
         const increaseBtns = document.querySelectorAll('.increase-btn');
         const removeBtns = document.querySelectorAll('.remove-btn');
-        
-        // Add event listeners to decrease buttons
+
+        // Update cart quantity function
+        async function updateCartQuantity(productId, quantity) {
+            try {
+                const response = await fetch('/cart/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, quantity }),
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to update cart');
+                }
+                console.log('Cart updated:', result);
+
+                // Update subtotal and total dynamically
+                if (result.total) {
+                    document.getElementById('subtotal').textContent = `₹${result.total.toLocaleString()}`;
+                    document.getElementById('total').textContent = `₹${result.total.toLocaleString()}`;
+                }
+
+                return result;
+            } catch (error) {
+                console.error('Error updating cart:', error);
+                throw error;
+            }
+        }
+
+        // Decrease button
         decreaseBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const cartItem = this.closest('.cart-item');
                 const productId = cartItem.dataset.id;
                 const input = cartItem.querySelector('.quantity-input');
                 let value = parseInt(input.value);
-                
+
                 if (value > 1) {
                     value -= 1;
                     input.value = value;
-                    updateCartQuantity(productId, value);
+                    updateCartQuantity(productId, value).catch(error => {
+                        input.value = value + 1;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to decrease quantity: ' + error.message,
+                            confirmButtonColor: '#82ae46',
+                        });
+                    });
                 }
             });
         });
-        
-        // Add event listeners to increase buttons
+
+        // Increase button (with Swal for invalid maxStock)
         increaseBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', async function () {
                 const cartItem = this.closest('.cart-item');
                 const productId = cartItem.dataset.id;
                 const maxStock = parseInt(cartItem.dataset.max);
                 const input = cartItem.querySelector('.quantity-input');
                 let value = parseInt(input.value);
-                
+
+                if (isNaN(maxStock) || maxStock <= 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Stock',
+                        text: 'The stock value for this product is invalid. Please contact support.',
+                        confirmButtonColor: '#82ae46',
+                    });
+                    console.error('Invalid maxStock:', cartItem.dataset.max);
+                    return;
+                }
+
                 if (value < maxStock) {
                     value += 1;
                     input.value = value;
-                    updateCartQuantity(productId, value);
+                    try {
+                        await updateCartQuantity(productId, value);
+                        console.log('Quantity increased to:', value);
+                    } catch (error) {
+                        input.value = value - 1;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to increase quantity: ' + error.message,
+                            confirmButtonColor: '#82ae46',
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Stock Limit',
+                        text: `Cannot increase quantity. Only ${maxStock} items in stock.`,
+                        confirmButtonColor: '#82ae46',
+                    });
                 }
             });
         });
-        
-        // Add event listeners to remove buttons
+
+        // Remove button
         removeBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const cartItem = this.closest('.cart-item');
                 const productId = cartItem.dataset.id;
-                
+
                 Swal.fire({
                     title: 'Are you sure?',
                     text: 'Do you want to remove this item from your cart?',
@@ -495,32 +549,8 @@
                 });
             });
         });
-        
-        // Function to update cart quantity
-        function updateCartQuantity(productId, quantity) {
-            fetch('/cart/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ productId, quantity }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('subtotal').textContent = `₹${data.total.toLocaleString()}`;
-                    document.getElementById('total').textContent = `₹${data.total.toLocaleString()}`;
-                } else {
-                    Swal.fire('Error', 'Failed to update cart: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating cart:', error);
-                Swal.fire('Error', 'An error occurred while updating your cart.', 'error');
-            });
-        }
-        
-        // Function to remove item from cart
+
+        // Remove from cart function
         function removeFromCart(productId) {
             fetch('/cart/remove', {
                 method: 'POST',
@@ -548,18 +578,34 @@
                 Swal.fire('Error', 'An error occurred while removing the item from your cart.', 'error');
             });
         }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Cart added successfully',
+                confirmButtonColor: '#82ae46',
+                timer: 2000, // Auto close after 2 seconds
+                showConfirmButton: false
+            });
+            // Remove the success parameter from URL
+            window.history.replaceState({}, document.title, '/cart');
+        }
+
+
+        
+
+        // Helper function for EJS template
+        function getDeliveryDate(daysFromNow) {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const date = new Date();
+            date.setDate(date.getDate() + daysFromNow);
+            
+            return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
+        }
     });
-    
-    // Helper function for EJS template
-    function getDeliveryDate(daysFromNow) {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        const date = new Date();
-        date.setDate(date.getDate() + daysFromNow);
-        
-        return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}`;
-    }
 </script>
 
 <%- include("../../views/partials/user/footer") %>

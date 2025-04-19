@@ -33,19 +33,15 @@ const loadLogin = (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log("Login Attempt:", email);
-
         const admin = await User.findOne({ email });
 
         if (!admin || !admin.isAdmin) {  
-            console.log("Admin Not Found or Not Authorized");
             return res.render("admin-login", { message: "Invalid email or password." });
         }
 
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if (passwordMatch) {
-            req.session.admin = { id: admin._id, email: admin.email, isAdmin: admin.isAdmin }; // Store full session
-            console.log("Session Set:", req.session.admin);
+            req.session.admin = { id: admin._id, email: admin.email, isAdmin: admin.isAdmin }; 
             return res.redirect("/admin");
         } else {
             console.log("Incorrect Password");

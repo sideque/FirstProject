@@ -31,7 +31,7 @@ const checkForDuplicateProducts = async () => {
 
        
         if (duplicates.length > 0) {
-            console.log('DUPLICATE PRODUCTS FOUND:');  // Checking any duplicates found
+            console.log('DUPLICATE PRODUCTS FOUND:');  
             duplicates.forEach(dup => {
                 console.log(`Product: "${dup.name}" has duplicates with IDs: ${dup.ids.join(', ')}`);
             });
@@ -85,7 +85,7 @@ const getProductAddPage = async (req, res) => {
         const products = await Product.find(query)
             .populate('category')
             .populate('brand')
-            .sort({ createdOn: -1, _id: 1 }) // Stable sort with _id as tiebreaker
+            .sort({ createdOn: -1, _id: 1 }) 
             .skip((page - 1) * limit)
             .limit(limit)
             .exec();
@@ -115,23 +115,23 @@ const getProductAddPage = async (req, res) => {
                 });
 
                 if (normalizedImages.length === 0) {
-                    console.log(`Product ${product._id} (${product.productName}) has no valid images`);
+                    // console.log(`Product ${product._id} (${product.productName}) has no valid images`);
                 }
             } else {
                 product.productImage = [];
                 product.formattedImages = [];
-                console.log(`Product ${product._id} (${product.productName}) has no productImage array`);
+                // console.log(`Product ${product._id} (${product.productName}) has no productImage array`);
             }
             return product;
         });
 
-        console.log("Products data:", formattedProducts.map(p => ({
-            id: p._id,
-            name: p.productName,
-            hasImages: !!p.productImage,
-            imageCount: p.productImage ? p.productImage.length : 0,
-            firstImage: p.productImage && p.productImage.length > 0 ? p.productImage[0] : null
-        })));
+        // console.log("Products data:", formattedProducts.map(p => ({
+        //     id: p._id,
+        //     name: p.productName,
+        //     hasImages: !!p.productImage,
+        //     imageCount: p.productImage ? p.productImage.length : 0,
+        //     firstImage: p.productImage && p.productImage.length > 0 ? p.productImage[0] : null
+        // })));
 
         // Calculate pagination values
         const maxPagesToShow = 5;
@@ -209,7 +209,6 @@ const addProducts = async (req, res) => {
         const images = [];
         try {
             for (const file of req.files) {
-                console.log('Processing file:', file.originalname);
 
                 // Validate file type
                 if (!file.mimetype.startsWith('image/')) {
@@ -222,7 +221,6 @@ const addProducts = async (req, res) => {
                 }
 
                 const filename = file.filename;
-                console.log('File processed successfully:', filename);
                 images.push(filename);
             }
 
@@ -390,7 +388,7 @@ const listProducts = async (req, res) => {
                 });
 
                 if (normalizedImages.length === 0) {
-                    console.log(`Product ${product._id} (${product.productName}) has no valid images`);
+                    // console.log(`Product ${product._id} (${product.productName}) has no valid images`);
                 }
             } else {
                 product.productImage = [];

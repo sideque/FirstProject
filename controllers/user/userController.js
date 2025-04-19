@@ -17,6 +17,8 @@ const pageNotFound = async (req, res) => {
 
 const loadHomePage = async (req, res) => {
     try {
+        console.log('from losdHome ====================================');
+        
         const user = req.session.user;
         const categories = await Category.find({ isListed: true });
 
@@ -67,6 +69,8 @@ const loadHomePage = async (req, res) => {
 
 const loadLogin = async (req, res) => {
     try {
+        console.log('from loadLogin    ====================================');
+
         if (!req.session.user) {
             return res.render("login", { message: "" });
         } else {

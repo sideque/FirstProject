@@ -148,7 +148,10 @@ const userProfile = async (req, res) => {
 
     // console.log('Fetched Orders:', orders); // Debug: Log orders to verify
     // console.log('Fetched Addresses:', addresses); // Debug: Log addresses to verify
-
+     console.log(orders,'orders')
+     orders.forEach(order => {
+      order.pro
+     });
     // Render profile.ejs with user, orders, and addresses data
     res.render('profile', {
       user: userData,

@@ -1,0 +1,217 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+  .success-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 40px;
+    text-align: center;
+  }
+  
+  .success-icon {
+    width: 100px;
+    height: 100px;
+    background: #00c9a7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 201, 167, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(0, 201, 167, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 201, 167, 0); }
+  }
+  
+  .success-icon i {
+    font-size: 50px;
+    color: #fff;
+  }
+  
+  .success-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .success-message {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+  
+  .order-ref {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0 30px;
+  }
+  
+  .order-ref-title {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  
+  .order-ref-code {
+    font-size: 18px;
+    font-weight: 600;
+    color: #00c9a7;
+    word-break: break-all;
+  }
+  
+  .btn-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .success-btn {
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .btn-primary {
+    background: #82ae46;
+    color: #fff;
+    border: 2px solid #82ae46;
+  }
+  
+  .btn-primary:hover {
+    background: #6b8e23;
+    border-color: #6b8e23;
+  }
+  
+  .btn-outline {
+    background: transparent;
+    color: #82ae46;
+    border: 2px solid #82ae46;
+  }
+  
+  .btn-outline:hover {
+    background: #f0f8e6;
+  }
+  
+  .success-info {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .hero-wrap {
+    background-size: cover;
+    background-position: center;
+    padding: 100px 0;
+  }
+  
+  @media (max-width: 768px) {
+    .success-container {
+      margin: 30px 15px;
+      padding: 30px 20px;
+    }
+    .success-title { font-size: 28px; }
+    .success-message { font-size: 16px; }
+    .btn-container { flex-direction: column; gap: 15px; }
+    .success-btn { width: 100%; }
+  }
+</style>
+
+<div class="hero-wrap hero-bread" style="background-image: url('/images/p491 (3)5.jpg');">
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center">
+        <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Order</span> <span>Success</span></p>
+        <h1 class="mb-0 bread">Order Confirmed</h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="ftco-section bg-light">
+  <div class="container">
+    <div class="success-container">
+      <div class="success-icon">
+        <i class="fa fa-check"></i>
+      </div>
+      
+      <h1 class="success-title">Order Confirmed!</h1>
+      
+      <p class="success-message">
+        Thank you for shopping with us! Your order is confirmed and will be on its way soon.
+        We've sent a confirmation email with all the details.
+      </p>
+      
+      <div class="order-ref">
+        <p class="order-ref-title">Order Reference</p>
+        <% if (order && order.orderId) { %>
+          <p class="order-ref-code" id="orderReference">Order #<%= order.orderId %></p>
+        <% } else { %>
+          <p class="order-ref-code" id="orderReference"><%= message || 'Order reference not available' %></p>
+        <% } %>
+      </div>
+      
+      <div class="btn-container">
+        <a href="/shop" class="success-btn btn-primary">
+          <i class="fa fa-shopping-bag mr-2"></i> Shop More
+        </a>
+        <a href="/userProfile#profile-orders" class="success-btn btn-outline">
+          <i class="fa fa-file-text-o mr-2"></i> Order Details
+        </a>
+      </div>
+      
+      <div class="success-info">
+        <p>Estimated delivery: 3-5 business days</p>
+        <p>Need help? <a href="/contact">Contact our support team</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Confetti effect
+  function createConfetti() {
+    const colors = ['#82ae46', '#00c9a7', '#ffc107', '#ff6b6b'];
+    for (let i = 0; i < 100; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.width = Math.random() * 10 + 5 + 'px';
+      confetti.style.height = Math.random() * 10 + 5 + 'px';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.position = 'fixed';
+      confetti.style.top = '-10px';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.opacity = Math.random() + 0.5;
+      confetti.style.borderRadius = '50%';
+      confetti.style.zIndex = '9999';
+      document.body.appendChild(confetti);
+      const animation = confetti.animate(
+        [
+          { transform: 'translate3d(0, 0, 0)', opacity: 1 },
+          { transform: `translate3d(${Math.random() * 100 - 50}px, ${Math.random() * 1000 + 500}px, 0)`, opacity: 0 }
+        ],
+        {
+          duration: Math.random() * 3000 + 2000,
+          easing: 'cubic-bezier(.55, .085, .68, .53)',
+          fill: 'forwards'
+        }
+      );
+      animation.onfinish = () => confetti.remove();
+    }
+  }
+  setTimeout(createConfetti, 500);
+</script>
+
+<%- include("../../views/partials/user/footer") %>

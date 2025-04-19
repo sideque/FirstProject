@@ -388,6 +388,57 @@
 </section>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add to Cart button click handler
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-id');
+                const quantity = 1; // Default quantity, adjust if you have a quantity input
+
+                fetch(`/cart/add/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' // Add CSRF if needed
+                    },
+                    body: JSON.stringify({ quantity })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: data.message || 'Update successfully',
+                            confirmButtonColor: '#82ae46',
+                            timer: 2000, // Auto close after 2 seconds
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to add to cart',
+                            confirmButtonColor: '#82ae46'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while adding to cart',
+                        confirmButtonColor: '#82ae46'
+                    });
+                });
+            });
+        });
+
+        // Other existing shop page scripts (if any)...
+    });
+
   function clearSearch() {
     document.getElementById('search').value = '';
     document.getElementById('min-price').value = '';

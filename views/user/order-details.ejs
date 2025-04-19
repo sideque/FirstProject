@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .order-detail-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .order-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .order-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: white;
+    }
+    
+    .status-processing {
+      background-color: #f0ad4e;
+    }
+    
+    .status-shipped {
+      background-color: #5bc0de;
+    }
+    
+    .status-delivered {
+      background-color: #5cb85c;
+    }
+    
+    .status-cancelled {
+      background-color: #d9534f;
+    }
+    
+    .order-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .order-info-card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .info-label {
+      font-weight: 500;
+      color: #666;
+    }
+    
+    .info-value {
+      text-align: right;
+    }
+    
+    .order-items {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .item-row {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+    }
+    
+    .item-header {
+      font-weight: 600;
+      color: #666;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    .product-img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    
+    .product-info {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .product-name {
+      font-weight: 500;
+    }
+    
+    .product-meta {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .price-col {
+      text-align: right;
+      font-weight: 500;
+    }
+    
+    .order-summary {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .summary-row:last-child {
+      border-bottom: none;
+      font-weight: 600;
+    }
+    
+    .grand-total {
+      font-weight: 700;
+      color: #82ae46;
+      font-size: 18px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 2px solid #eee;
+    }
+    
+    .order-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      text-align: center;
+    }
+    
+    .btn-primary {
+      background-color: #82ae46;
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+    
+    .btn-danger {
+      background-color: #dc3545;
+    }
+    
+    .tracking-info {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    
+    .tracking-status {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      position: relative;
+      padding-left: 40px;
+      margin-top: 20px;
+    }
+    
+    .tracking-status:before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #ddd;
+    }
+    
+    .status-item {
+      position: relative;
+    }
+    
+    .status-item:before {
+      content: '';
+      position: absolute;
+      left: -40px;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 2px solid #ddd;
+    }
+    
+    .status-item.completed:before {
+      background-color: #82ae46;
+      border-color: #82ae46;
+    }
+    
+    .status-date {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .status-text {
+      font-weight: 500;
+    }
+    
+    .status-location {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #82ae46;
+      text-decoration: none;
+    }
+    
+    .back-link i {
+      margin-right: 5px;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .item-row {
+        grid-template-columns: 60px 1fr auto;
+        gap: 10px;
+      }
+      
+      .product-img {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .order-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .item-row {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      
+      .product-img {
+        margin: 0 auto;
+      }
+      
+      .price-col {
+        text-align: center;
+      }
+      
+      .order-actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include("../../views/partials/user/header") %>
+
+  <div class="hero-wrap hero-bread" style="background-image: url('/images/p41.jpg');">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 ftco-animate text-center">
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span class="mr-2"><a href="/profile">Profile</a></span> <span>Order Details</span></p>
+          <h1 class="mb-0 bread">Order Details</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ftco-section bg-light">
+    <div class="container">
+      <a href="/userProfile" class="back-link"><i class="fa fa-arrow-left"></i> Back to Profile</a>
+      
+      <div class="order-detail-container">
+        <div class="order-header">
+          <div>
+            <h2 class="order-title">Order #<%= order.orderId %></h2>
+            <div class="order-date">Placed on <%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+          </div>
+          <div class="order-status status-<%= order.status.toLowerCase() %>"><%= order.status %></div>
+        </div>
+        
+        <div class="order-info-grid">
+          <div class="order-info-card">
+            <h3 class="card-title">Shipping Address</h3>
+            <% if (address) { %>
+              <p><strong><%= address.name || 'N/A' %></strong></p>
+              <p><%= address.addressLine1 || 'N/A' %></p>
+              <% if (address.addressLine2) { %>
+                <p><%= address.addressLine2 %></p>
+              <% } %>
+              <p><%= address.city || 'N/A' %>, <%= address.state || 'N/A' %> <%=address.pincode || 'N/A' %></p>
+              <p>Phone: <%=address.phone || 'N/A' %></p>
+              <% if (address.altPhone) { %>
+                <p>Alt Phone: <%= address.altPhone %></p>
+              <% } %>
+            <% } else { %>
+              <p>No address available</p>
+            <% } %>
+          </div>
+          
+          <div class="order-info-card">
+            <h3 class="card-title">Payment Information</h3>
+            <div class="info-item">
+              <div class="info-label">Payment Method</div>
+              <div class="info-value"><%= order.paymentMethod || 'N/A' %></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Payment Status</div>
+              <div class="info-value"><%= order.paymentStatus || 'N/A' %></div>
+            </div>
+          </div>
+        </div>
+        
+        <% if (order.status === 'Shipped' || order.status === 'Delivered') { %>
+          <div class="tracking-info">
+            <h3 class="card-title">Tracking Information</h3>
+            <div class="info-item">
+              <div class="info-label">Tracking Number</div>
+              <div class="info-value"><%= order.trackingId || 'Not available' %></div>
+            </div>
+            
+            <div class="tracking-status">
+              <div class="status-item completed">
+                <div class="status-date"><%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></div>
+                <div class="status-text">Order Placed</div>
+              </div>
+              
+              <div class="status-item completed">
+                <div class="status-date"><%= new Date(order.createdOn).setDate(new Date(order.createdOn).getDate() + 1) %></div>
+                <div class="status-text">Processing</div>
+              </div>
+              
+              <div class="status-item <%= order.status === 'Shipped' || order.status === 'Delivered' ? 'completed' : '' %>">
+                <div class="status-date"><%= order.shippedDate ? new Date(order.shippedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Pending' %></div>
+                <div class="status-text">Shipped</div>
+                <% if (order.status === 'Shipped' || order.status === 'Delivered') { %>
+                  <div class="status-location">Your order has been shipped from our warehouse</div>
+                <% } %>
+              </div>
+              
+              <div class="status-item <%= order.status === 'Delivered' ? 'completed' : '' %>">
+                <div class="status-date"><%= order.deliveredDate ? new Date(order.deliveredDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Pending' %></div>
+                <div class="status-text">Delivered</div>
+                <% if (order.status === 'Delivered') { %>
+                  <div class="status-location">Your order has been delivered</div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% } %>
+        
+        <div class="order-items">
+          <h3 class="card-title">Order Items</h3>
+          
+          <div class="item-row item-header">
+            <div>Image</div>
+            <div>Product</div>
+            <div>Price</div>
+          </div>
+          
+          <% order.orderItems.forEach(function(item) { %>
+            <div class="item-row">
+              <div>
+                <img src="/Uploads/product-images/<%= item.product.productImage[0] || 'default.jpg' %>" alt="<%= item.product.productName || 'Product' %>" class="product-img">
+              </div>
+              <div class="product-info">
+                <div class="product-name"><%= item.product.productName || 'Unknown Product' %></div>
+                <div class="product-meta">
+                  Quantity: <%= item.stock %>
+                </div>
+              </div>
+              <div class="price-col">₹<%= item.price.toLocaleString('en-IN') %></div>
+            </div>
+          <% }); %>
+        </div>
+        
+        <div class="order-summary">
+          <h3 class="card-title">Order Summary</h3>
+          
+          <div class="summary-row">
+            <div>Subtotal</div>
+            <div>₹<%= order.totalPrice.toLocaleString('en-IN') %></div>
+          </div>
+          
+          <% if (order.discount && order.discount > 0) { %>
+            <div class="summary-row">
+              <div>Discount</div>
+              <div>- ₹<%= order.discount.toLocaleString('en-IN') %></div>
+            </div>
+          <% } %>
+          
+          <div class="summary-row">
+            <div>Shipping</div>
+            <div><%= order.shippingCost > 0 ? '₹' + order.shippingCost.toLocaleString('en-IN') : 'Free' %></div>
+          </div>
+          
+          <% if (order.taxAmount && order.taxAmount > 0) { %>
+            <div class="summary-row">
+              <div>Tax</div>
+              <div>₹<%= order.taxAmount.toLocaleString('en-IN') %></div>
+            </div>
+          <% } %>
+          
+          <div class="summary-row grand-total">
+            <div>Total</div>
+            <div>₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+          </div>
+        </div>
+        
+        <div class="order-actions">
+          <% if (order.status === 'Processing') { %>
+            <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+          <% } %>
+          
+          <% if (order.status === 'Delivered') { %>
+            <% if (!order.isReviewed) { %>
+              <a href="/review/<%= order._id %>" class="btn btn-primary">Write a Review</a>
+            <% } %>
+            <% if (!order.isReturned && !order.isReturnRequested) { %>
+              <a href="/return/<%= order._id %>" class="btn btn-secondary">Return Order</a>
+            <% } %>
+          <% } %>
+          
+          <% if (order.invoice) { %>
+            <a href="/order/<%= order._id %>/invoice" class="btn btn-secondary">Download Invoice</a>
+          <% } %>
+          
+          <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include("../../views/partials/user/footer") %>
+
+  <script>
+    function cancelOrder(orderId) {
+      Swal.fire({
+        title: 'Cancel this order?',
+        text: 'Are you sure you want to cancel this order?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#82ae46',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel it'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/order/cancel';
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = 'orderId';
+          hiddenField.value = orderId;
+          form.appendChild(hiddenField);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
