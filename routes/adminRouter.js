@@ -7,7 +7,7 @@ const categoryController = require("../controllers/admin/categoryController");
 const brandController = require("../controllers/admin/brandController");
 const productController = require("../controllers/admin/productController");
 const upload = require("../middlewares/multerConfig");
-
+const orderController = require("../controllers/admin/orderController")
 const { userAuth, adminAuth } = require("../middlewares/auth");
 
 // Route to load the admin login page
@@ -63,4 +63,10 @@ router.post("/toggle-product-status/:id", adminAuth, productController.togglePro
 router.delete("/delete-product-image/:productId/:imageName", adminAuth, productController.deleteProductImage);
 router.get("/remove-duplicate-products", adminAuth, productController.removeDuplicateProducts);
 
+
+router.get('/orders', orderController.loadOrder);
+router.get('/vieworder/:orderId', orderController.viewOrder);
+router.patch('/updateStatus/:orderId', orderController.updateOrderStatus);
+router.get('/returnOrder', orderController.verifyReturnRequest);
+router.get('/orders/clear', orderController.clearFilters);;
 module.exports = router;

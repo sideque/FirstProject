@@ -333,7 +333,7 @@
                             <% const itemTotal = item.productId.salePrice * item.stock; %>
                             <% const itemOriginalTotal = item.productId.originalPrice ? item.productId.originalPrice * item.stock : itemTotal; %>
                             <% subtotal += itemTotal; %>
-                            <div class="cart-item" data-id="<%= item.productId._id %>" data-max="<%= item.productId.stock || 0 %>">
+                            <div class="cart-item" data-id="<%= item.productId._id %>" data-max="<%= item.productId.quantity || 0 %>">
                                 <img class="img-fluid"
                                      src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
                                      alt="<%= item.productId.productName || 'mobile phone' %>"
@@ -343,7 +343,7 @@
                                         <h3 class="item-title"><%= item.productId.productName || 'Unnamed Product' %></h3>
                                         <p class="item-seller">Seller: <%= item.productId.brand || 'Brand' %></p>
                                         <p class="item-delivery">Delivery by <%= getDeliveryDate(5) %> | Free</p>
-                                        <p class="item-stock">In Stock (<%= item.productId.stock || 4 %> available)</p>
+                                        <p class="item-stock">In Stock (<%= item.productId.quantity || 4 %> available)</p>
                                     </div>
                                     <div>
                                         <p class="item-price">₹<%= item.productId.salePrice.toLocaleString() %> 

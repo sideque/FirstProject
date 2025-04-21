@@ -26,7 +26,6 @@ const adminAuth = (req, res, next) => {
         User.findById(req.session.admin.id)
             .then(admin => {
                 if (admin && admin.isAdmin) {
-                    console.log("Admin Verified:", admin.email);
                     next(); // Admin authenticated
                 } else {
                     console.log("Not an Admin or Invalid Session");

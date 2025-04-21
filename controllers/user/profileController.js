@@ -6,7 +6,10 @@ const Order = require('../../models/orderSchema');
 const env = require("dotenv").config();
 const upload = require("../../middlewares/multerConfig");
 const saltRounds = 10;
+const mongoose = require("mongoose");
 
+
+//Generate OTP
 function generateOtp() {
   const digits = "1234567890";
   let otp = "";
@@ -16,6 +19,8 @@ function generateOtp() {
   return otp;
 }
 
+
+// sendVerificationEmail 
 const sendVerificationEmail = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -46,6 +51,9 @@ const sendVerificationEmail = async (email, otp) => {
   }
 };
 
+
+
+// getForgotPassPage
 const getForgotPassPage = async (req, res) => {
   try {
     res.render("forgot-password");
@@ -81,6 +89,9 @@ const forgotEmailValid = async (req, res) => {
   }
 };
 
+
+
+// verifyForgotPassOtp
 const verifyForgotPassOtp = async (req, res) => {
   try {
     const enteredOtp = req.body.otp;
@@ -95,6 +106,8 @@ const verifyForgotPassOtp = async (req, res) => {
   }
 };
 
+
+//getResetPassPage
 const getResetPassPage = async (req, res) => {
   try {
     res.render("reset-password");
@@ -103,6 +116,8 @@ const getResetPassPage = async (req, res) => {
   }
 };
 
+
+// postNewPassword
 const postNewPassword = async (req, res) => {
   try {
     const { NewPassword, password } = req.body;
@@ -121,6 +136,8 @@ const postNewPassword = async (req, res) => {
   }
 };
 
+
+// userProfile
 const userProfile = async (req, res) => {
   try {
     // Check if user is logged in
@@ -130,39 +147,40 @@ const userProfile = async (req, res) => {
       return res.redirect('/login');
     }
 
-    // Fetch user data
+    // Fetch user data from the database
     const userData = await User.findOne({ _id: user._id });
     if (!userData) {
       console.log('User not found in database for ID:', user._id);
       return res.redirect('/login');
     }
 
-    // Fetch orders for the logged-in user
-    const orders = await Order.find({ address: user._id })
-      .populate('orderItems.product') // Populate product details
-      .sort({ createdOn: -1 }); // Sort by creation date (newest first)
+    // Fetch orders for the logged-in user using userId
+    const orders = await Order.find({ userId: new mongoose.Types.ObjectId(user._id) })
+      .populate('orderItems.product')
+      .sort({ createdOn: -1 });
+
+    // Debug each order individually
+    orders.forEach(order => {
+      console.log('Individual order details:', order);
+    });
 
     // Fetch addresses for the logged-in user
     const addressDoc = await Address.findOne({ userId: user._id });
-    const addresses = addressDoc ? addressDoc.address : []; // Extract addresses or empty array if none
+    const addresses = addressDoc ? addressDoc.address : [];
 
-    // console.log('Fetched Orders:', orders); // Debug: Log orders to verify
-    // console.log('Fetched Addresses:', addresses); // Debug: Log addresses to verify
-     console.log(orders,'orders')
-     orders.forEach(order => {
-      order.pro
-     });
-    // Render profile.ejs with user, orders, and addresses data
+    // Render the profile page with user, orders, and addresses data
     res.render('profile', {
       user: userData,
       orders,
-      addresses, // Pass addresses to the template
+      addresses,
     });
   } catch (error) {
     console.error('Error loading user profile:', error.message, error.stack);
     res.redirect('/pageNotFound');
   }
 };
+
+
 
 const postUserNewPassword = async (req, res) => {
   try {
@@ -224,7 +242,6 @@ const profileUpdate = async (req, res) => {
 };
 
 const addAddress = async (req, res) => {
-  console.log("Adding address with data:", req.body);
   try {
     const {
       addressType,
@@ -267,7 +284,6 @@ const addAddress = async (req, res) => {
     }
 
     await addressDoc.save();
-    console.log("Address saved successfully:", addressDoc);
     res.redirect("/userProfile");
   } catch (error) {
     console.error("Error adding address:", error);
@@ -400,6 +416,8 @@ const getAddressForEdit = async (req, res) => {
   }
 };
 
+
+
 const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.body;
@@ -419,6 +437,9 @@ const cancelOrder = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
+
+
 
 const editEmail = async (req, res) => {
   try {

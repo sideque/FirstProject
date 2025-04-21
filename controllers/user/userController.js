@@ -17,7 +17,6 @@ const pageNotFound = async (req, res) => {
 
 const loadHomePage = async (req, res) => {
     try {
-        console.log('from losdHome ====================================');
         
         const user = req.session.user;
         const categories = await Category.find({ isListed: true });
@@ -69,7 +68,6 @@ const loadHomePage = async (req, res) => {
 
 const loadLogin = async (req, res) => {
     try {
-        console.log('from loadLogin    ====================================');
 
         if (!req.session.user) {
             return res.render("login", { message: "" });
@@ -215,7 +213,7 @@ async function sendVerificationEmail(email,otp){
 
         const { userOtp, otpExpires, userData } = req.session;
 
-        console.log('//',otp,userOtp)
+        console.log('otp and user Otp',otp,userOtp)
 
         if (!userOtp || !otpExpires || Date.now() > otpExpires) {
             return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
@@ -304,8 +302,6 @@ async function sendVerificationEmail(email,otp){
 };
 
 const loadShoppingPage = async (req, res) => {
-    console.log('Session:', req.session);
-    console.log('User:', req.session.user);
     try {
         const user = req.session.user;
         const { category, brand, search, minPrice, maxPrice, page: pageQuery } = req.query;

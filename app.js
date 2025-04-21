@@ -18,6 +18,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req,res,next)=>{
+    res.set('cache-control','no-store')
+    next()
+})
 app.use(session({
     secret: process.env.SESSION_SECRET || "mySecret",
     resave: false,
@@ -56,10 +60,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
 app.use((req, res, next) => {
     if (req.url.includes('/uploads/')) {
-        console.log(`Static file requested: ${req.url}`);
         const relativePath = req.url.replace('/uploads/', '');
         const absolutePath = path.join(__dirname, 'Uploads', relativePath);
-        console.log(`Absolute path: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
     }
     next();
 });

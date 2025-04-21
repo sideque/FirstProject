@@ -74,6 +74,7 @@
     gap: 20px;
     justify-content: center;
     margin-top: 30px;
+    flex-wrap: wrap;
   }
   
   .success-btn {
@@ -83,6 +84,8 @@
     font-weight: 600;
     transition: all 0.3s ease;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
   }
   
   .btn-primary {
@@ -106,6 +109,17 @@
     background: #f0f8e6;
   }
   
+  .btn-invoice {
+    background: #007bff;
+    color: #fff;
+    border: 2px solid #007bff;
+  }
+  
+  .btn-invoice:hover {
+    background: #0069d9;
+    border-color: #0069d9;
+  }
+  
   .success-info {
     margin-top: 30px;
     font-size: 14px;
@@ -118,6 +132,179 @@
     padding: 100px 0;
   }
   
+  /* Invoice Modal Styles */
+  .invoice-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+  }
+  
+  .invoice-modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 900px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    position: relative;
+    animation: modalFade 0.3s ease;
+  }
+  
+  @keyframes modalFade {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .close-modal:hover {
+    color: #333;
+  }
+  
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .invoice-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .invoice-logo {
+    max-width: 150px;
+  }
+  
+  .invoice-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .invoice-company, .invoice-customer {
+    flex: 1;
+  }
+  
+  .invoice-label {
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  .invoice-value {
+    margin-bottom: 15px;
+    font-size: 15px;
+  }
+  
+  .invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+  }
+  
+  .invoice-table th {
+    background-color: #f8f9fa;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #eee;
+  }
+  
+  .invoice-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .invoice-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .invoice-totals {
+    width: 300px;
+    margin-left: auto;
+  }
+  
+  .invoice-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 15px;
+  }
+  
+  .invoice-total-row.final {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    border-top: 2px solid #eee;
+    padding-top: 12px;
+    margin-top: 5px;
+  }
+  
+  .invoice-actions {
+    text-align: center;
+    margin-top: 30px;
+  }
+  
+  .invoice-btn {
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    margin: 0 10px;
+  }
+  
+  .btn-download {
+    background: #82ae46;
+    color: #fff;
+  }
+  
+  .btn-download:hover {
+    background: #6b8e23;
+  }
+  
+  .btn-print {
+    background: #f8f9fa;
+    color: #555;
+  }
+  
+  .btn-print:hover {
+    background: #e9ecef;
+  }
+  
+  .invoice-footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #777;
+    font-size: 14px;
+  }
+  
   @media (max-width: 768px) {
     .success-container {
       margin: 30px 15px;
@@ -127,6 +314,14 @@
     .success-message { font-size: 16px; }
     .btn-container { flex-direction: column; gap: 15px; }
     .success-btn { width: 100%; }
+    .invoice-modal-content { width: 95%; padding: 20px; }
+    .invoice-header, .invoice-details { flex-direction: column; }
+    .invoice-company, .invoice-customer { margin-bottom: 20px; }
+    .invoice-table { font-size: 14px; }
+    .invoice-table th, .invoice-table td { padding: 8px; }
+    .invoice-totals { width: 100%; }
+    .invoice-actions { display: flex; flex-direction: column; gap: 10px; }
+    .invoice-btn { margin: 5px 0; }
   }
 </style>
 
@@ -171,6 +366,9 @@
         <a href="/userProfile#profile-orders" class="success-btn btn-outline">
           <i class="fa fa-file-text-o mr-2"></i> Order Details
         </a>
+        <a href="#" class="success-btn btn-invoice" id="viewInvoiceBtn">
+          <i class="fa fa-file-pdf-o mr-2"></i> View Invoice
+        </a>
       </div>
       
       <div class="success-info">
@@ -181,7 +379,128 @@
   </div>
 </section>
 
+<!-- Invoice Modal -->
+<!-- Invoice Modal -->
+<div id="invoiceModal" class="invoice-modal">
+  <div class="invoice-modal-content">
+    <span class="close-modal">×</span>
+    
+    <div class="invoice-header">
+      <div>
+        <h2 class="invoice-title">INVOICE</h2>
+        <p>
+          <span class="invoice-label">Order Id:</span> 
+          <span id="invoiceNumber"><%= order?.orderId || 'N/A' %></span>
+        </p>
+        <p>
+          <span class="invoice-label">Date:</span> 
+          <span><%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+        </p>
+      </div>
+    </div>
+    
+    <div class="invoice-customer">
+      <p class="invoice-label">BILLED TO</p>
+      <% if (address) { %>
+        <p class="invoice-value"><%= order?.userId?.name || 'Customer Name' %></p>
+        <p class="invoice-value"><%= address.addressLine1 || 'Address Line 1' %></p>
+        <% if (address.addressLine2) { %>
+          <p class="invoice-value"><%= address.addressLine2 %></p>
+        <% } %>
+        <p class="invoice-value"><%= address.city || 'City' %>, <%= address.state || 'State' %> <%= address.pincode || '00000' %></p>
+        <p class="invoice-value"><%= address.country || 'Country' %></p>
+        <p class="invoice-value">Email: <%= order?.userId?.email || 'customer@example.com' %></p>
+      <% } else { %>
+        <p class="invoice-value">Customer Name</p>
+        <p class="invoice-value">456 Customer Street</p>
+        <p class="invoice-value">Customer City, CC 20002</p>
+        <p class="invoice-value">United States</p>
+        <p class="invoice-value">Email: customer@example.com</p>
+      <% } %>
+    </div>
+    
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (order && order.orderItems && order.orderItems.length > 0) { %>
+          <% order.orderItems.forEach(item => { %>
+            <tr>
+              <td><%= item.product?.productName || 'Unknown Product' %></td>
+              <td><%= item.stock || 0 %></td>
+              <td>₹<%= item.price ? parseFloat(item.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></td>
+              <td>₹<%= item.price && item.stock ? (parseFloat(item.price) * item.stock).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></td>
+
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="4">No items found</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+    
+    <div class="invoice-totals">
+      <% if (order && order.totalPrice) { %>
+        <div class="invoice-total-row">
+          <span>Subtotal</span>
+          <span>₹<%= parseFloat(order.totalPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        <div class="invoice-total-row">
+          <span>Tax</span>
+          <span>₹<%= order.tax ? parseFloat(order.tax).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></span>
+        </div>
+        <div class="invoice-total-row">
+          <span>Shipping</span>
+          <span>₹<%= order.shipping ? parseFloat(order.shipping).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></span>
+        </div>
+        <div class="invoice-total-row final">
+          <span>Total</span>
+          <span>₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+      <% } else { %>
+        <div class="invoice-total-row">
+          <span>Subtotal</span>
+          <span>₹0.00</span>
+        </div>
+        <div class="invoice-total-row final">
+          <span>Total</span>
+          <span>₹0.00</span>
+        </div>
+      <% } %>
+    </div>
+    
+    
+    <div class="invoice-actions">
+      <button id="downloadInvoiceBtn" class="invoice-btn btn-download">
+        <i class="fa fa-download mr-2"></i> Download Invoice
+      </button>
+      <button id="printInvoiceBtn" class="invoice-btn btn-print">
+        <i class="fa fa-print mr-2"></i> Print
+      </button>
+    </div>
+    
+    <div class="invoice-footer">
+      <p>Thank you for your business!</p>
+      <p>If you have any questions about this invoice, please contact our customer support.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Include jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
+  // Access jsPDF
+  const { jsPDF } = window.jspdf;
+
   // Confetti effect
   function createConfetti() {
     const colors = ['#82ae46', '#00c9a7', '#ffc107', '#ff6b6b'];
@@ -212,6 +531,151 @@
     }
   }
   setTimeout(createConfetti, 500);
+
+  // Invoice Modal Functions
+  const modal = document.getElementById("invoiceModal");
+  const invoiceBtn = document.getElementById("viewInvoiceBtn");
+  const closeBtn = document.querySelector(".close-modal");
+  const downloadBtn = document.getElementById("downloadInvoiceBtn");
+  const printBtn = document.getElementById("printInvoiceBtn");
+
+  // Open modal
+  invoiceBtn.onclick = function () {
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden"; // Prevent scrolling when modal is open
+  };
+
+  // Close modal
+  closeBtn.onclick = function () {
+    modal.style.display = "none";
+    document.body.style.overflow = "auto"; // Restore scrolling
+  };
+
+  // Close modal when clicking outside
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+      document.body.style.overflow = "auto"; // Restore scrolling
+    }
+  };
+
+  // Function to generate and download invoice PDF
+  function generateInvoicePDF() {
+    const doc = new jsPDF();
+
+    // Get current date for filename and invoice
+    const date = new Date();
+    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
+    // Get invoice number
+    const invoiceNum = document.getElementById("invoiceNumber").textContent.trim();
+
+    // Set document properties
+    doc.setFontSize(20);
+    doc.text("INVOICE", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Invoice Number: ${invoiceNum}`, 20, 30);
+    doc.text(`Date: ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 20, 40);
+
+    // Company Details
+    doc.text("FROM", 20, 60);
+    doc.setFontSize(10);
+    doc.text("Mobivault", 20, 70);
+    doc.text("123 Dream Street", 20, 80);
+    doc.text("Power City, HC 10001", 20, 90);
+    doc.text("Phone: + 9207020851", 20, 100);
+    doc.text("Email: mobivxult@gmail.com", 20, 110);
+
+    // Customer Details
+    const customerDetails = document.querySelectorAll(".invoice-customer .invoice-value");
+    let customerY = 60;
+    doc.setFontSize(12);
+    doc.text("BILLED TO", 120, customerY);
+    doc.setFontSize(10);
+    customerDetails.forEach((detail, index) => {
+      doc.text(detail.textContent, 120, customerY + 10 + index * 10);
+    });
+
+    // Invoice Table
+    const items = document.querySelectorAll(".invoice-table tbody tr");
+    let y = 140;
+    doc.setFontSize(12);
+    doc.text("Item", 20, y);
+    doc.text("Quantity", 100, y);
+    doc.text("Unit Price", 130, y);
+    doc.text("Amount", 170, y);
+    doc.line(20, y + 5, 190, y + 5); // Header underline
+    y += 10;
+    doc.setFontSize(10);
+    items.forEach((item) => {
+      const cols = item.querySelectorAll("td");
+      doc.text(cols[0].textContent, 20, y);
+      doc.text(cols[1].textContent, 100, y);
+      doc.text(cols[2].textContent, 130, y);
+      doc.text(cols[3].textContent, 170, y);
+      y += 10;
+    });
+
+    // Totals
+    const totals = document.querySelectorAll(".invoice-totals .invoice-total-row");
+    y += 10;
+    totals.forEach((total) => {
+      const spans = total.querySelectorAll("span");
+      const isFinal = total.classList.contains("final");
+      doc.setFontSize(isFinal ? 12 : 10);
+      doc.setFont("helvetica", isFinal ? "bold" : "normal");
+      doc.text(spans[0].textContent, 130, y);
+      doc.text(spans[1].textContent, 170, y);
+      if (isFinal) {
+        doc.line(130, y + 5, 190, y + 5); // Total underline
+      }
+      y += 10;
+    });
+
+    // Footer
+    doc.setFontSize(10);
+    doc.text("Thank you for your business!", 20, y + 20);
+    doc.text("If you have any questions about this invoice, please contact our customer support.", 20, y + 30);
+
+    // Save the PDF
+    doc.save(`${invoiceNum.replace(/\s+/g, '-')}-${formattedDate}.pdf`);
+
+    // Show notification
+    const notification = document.createElement("div");
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.right = "20px";
+    notification.style.backgroundColor = "#82ae46";
+    notification.style.color = "white";
+    notification.style.padding = "15px 25px";
+    notification.style.borderRadius = "5px";
+    notification.style.boxShadow = "0 3px 10px rgba(0,0,0,0.2)";
+    notification.style.zIndex = "10000";
+    notification.style.fontWeight = "500";
+    notification.innerHTML = `<i class="fa fa-check-circle mr-2"></i> Invoice ${invoiceNum} downloaded successfully`;
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      notification.style.transition = "opacity 0.5s";
+      setTimeout(() => {
+        notification.remove();
+      }, 500);
+    }, 3000);
+  }
+
+  // Handle download button click
+  downloadBtn.onclick = function () {
+    generateInvoicePDF();
+  };
+
+  // Handle print button click
+  printBtn.onclick = function () {
+    window.print();
+  };
 </script>
 
 <%- include("../../views/partials/user/footer") %>

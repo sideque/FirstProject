@@ -25,7 +25,7 @@ const loadCart = async (req, res) => {
   
       let cart = await Cart.findOne({ userId: user._id }).populate({
         path: 'items.productId',
-        select: 'productName productImage salePrice originalPrice brand stock'
+        select: 'productName productImage salePrice originalPrice brand quantity'
       });
   
       if (cart) {
@@ -117,7 +117,6 @@ const updateCartItem = async (req, res) => {
       }
 
       const { productId, quantity } = req.body;
-      console.log('Received update for productId:', productId, 'quantity:', quantity);
 
       const cart = await Cart.findOne({ userId: user._id }).populate('items.productId');
       if (!cart) {
@@ -181,5 +180,6 @@ module.exports = {
   loadCart,
   addToCart,
   updateCartItem,
-  removeCartItem
+  removeCartItem,
+  
 };

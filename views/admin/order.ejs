@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Page</title>
+    <title>Order Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -152,7 +152,7 @@
             overflow: hidden;
             background-color: #333;
             display: flex;
-                align-items: center;
+            align-items: center;
             margin-right: 10px;
         }
         
@@ -304,8 +304,8 @@
             color: white;
         }
         
-        /* Product Image */
-        .product-image {
+        /* Order Image */
+        .order-image {
             width: 80px;
             height: 80px;
             border-radius: 8px;
@@ -313,14 +313,14 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
         
-        .product-image img {
+        .order-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
         
-        .product-image:hover img {
+        .order-image:hover img {
             transform: scale(1.05);
         }
         
@@ -335,22 +335,28 @@
             min-width: 80px;
         }
         
-        .status-active {
+        .status-pending {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.5);
+        }
+        
+        .status-shipped {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.5);
+        }
+        
+        .status-delivered {
             background-color: rgba(46, 204, 113, 0.2);
             color: #2ecc71;
             border: 1px solid rgba(46, 204, 113, 0.5);
         }
         
-        .status-inactive {
+        .status-cancelled {
             background-color: rgba(231, 76, 60, 0.2);
             color: #e74c3c;
             border: 1px solid rgba(231, 76, 60, 0.5);
-        }
-        
-        .status-blocked {
-            background-color: rgba(231, 76, 60, 0.3);
-            color: #e74c3c;
-            border: 1px solid rgba(231, 76, 60, 0.6);
         }
         
         /* Action Buttons */
@@ -376,32 +382,12 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
         
-        .action-btn-edit {
+        .action-btn-view {
             background-color: rgba(71, 120, 255, 0.2);
         }
         
-        .action-btn-edit:hover {
+        .action-btn-view:hover {
             background-color: var(--primary-color);
-        }
-        
-        .action-btn-delete {
-            background-color: rgba(231, 76, 60, 0.2);
-        }
-        
-        .action-btn-delete:hover {
-            background-color: var(--danger-color);
-        }
-        
-        .btn-block {
-            background-color: var(--danger-color);
-            border-color: var(--danger-color);
-            min-width: 80px;
-        }
-        
-        .btn-unblock {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-            min-width: 80px;
         }
         
         /* Pagination */
@@ -606,7 +592,7 @@
             }
         }
     </style>
-</head>
+</body>
 <body>
     <!-- Menu Toggle Button (Mobile) -->
     <%-include("../../views/partials/admin/admin-sidebar")%>
@@ -616,124 +602,93 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="page-title">
-            <h1>Product Management</h1>
-            <button class="btn btn-primary">
-                <a class="fas fa-plus" href="/admin/add-product" style="text-decoration: none; color: white;"> Add New Product</a>
-            </button>
+            <h1>Order Management</h1>
+            <!-- <div class="filter-container">
+                <select class="filter-select" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select class="filter-select" id="dateFilter">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="this_week">This Week</option>
+                    <option value="this_month">This Month</option>
+                    <option value="last_month">Last Month</option>
+                </select>
+            </div> -->
         </div>
         
-        <!-- Products Table -->
+        <!-- Orders Table -->
         <div class="dashboard-card">
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Product</th>
                                 <th>Image</th>
-                                <th>Brand</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Block Status</th>
-                                <th>Actions</th>
+                                <th>Order ID</th>
+                                <th>Customer Name</th>
+                                <th>Order Date</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>View</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <% for(let i = data.length - 1; i >= 0; i--) { %>
+                       <tbody>
+                            <% for(let i = orders.length - 1; i >= 0; i--) { %>
                                 <tr>
-                                    <td><%= data[i].productName %></td>
-                                    <td>
-                                        <div class="product-image">
-                                            <% if (data[i].productImage && data[i].productImage.length > 0) { %>
-                                                <% 
-                                                let imagePath;
-                                                if (data[i].formattedImages && data[i].formattedImages.length > 0) {
-                                                    imagePath = data[i].formattedImages[0].path;
-                                                } else {
-                                                    imagePath = data[i].productImage[0];
-                                                    if (imagePath && !imagePath.startsWith('/uploads/product-images/')) {
-                                                        imagePath = `/uploads/product-images/${imagePath}`;
-                                                    }
-                                                }
-                                                
-
-                                                if (!imagePath) {
-                                                    imagePath = 'https://placehold.co/80x80/darkgray/white?text=No+Image';
-                                                }
-                                                %>
-                                                <img src="<%= imagePath %>" alt="<%= data[i].productName %>" width="80" height="80">
-                                            <% } else { %>
-                                                <img src="https://placehold.co/80x80/darkgray/white?text=No+Image" alt="No image available" width="80" height="80">
-                                            <% } %>                                            
-                                        </div>
-                                    </td>
-                                    <td><%= data[i].brand %></td> 
-                                    <td><%= data[i].category ? data[i].category.name : "No Category" %></td> 
-                                    <!-- <td><%= data[i].salePrice %></td> -->
-                                    <td><%= Number(data[i].salePrice).toLocaleString() %></td>
-                                    <td><%= data[i].quantity %></td>
-                                    <td>
-                                        <% if (data[i].isBlocked === false) { %>
-                                            <button class="btn btn-sm btn-block text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', true)">
-                                                <i class="fas fa-ban"></i> Block
-                                            </button>
-                                        <% } else { %>
-                                            <button class="btn btn-sm btn-unblock text-white" onclick="toggleBlockStatus('<%= data[i]._id %>', false)">
-                                                <i class="fas fa-check-circle"></i> Unblock
-                                            </button>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <div class="action-btns">
-                                            <a href="/admin/edit-product/<%= data[i]._id %>" class="action-btn action-btn-edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="#" onclick="deleteProduct('/admin/delete-product/<%= data[i]._id %>')" class="action-btn action-btn-delete">
-                                                <i class="fas fa-trash"></i>
-                                            </a>                                            
-                                        </div>
-                                    </td>
+                                <td>
+                                    <div class="order-image">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M36.8 192l566.3 0c20.3 0 36.8-16.5 36.8-36.8c0-7.3-2.2-14.4-6.2-20.4L558.2 21.4C549.3 8 534.4 0 518.3 0L121.7 0c-16 0-31 8-39.9 21.4L6.2 134.7c-4 6.1-6.2 13.2-6.2 20.4C0 175.5 16.5 192 36.8 192zM64 224l0 160 0 80c0 26.5 21.5 48 48 48l224 0c26.5 0 48-21.5 48-48l0-80 0-160-64 0 0 160-192 0 0-160-64 0zm448 0l0 256c0 17.7 14.3 32 32 32s32-14.3 32-32l0-256-64 0z"/></svg>
+                                    </div>
+                                </td>
+                                <td><%= orders[i].orderId %></td>
+                                <td><%= orders[i].shippingAddress.name %></td>
+                                <td><%= new Date(orders[i].orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                                <td><%= Number(orders[i].totalAmount).toLocaleString() %></td>
+                                <td>
+                                    <% if (orders[i].status === 'Pending') { %>
+                                    <span class="status-badge status-pending">Pending</span>
+                                    <% } else if (orders[i].status === 'Shipped') { %>
+                                    <span class="status-badge status-shipped">Shipped</span>
+                                    <% } else if (orders[i].status === 'Delivered') { %>
+                                    <span class="status-badge status-delivered">Delivered</span>
+                                    <% } else if (orders[i].status === 'Cancelled') { %>
+                                    <span class="status-badge status-cancelled">Cancelled</span>
+                                    <% }else{%>
+                                        <span class="status-badge status-shipped"><%=orders[i].status%></span>
+                                    <%} %>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                    <a href="/admin/vieworder/<%=orders[i].orderId%>" class="action-btn action-btn-view" aria-label="View order details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    </div>
+                                </td>
                                 </tr>
                             <% } %>
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    
-    <%-include("../../views/partials/admin/pagination")%>
+
     
     <script>
-        // Toggle product block status
-        function toggleBlockStatus(productId, shouldBlock) {
-            const url = `/admin/toggle-product-status/${productId}`;
+        // Filter orders by status and date
+        document.getElementById('statusFilter').addEventListener('change', filterOrders);
+        document.getElementById('dateFilter').addEventListener('change', filterOrders);
+        
+        function filterOrders() {
+            const status = document.getElementById('statusFilter').value;
+            const dateRange = document.getElementById('dateFilter').value;
             
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showNotification('Product status updated successfully');
-                    location.reload();
-                } else {
-                    throw new Error(data.message || 'Failed to update product status');
-                }
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                showNotification(err.message || 'Error updating product status', 'error');
-            });
+            window.location.href = `/admin/orders?status=${status}&date=${dateRange}`;
         }
 
         // Show notification function
@@ -749,34 +704,6 @@
                 timer: 3000,
                 timerProgressBar: true
             });
-        }
-
-
-        async function deleteProduct(productId) {
-            const confirmDelete = await Swal.fire({
-                title : 'Are you sure?',
-                text: 'Do you want to delete this product?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
-            }); 
-
-            if (confirmDelete.isConfirmed) {
-
-                const response = await fetch(`${productId}`,
-                 { method: 'GET'});
-                const result = await response.json();
-
-                if(result.success) {
-                    await Swal.fire('Deleted!', 'The product was deleted successfully.', 'success');
-                    location.reload();
-                } else {
-                    Swal.fire('Error!', result.message || 'Something went wrong.', 'error')
-                }
-            }
         }
     </script>
 </body>

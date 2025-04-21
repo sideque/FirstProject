@@ -10,7 +10,7 @@ const adminController = require('./adminController');
 // Function to check for duplicate products
 const checkForDuplicateProducts = async () => {
     try {
-        // Get all products
+        
         const allProducts = await Product.find({}, 'productName');
 
         // Track product names and potential duplicates
@@ -85,7 +85,7 @@ const getProductAddPage = async (req, res) => {
         const products = await Product.find(query)
             .populate('category')
             .populate('brand')
-            .sort({ createdOn: -1, _id: 1 }) 
+            .sort({ createdAt: -1}) 
             .skip((page - 1) * limit)
             .limit(limit)
             .exec();
@@ -110,30 +110,19 @@ const getProductAddPage = async (req, res) => {
                 product.formattedImages = normalizedImages.map(image => {
                     let path = `/uploads/product-images/${image}`;
                     const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                    // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                     return { filename: image, path: path };
                 });
 
                 if (normalizedImages.length === 0) {
-                    // console.log(`Product ${product._id} (${product.productName}) has no valid images`);
                 }
             } else {
                 product.productImage = [];
                 product.formattedImages = [];
-                // console.log(`Product ${product._id} (${product.productName}) has no productImage array`);
             }
             return product;
         });
 
-        // console.log("Products data:", formattedProducts.map(p => ({
-        //     id: p._id,
-        //     name: p.productName,
-        //     hasImages: !!p.productImage,
-        //     imageCount: p.productImage ? p.productImage.length : 0,
-        //     firstImage: p.productImage && p.productImage.length > 0 ? p.productImage[0] : null
-        // })));
-
-        // Calculate pagination values
+        // pagination 
         const maxPagesToShow = 5;
         let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
         let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
@@ -146,8 +135,10 @@ const getProductAddPage = async (req, res) => {
             endPage = Math.min(page + 2, totalPages);
         }
 
+        const sortedProducts = formattedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
         res.render("product", {
-            data: formattedProducts,
+            data: sortedProducts,
             currentPage: page,
             totalPages: totalPages,
             totalProducts: totalProducts,
@@ -253,7 +244,6 @@ const addProducts = async (req, res) => {
             });
 
             await newProduct.save();
-            console.log("New product saved:", newProduct); // Debug log
 
             res.status(201).json({
                 success: true,
@@ -345,7 +335,7 @@ const listProducts = async (req, res) => {
                         ]
                     }
                 },
-                { $sort: { createdOn: -1, _id: 1 } },
+                { $sort: { createdAt: -1} },
                 { $skip: (page - 1) * limit },
                 { $limit: limit }
             ]);
@@ -358,7 +348,7 @@ const listProducts = async (req, res) => {
             products = await Product.find(searchQuery)
                 .populate('category', 'name')
                 .populate('brand', 'name')
-                .sort({ createdOn: -1, _id: 1 })
+                .sort({ createdAt: -1 })
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .exec();
@@ -383,17 +373,14 @@ const listProducts = async (req, res) => {
                 product.formattedImages = normalizedImages.map(image => {
                     let path = `/uploads/product-images/${image}`;
                     const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                    // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                     return { filename: image, path: path };
                 });
 
                 if (normalizedImages.length === 0) {
-                    // console.log(`Product ${product._id} (${product.productName}) has no valid images`);
                 }
             } else {
                 product.productImage = [];
                 product.formattedImages = [];
-                console.log(`Product ${product._id} (${product.productName}) has no productImage array`);
             }
             return product;
         });
@@ -422,11 +409,9 @@ const listProducts = async (req, res) => {
 const deleteProductImage = async (req, res) => {
     try {
         const { productId, imageName } = req.params;
-        console.log("Attempting to delete image:", { productId, imageName });
 
         const product = await Product.findById(productId);
         if (!product) {
-            console.log("Product not found");
             return res.status(404).json({
                 success: false,
                 message: "Product not found"
@@ -442,7 +427,6 @@ const deleteProductImage = async (req, res) => {
         if (imageIndex === -1) {
             imageIndex = product.productImage.indexOf('/uploads/product-images/' + normalizedImageName);
             if (imageIndex === -1) {
-                console.log("Image not found in product's images");
                 return res.status(404).json({
                     success: false,
                     message: "Image not found in product"
@@ -452,18 +436,17 @@ const deleteProductImage = async (req, res) => {
 
         try {
             const imagePath = path.join(process.cwd(), 'uploads', 'product-images', normalizedImageName);
-            console.log("Attempting to delete file at path:", imagePath);
 
             if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath);
                 console.log("File deleted successfully");
             } else {
-                console.log("File does not exist at path:", imagePath);
+               
             }
 
             product.productImage.splice(imageIndex, 1);
             await product.save();
-            console.log("Product updated in database");
+            
 
             return res.status(200).json({
                 success: true,
@@ -489,10 +472,10 @@ const deleteProductImage = async (req, res) => {
     }
 };
 
+
+
 const updateProduct = async (req, res) => {
     try {
-        console.log("Request body:", req.body);
-        console.log("Files received:", req.files ? req.files.length : "No files");
 
         const productId = req.body.productId;
         if (!productId) {
@@ -506,12 +489,10 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        console.log("Existing product images:", existingProduct.productImage);
-
-        // Process new images (from file uploads or base64 cropped images)
+        // Process new images 
         const newImages = [];
 
-        // Handle base64 cropped images
+        // Handle cropped images
         const croppedImages = [
             productData.croppedImage0,
             productData.croppedImage1,
@@ -519,10 +500,9 @@ const updateProduct = async (req, res) => {
         ].filter((img) => img && img.startsWith("data:image")); // Only valid base64 images
 
         if (croppedImages.length > 0) {
-            console.log("Processing cropped images:", croppedImages.length);
             for (let i = 0; i < croppedImages.length; i++) {
                 try {
-                    // Extract base64 data (remove "data:image/jpeg;base64," prefix)
+                    
                     const base64Data = croppedImages[i].replace(/^data:image\/\w+;base64,/, "");
                     const buffer = Buffer.from(base64Data, "base64");
 
@@ -548,7 +528,6 @@ const updateProduct = async (req, res) => {
 
         // Handle file uploads (if any)
         if (req.files && req.files.length > 0) {
-            console.log("Processing new uploaded images:", req.files.length);
             for (let i = 0; i < req.files.length; i++) {
                 try {
                     const originalImagePath = req.files[i].path;
@@ -604,7 +583,6 @@ const updateProduct = async (req, res) => {
         let finalProductImages = existingProduct.productImage; // Default to existing images
 
         if (newImages.length > 0) {
-            console.log("Using newly uploaded or cropped images");
             finalProductImages = newImages;
 
             // Delete old images if new ones are uploaded
@@ -643,7 +621,6 @@ const updateProduct = async (req, res) => {
                     }
                 }
             } catch (error) {
-                console.error("Error parsing existingImages:", error);
                 // Fallback to existing images if parsing fails
                 finalProductImages = existingProduct.productImage;
             }
@@ -783,17 +760,17 @@ const getAllProducts = async (req, res) => {
                 product.formattedImages = normalizedImages.map(image => {
                     let path = `/uploads/product-images/${image}`;
                     const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                    console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
+                    // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                     return { filename: image, path: path };
                 });
 
                 if (normalizedImages.length === 0) {
-                    console.log(`Product ${product._id} (${product.productName}) has no valid images`);
+
                 }
             } else {
                 product.productImage = [];
                 product.formattedImages = [];
-                console.log(`Product ${product._id} (${product.productName}) has no productImage array`);
+
             }
             return product;
         });
@@ -845,7 +822,6 @@ const unblockProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("Edit product request for ID:", id);
 
         if (!id) {
             console.log("Missing product ID");
@@ -857,7 +833,6 @@ const getEditProduct = async (req, res) => {
             .populate('brand', 'name');
 
         if (!product) {
-            console.log('Product not found with ID:', id);
             return res.redirect("/admin/product");
         }
 
@@ -882,7 +857,6 @@ const getEditProduct = async (req, res) => {
         const category = await Category.find({ isListed: true });
         const brand = await Brand.find({ isListed: true });
 
-        console.log("Rendering edit-product view with data");
 
         res.render("edit-product", {
             product: product,
@@ -891,7 +865,6 @@ const getEditProduct = async (req, res) => {
         });
     } catch (error) {
         console.log("Error fetching product for edit:", error);
-        console.log("Error stack:", error.stack);
         return res.redirect("/admin/product");
     }
 };
@@ -899,7 +872,6 @@ const getEditProduct = async (req, res) => {
 const getProductData = async (req, res) => {
     try {
         const productId = req.params.id;
-        console.log('Fetching product with ID:', productId);
 
         if (!productId) {
             console.log('No product ID provided');
@@ -914,14 +886,13 @@ const getProductData = async (req, res) => {
             .populate("brand", "name");
 
         if (!product) {
-            console.log('Product not found with ID:', productId);
+            
             return res.status(404).json({
                 success: false,
                 message: "Product not found"
             });
         }
 
-        console.log('Product found:', product);
 
         if (product.productImage && product.productImage.length > 0) {
             const normalizedImages = product.productImage.map(img => {
@@ -1023,14 +994,6 @@ const getProductByID = async (req, res) => {
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
-
-        console.log("Retrieved product:", {
-            id: product._id,
-            name: product.productName,
-            hasImages: !!product.productImage,
-            imageCount: product.productImage ? product.productImage.length : 0,
-            firstImage: product.productImage && product.productImage.length > 0 ? product.productImage[0] : null
-        });
 
         if (product.productImage && product.productImage.length > 0) {
             product.productImage = product.productImage.map(img => {

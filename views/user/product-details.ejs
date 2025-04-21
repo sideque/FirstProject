@@ -236,6 +236,13 @@
       outline: none;
     }
 
+    /* Out of Stock Message */
+    .out-of-stock {
+      color: #e63946;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+
     /* Action Buttons */
     .product-actions {
       display: flex;
@@ -688,49 +695,53 @@
             </div>
           </div>
 
-          <!-- Quantity Selector -->
-          <div class="quantity-container">
-            <span class="quantity-label">Quantity:</span>
-            <div class="quantity-input-group">
-              <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
-              <input type="number" min="1" value="1" class="quantity-input" id="quantity">
-              <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+          <!-- Quantity Selector or Out of Stock Message -->
+          <% if (product.quantity <= 0 || product.status === 'out of stock' || product.isBlocked) { %>
+            <div class="out-of-stock">Out of Stock</div>
+          <% } else { %>
+            <div class="quantity-container">
+              <span class="quantity-label">Quantity:</span>
+              <div class="quantity-input-group">
+                <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                <input type="number" min="1" max="<%= Math.min(product.quantity, 5) %>" value="1" class="quantity-input" id="quantity" readonly>
+                <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+              </div>
+              <span style="margin-left: 15px; color: #666;">Available: <%= product.quantity %></span>
             </div>
-          </div>
 
-          <!-- Action Buttons -->
-          <div class="product-actions">
-            <form action="/cart/add/<%= product._id %>" method="POST" style="width: 48%;">
-              <input type="hidden" name="quantity" id="cartQuantity" value="1">
-              <button type="submit" class="cart-btn" style="width: 100%;">
-                <i class="ion-ios-cart"></i> Add to Cart
-              </button>
-            </form>
-            <form action="/buy/<%= product._id %>" method="POST" style="width: 48%;">
-              <input type="hidden" name="quantity" id="buyQuantity" value="1">
-              <button type="submit" class="buy-btn" style="width: 100%;">
-                <i class="ion-ios-basket"></i> Buy Now
-              </button>
-            </form>
-          </div>
-
-         <!-- Inside the product-info-col div, update the additional-info section -->
-        <div class="additional-info">
-          <p><strong>Availability:</strong> 
-            <% if (product.status === "Available: false" || product.stock === false || (product.stock && product.stock <= 0)) { %>
-              Out of Stock
-            <% } else { %>
-              In Stock
-            <% } %>
-          </p>
-          <p><strong>Category:</strong> <%= product.category.name %></p>
-          <% if (product.warranty) { %>
-            <p><strong>Warranty:</strong> <%= product.warranty %></p>
+            <!-- Action Buttons -->
+            <div class="product-actions">
+              <form action="/cart/add/<%= product._id %>" method="POST" style="width: 48%;">
+                <input type="hidden" name="quantity" id="cartQuantity" value="1">
+                <button type="submit" class="cart-btn" style="width: 100%;">
+                  <i class="ion-ios-cart"></i> Add to Cart
+                </button>
+              </form>
+              <form action="/buy/<%= product._id %>" method="POST" style="width: 48%;">
+                <input type="hidden" name="quantity" id="buyQuantity" value="1">
+                <button type="submit" class="buy-btn" style="width: 100%;">
+                  <i class="ion-ios-basket"></i> Buy Now
+                </button>
+              </form>
+            </div>
           <% } %>
-        </div>
 
+          <!-- Additional Info -->
+          <div class="additional-info">
+            <p><strong>Availability:</strong> 
+              <% if (product.quantity <= 0 || product.status === 'out of stock' || product.isBlocked) { %>
+                Out of Stock
+              <% } else { %>
+                In Stock
+              <% } %>
+            </p>
+            <p><strong>Category:</strong> <%= product.category ? product.category.name : 'N/A' %></p>
+            <% if (product.warranty) { %>
+              <p><strong>Warranty:</strong> <%= product.warranty %></p>
+            <% } %>
+          </div>
+        </div>
       </div>
-    </div>
 
       <!-- Product Tabs (Description and Reviews) -->
       <div class="product-tabs">
@@ -939,11 +950,32 @@
     });
 
     // Quantity Handling
-    function increaseQuantity() {
+    async function increaseQuantity() {
       const quantityInput = document.getElementById('quantity');
       const currentValue = parseInt(quantityInput.value);
-      quantityInput.value = currentValue + 1;
-      updateHiddenQuantityInputs();
+      const newValue = currentValue + 1;
+
+      try {
+        const response = await fetch('/quantityController', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productId: '<%= product._id %>',
+            quantity: newValue
+          })
+        });
+
+        const result = await response.json();
+        if (result.valid) {
+          quantityInput.value = newValue;
+          updateHiddenQuantityInputs();
+        }
+        // No alert; silently ignore if quantity is invalid
+      } catch (error) {
+        console.error('Error checking quantity:', error);
+      }
     }
 
     function decreaseQuantity() {
@@ -961,8 +993,10 @@
       document.getElementById('buyQuantity').value = quantity;
     }
 
-    document.getElementById('quantity').addEventListener('change', function() {
-      updateHiddenQuantityInputs();
+    // Prevent manual input changes
+    document.getElementById('quantity')?.addEventListener('input', function(e) {
+      e.preventDefault(); // Ignore manual input
+      this.value = this.value; // Revert to current value
     });
 
     // Tab Functionality

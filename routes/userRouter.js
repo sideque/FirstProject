@@ -9,6 +9,7 @@ const productController = require('../controllers/user/productController');
 const upload = require('../middlewares/multerConfig');
 const cartController = require('../controllers/user/cartController');
 
+
 router.use((req, res, next) => {
     console.log('Route:', req.path, 'Session:', req.session.user);
     next();
@@ -42,7 +43,6 @@ router.get(
                   console.error('Session save error:', err);
                   return res.redirect('/signup?error=session_save_failed');
               }
-              console.log('Session saved, redirecting to /');
               req.session.user = req.user
               res.redirect('/');
           });
@@ -91,7 +91,7 @@ router.post('/resend-email-otp', userAuth, profileController.resendOtp);
 
 // Product Management
 router.get('/product', userAuth, productController.productController);
-
+router.post('/quantityController',userAuth,productController.checkQuantity);
 // Cart
 router.get('/cart', userAuth, cartController.loadCart);
 router.post('/cart/add/:id', userAuth, cartController.addToCart);
@@ -102,8 +102,8 @@ router.post('/cart/remove', userAuth, cartController.removeCartItem);
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
 router.get('/orders', userAuth, checkoutController.loadOrders); 
-router.post('/order/cancel', userAuth, checkoutController.cancelOrder); 
+router.post('/cancelOrder', userAuth, checkoutController.cancelOrder); 
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails); 
 router.get('/success',userAuth, checkoutController.success)
-
+router.post("/order/return",userAuth,checkoutController. returnOrder)
 module.exports = router;

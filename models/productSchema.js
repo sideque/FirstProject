@@ -19,7 +19,6 @@ const productSchema = new Schema({
         ref: "Category",
         required: true
     },
-    productImage: [String],
     regularPrice: {
         type: Number,
         required: true
