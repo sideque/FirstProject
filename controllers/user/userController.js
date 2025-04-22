@@ -38,7 +38,6 @@ const loadHomePage = async (req, res) => {
             .limit(4);
             console.log("Categories:", categories);
             console.log("Brands:", brands);
-        console.log('ameerrrkkaaaaaaaaaaaaaaaaa',productData);
         
         const formattedProducts = productData.map((product) => {
             let images = [];
