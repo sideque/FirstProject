@@ -708,30 +708,100 @@ function closeEmailModal() {
     });
   
     // Client-side validation for address form
-    document.getElementById('address-form').addEventListener('submit', function(event) {
-      const requiredFields = ['address-type', 'address-name', 'address-phone', 'address-line1', 'address-city', 'address-state', 'address-pincode'];
-      let isValid = true;
-  
-      requiredFields.forEach(id => {
-        const field = document.getElementById(id);
-        if (!field.value.trim()) {
-          isValid = false;
-          field.style.borderColor = 'red';
-        } else {
-          field.style.borderColor = '';
-        }
-      });
-  
-      if (!isValid) {
-        event.preventDefault();
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Please fill in all required fields',
-          confirmButtonColor: '#3085d6'
-        });
-      }
+document.getElementById('address-form').addEventListener('submit', function(event) {
+  const requiredFields = [
+    { id: 'address-type', label: 'Address Type' },
+    { id: 'address-name', label: 'Full Name' },
+    { id: 'address-phone', label: 'Phone Number' },
+    { id: 'address-line1', label: 'Address Line 1' },
+    { id: 'address-city', label: 'City' },
+    { id: 'address-state', label: 'State' },
+    { id: 'address-pincode', label: 'Pincode' }
+  ];
+  const phoneRegex = /^[6-9]\d{9}$/; // Indian phone number: 10 digits, starts with 6-9
+  const pincodeRegex = /^\d{6}$/; // Indian pincode: 6 digits
+  const nameRegex = /^[a-zA-Z\s]{2,50}$/; // Name: letters and spaces, 2-50 chars
+  const cityStateRegex = /^[a-zA-Z\s]{2,50}$/; // City/State: letters and spaces, 2-50 chars
+  let isValid = true;
+  let errorMessage = '';
+
+  // Reset border colors for all inputs
+  requiredFields.forEach(field => {
+    document.getElementById(field.id).style.borderColor = '';
+  });
+  document.getElementById('address-altPhone').style.borderColor = '';
+  document.getElementById('address-line2').style.borderColor = '';
+  document.getElementById('address-landMark').style.borderColor = '';
+
+  // Validate required fields
+  requiredFields.forEach(field => {
+    const input = document.getElementById(field.id);
+    if (!input.value.trim()) {
+      isValid = false;
+      input.style.borderColor = 'red';
+      errorMessage += `${field.label} is required.\n`;
+    }
+  });
+
+  // Validate Full Name format
+  const nameInput = document.getElementById('address-name');
+  if (nameInput.value.trim() && !nameRegex.test(nameInput.value.trim())) {
+    isValid = false;
+    nameInput.style.borderColor = 'red';
+    errorMessage += 'Full Name must be 2-50 characters long and contain only letters and spaces.\n';
+  }
+
+  // Validate Phone Number format
+  const phoneInput = document.getElementById('address-phone');
+  if (phoneInput.value.trim() && !phoneRegex.test(phoneInput.value.trim())) {
+    isValid = false;
+    phoneInput.style.borderColor = 'red';
+    errorMessage += 'Phone Number must be a valid 10-digit Indian number starting with 6-9.\n';
+  }
+
+  // Validate Alternate Phone Number (if provided)
+  const altPhoneInput = document.getElementById('address-altPhone');
+  if (altPhoneInput.value.trim() && !phoneRegex.test(altPhoneInput.value.trim())) {
+    isValid = false;
+    altPhoneInput.style.borderColor = 'red';
+    errorMessage += 'Alternate Phone Number must be a valid 10-digit Indian number starting with 6-9.\n';
+  }
+
+  // Validate City format
+  const cityInput = document.getElementById('address-city');
+  if (cityInput.value.trim() && !cityStateRegex.test(cityInput.value.trim())) {
+    isValid = false;
+    cityInput.style.borderColor = 'red';
+    errorMessage += 'City must be 2-50 characters long and contain only letters and spaces.\n';
+  }
+
+  // Validate State format
+  const stateInput = document.getElementById('address-state');
+  if (stateInput.value.trim() && !cityStateRegex.test(stateInput.value.trim())) {
+    isValid = false;
+    stateInput.style.borderColor = 'red';
+    errorMessage += 'State must be 2-50 characters long and contain only letters and spaces.\n';
+  }
+
+  // Validate Pincode format
+  const pincodeInput = document.getElementById('address-pincode');
+  if (pincodeInput.value.trim() && !pincodeRegex.test(pincodeInput.value.trim())) {
+    isValid = false;
+    pincodeInput.style.borderColor = 'red';
+    errorMessage += 'Pincode must be a valid 6-digit number.\n';
+  }
+
+  // Prevent form submission if validation fails
+  if (!isValid) {
+    event.preventDefault();
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      text: errorMessage.trim(),
+      confirmButtonColor: '#3085d6'
     });
+  }
+});
 
 
     // Open Email Modal

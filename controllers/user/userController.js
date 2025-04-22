@@ -19,20 +19,27 @@ const loadHomePage = async (req, res) => {
     try {
         
         const user = req.session.user;
-        const categories = await Category.find({ isListed: true });
+        const categories = await Category.find({ isListed: true, isDeleted:false });
+        const brands = await Brand.find({ isListed: true, isDeleted:false });
+        
 
         let productData = await Product.find({
             isBlocked: false,
             category: { $in: categories.map((category) => category._id) },
+            brand: { $in: brands.map((brand) => brand._id) },
             quantity: { $gt: 0 },
         })
             .populate("category", "name")
+            .populate('brand','name')
             .select(
                 "productName productImage regularPrice salePrice productOffer category rating createdOn"
             )
             .sort({ createdOn: -1 })
             .limit(4);
-
+            console.log("Categories:", categories);
+            console.log("Brands:", brands);
+        console.log('ameerrrkkaaaaaaaaaaaaaaaaa',productData);
+        
         const formattedProducts = productData.map((product) => {
             let images = [];
             if (product.productImage && Array.isArray(product.productImage)) {
@@ -301,6 +308,117 @@ async function sendVerificationEmail(email,otp){
     }
 };
 
+// const loadShoppingPage = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         const { category, brand, search, minPrice, maxPrice, page: pageQuery } = req.query;
+//         const page = parseInt(pageQuery) || 1;
+//         const limit = 9;
+//         const skip = (page - 1) * limit;
+
+//         if (category && !mongoose.isValidObjectId(category)) {
+//             return res.redirect('/pageNotFound');
+//         }
+
+//         let userData = null;
+//         if (user) {
+//             userData = await User.findOne({ _id: user._id || user });
+//         }
+
+//         const categories = await Category.find({ isListed: true, isDeleted:false });
+//         const categoriesWithIds = categories.map(category => ({
+//             _id: category._id,
+//             name: category.name,
+//         }));
+
+        
+//         const brands = await Brand.find({ isListed: true, isDeleted:false });
+//         const brandsWithIds = brands.map(brands => ({
+//             _id: category,
+//             name: category,
+//         }));
+
+//         const query = {
+//             isBlocked: false,
+//             quantity: { $gt: 0 },
+//         };
+
+//         if (category) {
+//             query.category = category;
+//         } else {
+//             const categoryIds = categories.map(category => category._id);
+//             query.category = { $in: categoryIds };
+//         }
+
+//         if (brand) {
+//             const validBrand = await Brand.findOne({ _id: brand, isDeleted: false , isListed:true});
+//             if (!validBrand) {
+//                 return res.redirect('/pageNotFound');
+//             query.brand = brand;
+//             }
+//             query.brand = brand;
+//         }
+
+//         if (search) {
+//             query.productName = { $regex: search, $options: 'i' };
+//         }
+
+//         if (minPrice || maxPrice) {
+//             query.salePrice = {};
+//             if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
+//             if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
+//         }
+
+//         const productsData = await Product.find(query)
+//             .sort({ createdAt: -1 })
+//             .skip(skip)
+//             .limit(limit);
+
+//         const products = productsData.map((product) => {
+//             const formattedImages = (product.productImage || []).map((img) =>
+//                 img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
+//             );
+//             return {
+//                 ...product.toObject(),
+//                 productImage: formattedImages,
+//             };
+//         });
+
+//         const totalProducts = await Product.countDocuments(query);
+//         const totalPages = Math.ceil(totalProducts / limit);
+
+//         if (userData && (category || brand || search || minPrice || maxPrice)) {
+//             const searchEntry = {
+//                 category: category || null,
+//                 brand: brand || null,
+//                 searchQuery: search || null,
+//                 minPrice: minPrice ? parseFloat(minPrice) : null,
+//                 maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+//                 searchedOn: new Date(),
+//             };
+//             userData.searchHistory.push(searchEntry);
+//             await userData.save();
+//         }
+
+//         res.render('shop', {
+//             user: userData,
+//             products,
+//             category: categoriesWithIds,
+//             brand: brands,
+//             totalProducts,
+//             currentPage: page,
+//             totalPages,
+//             selectedCategory: category || null,
+//             selectedBrand: brand || null,
+//             search: search || '',
+//             minPrice: minPrice || '',
+//             maxPrice: maxPrice || '',
+//         });
+//     } catch (error) {
+//         console.error('Load Shopping Page Error:', error.message, error.stack);
+//         res.redirect('/pageNotFound');
+//     }
+// };
 const loadShoppingPage = async (req, res) => {
     try {
         const user = req.session.user;
@@ -309,58 +427,98 @@ const loadShoppingPage = async (req, res) => {
         const limit = 9;
         const skip = (page - 1) * limit;
 
+        // Validate category and brand ObjectIds
         if (category && !mongoose.isValidObjectId(category)) {
+            console.log(`Invalid category ID: ${category}`);
+            return res.redirect('/pageNotFound');
+        }
+        if (brand && !mongoose.isValidObjectId(brand)) {
+            console.log(`Invalid brand ID: ${brand}`);
             return res.redirect('/pageNotFound');
         }
 
+        // Fetch user data if logged in
         let userData = null;
         if (user) {
             userData = await User.findOne({ _id: user._id || user });
         }
 
-        const categories = await Category.find({ isListed: true });
+        // Fetch only listed and non-deleted categories
+        const categories = await Category.find({ isListed: true, isDeleted: false });
         const categoriesWithIds = categories.map(category => ({
             _id: category._id,
             name: category.name,
         }));
 
-        const brands = await Brand.find({ isBlocked: false });
+        // Fetch only listed and non-deleted brands
+        const brands = await Brand.find({ isListed: true, isDeleted: false });
+        const brandsWithIds = brands.map(brand => ({
+            _id: brand._id,
+            name: brand.name,
+        }));
 
+        // Build product query
         const query = {
             isBlocked: false,
             quantity: { $gt: 0 },
         };
 
+        // Handle category filtering
         if (category) {
+            const validCategory = await Category.findOne({ 
+                _id: category, 
+                isListed: true, 
+                isDeleted: false 
+            });
+            if (!validCategory) {
+                console.log(`Category not found or unlisted/deleted: ${category}`);
+                return res.redirect('/pageNotFound');
+            }
             query.category = category;
         } else {
             const categoryIds = categories.map(category => category._id);
             query.category = { $in: categoryIds };
         }
 
+        // Handle brand filtering
         if (brand) {
-            const validBrand = await Brand.findOne({ name: brand, isBlocked: false });
+            const validBrand = await Brand.findOne({ 
+                _id: brand, 
+                isListed: true, 
+                isDeleted: false 
+            });
             if (!validBrand) {
+                console.log(`Brand not found or unlisted/deleted: ${brand}`);
                 return res.redirect('/pageNotFound');
             }
             query.brand = brand;
+        } else {
+            // Only include products from listed and non-deleted brands
+            const brandIds = brands.map(brand => brand._id);
+            query.brand = { $in: brandIds };
         }
 
+        // Handle search
         if (search) {
             query.productName = { $regex: search, $options: 'i' };
         }
 
+        // Handle price range
         if (minPrice || maxPrice) {
             query.salePrice = {};
             if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
             if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
         }
 
+        console.log('Product query:', JSON.stringify(query, null, 2));
+
+        // Fetch products
         const productsData = await Product.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
+        // Format product images
         const products = productsData.map((product) => {
             const formattedImages = (product.productImage || []).map((img) =>
                 img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
@@ -371,9 +529,11 @@ const loadShoppingPage = async (req, res) => {
             };
         });
 
+        // Count total products for pagination
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
+        // Save search history for logged-in user
         if (userData && (category || brand || search || minPrice || maxPrice)) {
             const searchEntry = {
                 category: category || null,
@@ -387,11 +547,12 @@ const loadShoppingPage = async (req, res) => {
             await userData.save();
         }
 
+        // Render shop page
         res.render('shop', {
             user: userData,
             products,
             category: categoriesWithIds,
-            brand: brands,
+            brand: brandsWithIds,
             totalProducts,
             currentPage: page,
             totalPages,

@@ -668,7 +668,7 @@
                                             <% } %>                                            
                                         </div>
                                     </td>
-                                    <td><%= data[i].brand %></td> 
+                                    <td><%= data[i].brand ? data[i].brand.name : 'No Brand'%></td> 
                                     <td><%= data[i].category ? data[i].category.name : "No Category" %></td> 
                                     <!-- <td><%= data[i].salePrice %></td> -->
                                     <td><%= Number(data[i].salePrice).toLocaleString() %></td>

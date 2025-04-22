@@ -11,9 +11,10 @@ const brandInfo = async (req, res) => {
         const limit = 5; 
         
         // Build search query
-        let query = {};
+        let query = {isDeleted:false};
         if (search) {
             query = {
+                isDeleted:false,
                 $or: [
                     { name: { $regex: new RegExp(search, "i") } },
                     { description: { $regex: new RegExp(search, "i") } }
@@ -52,7 +53,7 @@ const brandInfo = async (req, res) => {
         });
     } catch (error) {
         console.log(error.message);
-        res.redirect('/pageerror');
+        res.redirect('/admin/pageerror');
     }
 };
 
@@ -90,7 +91,7 @@ const loadAddBrand = (req,res) => {
         });
     }catch (error) {
         console.log(error.message);
-        res.redirect('/pageerror');
+        res.redirect('/admin/pageerror');
     }
 }
 
@@ -167,18 +168,18 @@ const removeBrandOffer = async (req, res) => {
     }
 }
 
-// Functions to add to your brandController.js
 
 const deleteBrand = async (req, res) => {
     try {
         const brandId = req.params.id;
         
         const brand = await Brand.findById(brandId);
+        
         if (!brand) {
             return res.status(404).json({ success: false, message: "Brand not found" });
         }
 
-        await Brand.findByIdAndDelete(brandId);
+        await Brand.findOneAndUpdate({_id:brandId},{$set:{isDeleted:true}})
 
         return res.status(200).json({ success: true, message: "Brand deleted successfully" });
     } catch (error) {
@@ -271,7 +272,7 @@ const getListBrand = async (req,res) =>{
 
     } catch (error) {
         
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
 
     }
 }
@@ -285,7 +286,7 @@ const getUnlistBrand = async (req,res) =>{
 
     } catch (error) {
         
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
 
     }
 }

@@ -18,8 +18,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req,res,next)=>{
-    res.set('cache-control','no-store')
+app.use((req, res, next) => {
+    res.set('cache-control', 'no-store')
     next()
 })
 app.use(session({

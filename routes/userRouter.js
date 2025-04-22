@@ -29,40 +29,40 @@ router.get(
 );
 
 router.get(
-  '/auth/google/callback',
-  passport.authenticate('google', {
-      failureRedirect: '/signup',
-      failureFlash: true,
-  }),
-  (req, res) => {
-      console.log('Google callback - User:', req.user);
-      if (req.user && req.user._id) {
-          req.session.user = req.user._id;
-          req.session.save((err) => {
-              if (err) {
-                  console.error('Session save error:', err);
-                  return res.redirect('/signup?error=session_save_failed');
-              }
-              req.session.user = req.user
-              res.redirect('/');
-          });
-      } else {
-          console.error('Invalid user object:', req.user);
-          res.redirect('/signup?error=invalid_user');
-      }
-  },
-  (err, req, res, next) => {
-      console.error('Google callback error:', err);
-      res.redirect('/signup?error=authentication_failed');
-  }
+    '/auth/google/callback',
+    passport.authenticate('google', {
+        failureRedirect: '/signup',
+        failureFlash: true,
+    }),
+    (req, res) => {
+        console.log('Google callback - User:', req.user);
+        if (req.user && req.user._id) {
+            req.session.user = req.user._id;
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    return res.redirect('/signup?error=session_save_failed');
+                }
+                req.session.user = req.user
+                res.redirect('/');
+            });
+        } else {
+            console.error('Invalid user object:', req.user);
+            res.redirect('/signup?error=invalid_user');
+        }
+    },
+    (err, req, res, next) => {
+        console.error('Google callback error:', err);
+        res.redirect('/signup?error=authentication_failed');
+    }
 );
 
-router.get('/login', userController.loadLogin); // No userAuth
+router.get('/login', userController.loadLogin); 
 router.post('/login', userController.login);
 router.get('/logout', userController.logout);
 
 // Home page & Shopping page
-router.get('/',  userController.loadHomePage); 
+router.get('/', userController.loadHomePage);
 router.get('/shop', userAuth, userController.loadShoppingPage);
 
 // Profile Management
@@ -83,15 +83,15 @@ router.post('/profile/address/default', userAuth, profileController.setDefaultAd
 router.post('/profile/address/delete', userAuth, profileController.deleteAddress);
 router.post('/profile/address/edit', userAuth, profileController.editAddress);
 router.get('/profile/address/:addressIndex', userAuth, profileController.getAddressForEdit);
-// router.post('/order/cancel', userAuth, profileController.cancelOrder);
-
+router.post('/order/cancel', userAuth, profileController.cancelOrder);
 router.post('/editemail', userAuth, profileController.editEmail);
 router.post('/verify-email-otp', userAuth, profileController.verifyEmailOtp);
 router.post('/resend-email-otp', userAuth, profileController.resendOtp);
 
 // Product Management
 router.get('/product', userAuth, productController.productController);
-router.post('/quantityController',userAuth,productController.checkQuantity);
+router.post('/quantityController', userAuth, productController.checkQuantity);
+
 // Cart
 router.get('/cart', userAuth, cartController.loadCart);
 router.post('/cart/add/:id', userAuth, cartController.addToCart);
@@ -101,9 +101,11 @@ router.post('/cart/remove', userAuth, cartController.removeCartItem);
 // Checkout routes
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
-router.get('/orders', userAuth, checkoutController.loadOrders); 
-router.post('/cancelOrder', userAuth, checkoutController.cancelOrder); 
-router.get('/order/:id', userAuth, checkoutController.loadOrderDetails); 
-router.get('/success',userAuth, checkoutController.success)
-router.post("/order/return",userAuth,checkoutController. returnOrder)
+router.get('/orders', userAuth, checkoutController.loadOrders);
+router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
+router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);
+router.get('/success', userAuth, checkoutController.success);
+router.post("/order/return", userAuth, checkoutController.returnOrder);
+
+
 module.exports = router;

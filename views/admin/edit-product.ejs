@@ -86,7 +86,7 @@
                             <select class="form-control" id="brand" name="brand">
                                 <option value="" selected disabled>Select a Brand</option>
                                 <% for(let i=0; i<brand.length; i++) { %>
-                                    <option value="<%= brand[i].name %>" <%= (brand[i].name === product.brand) ? 'selected' : '' %>><%= brand[i].name %></option>
+                                    <option value="<%= brand[i]._id %>" <%= (brand[i].name === product.brand) ? 'selected' : '' %>><%= brand[i].name %></option>
                                 <% } %>
                             </select>
                             <div id="brand-error" class="error-message"></div>
@@ -106,7 +106,7 @@
                             <select class="form-control" id="category" name="category">
                                 <option value="" selected disabled>Select a Category</option>
                                 <% for(let i=0; i<cat.length; i++) { %>
-                                    <option value="<%= cat[i].name %>" <%= (cat[i].name === product.category.name) ? 'selected' : '' %>><%= cat[i].name %></option>
+                                    <option value="<%= cat[i]._id %>" <%= (cat[i].name === product.category.name) ? 'selected' : '' %>><%= cat[i].name %></option>
                                 <% } %>
                             </select>
                             <div id="category-error" class="error-message"></div>

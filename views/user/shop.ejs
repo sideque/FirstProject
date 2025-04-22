@@ -274,7 +274,7 @@
                 <select id="brand" name="brand" onchange="document.getElementById('filterForm').submit()">
                   <option value="">All Brands</option>
                   <% brand.forEach(b => { %>
-                    <option value="<%= b.name %>" <%= selectedBrand && selectedBrand === b.name ? 'selected' : '' %>>
+                    <option value="<%= b._id %>" <%= selectedBrand && selectedBrand === b.name ? 'selected' : '' %>>
                       <%= b.name %>
                     </option>
                   <% }) %>
@@ -348,7 +348,7 @@
                       <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
                     </div>
                     <p class="bottom-area d-flex px-3">
-                      <a href="/product?id=<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
+                      <a href="/shop" class="add-to-cart text-center py-2 mr-1">
                         <span>View <i class="ion-ios-add ml-1"></i></span>
                       </a>
                       <!-- <a href="/product?id=<%= product._id %>" class="buy-now text-center py-2">

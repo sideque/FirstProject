@@ -1,7 +1,7 @@
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
-const Wallet = require("../../models/walletSchema"); 
+const Wallet = require("../../models/walletSchema");
 
 
 
@@ -46,7 +46,7 @@ const loadOrder = async (req, res) => {
     // Fetch orders
     const orders = await Order.find(query)
       .populate({
-        path: "orderItems.product", 
+        path: "orderItems.product",
         select: "productImage",
       })
       .populate({
@@ -89,192 +89,189 @@ const loadOrder = async (req, res) => {
 };
 
 
-
-
-
 const viewOrder = async (req, res) => {
-    try {
-      const { orderId } = req.params;
-  
-      const order = await Order.findOne({ orderId })
-        .populate({
-          path: "orderItems.product",
-          select: "name productName productImage",
-        })
-        .populate({
-          path: "userId",
-          select: "name email",
-        })
-        .lean();
-  
-      if (!order) {
-        return res.status(404).json({ error: "Order not found" });
-      }
-  
-      // Detailed debugging
-      console.log('Raw order:', JSON.stringify(order, null, 2));
-      console.log('Order items details:');
-      order.orderItems.forEach((item, index) => {
-        console.log(`OrderItem ${index}:`, {
-          productId: item.product?._id || 'null',
-          productName: item.product?.name || item.product?.productName || 'undefined',
-          productImage: item.product?.productImage || 'undefined',
-          stock: item.stock,
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({ orderId })
+      .populate({
+        path: "orderItems.product",
+        select: "name productName productImage",
+      })
+      .populate({
+        path: "userId",
+        select: "name email",
+      })
+      .lean();
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Detailed debugging
+    console.log('Raw order:', JSON.stringify(order, null, 2));
+    console.log('Order items details:');
+    order.orderItems.forEach((item, index) => {
+      console.log(`OrderItem ${index}:`, {
+        productId: item.product?._id || 'null',
+        productName: item.product?.name || item.product?.productName || 'undefined',
+        productImage: item.product?.productImage || 'undefined',
+        stock: item.stock,
+        price: item.price,
+        status: item.status
+      });
+    });
+
+    const formattedOrder = {
+      ...order,
+      customerName: order.address?.name || 'N/A',
+      customerEmail: order.userId?.email || 'N/A',
+      products: order.orderItems
+        .filter(item => item.product) // Skip items with null product
+        .map(item => ({
+          name: item.product.name || item.product.productName || 'N/A',
+          image: item.product.productImage?.[0] || '/images/placeholder.png',
+          quantity: item.stock,
           price: item.price,
-          status: item.status
+          total: item.stock * item.price
+        })),
+      returnItems: order.orderItems
+        .filter(item => item.product && (item.status === 'Returned' || item.status === 'Return Request'))
+        .map(item => ({
+          name: item.product.name || item.product.productName || 'N/A', // Support both fields
+          image: item.product.productImage?.[0] || '/images/placeholder.png',
+          quantity: item.stock,
+          price: item.price,
+          reason: order.returnReason || 'N/A'
+        }))
+    };
+
+
+    if (formattedOrder.products.length === 0) {
+      console.warn(`Order ${orderId} has no valid products after filtering`);
+    }
+
+    res.render('viewOrder', { order: formattedOrder });
+  } catch (error) {
+    console.error('Error in viewOrder:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["Pending", "Processing", "Shipped", "Delivered"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // If cancelling, restore stock
+    if (status === "Cancelled" && order.status !== "Cancelled") {
+      for (const item of order.orderItems) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.stock }
         });
-      });
-  
-      const formattedOrder = {
-        ...order,
-        customerName: order.address?.name || 'N/A',
-        customerEmail: order.userId?.email || 'N/A',
-        products: order.orderItems
-          .filter(item => item.product) // Skip items with null product
-          .map(item => ({
-            name: item.product.name || item.product.productName || 'N/A', 
-            image: item.product.productImage?.[0] || '/images/placeholder.png',
-            quantity: item.stock,
-            price: item.price,
-            total: item.stock * item.price
-          })),
-        returnItems: order.orderItems
-          .filter(item => item.product && (item.status === 'Returned' || item.status === 'Return Request'))
-          .map(item => ({
-            name: item.product.name || item.product.productName || 'N/A', // Support both fields
-            image: item.product.productImage?.[0] || '/images/placeholder.png',
-            quantity: item.stock,
-            price: item.price,
-            reason: order.returnReason || 'N/A'
-          }))
-      };
-  
-      
-      if (formattedOrder.products.length === 0) {
-        console.warn(`Order ${orderId} has no valid products after filtering`);
       }
-  
-      res.render('viewOrder', { order: formattedOrder });
-    } catch (error) {
-      console.error('Error in viewOrder:', error);
-      res.status(500).json({ error: 'Internal server error' });
     }
-  };
 
+    order.status = status;
+    if (status === "Shipped") order.shippedDate = new Date();
+    if (status === "Delivered") order.deliveredDate = new Date();
 
+    await order.save();
 
+    res.json({ success: true, message: "Order status updated successfully" });
+  } catch (error) {
 
-  const updateOrderStatus = async (req, res) => {
-    try {
-      const { orderId } = req.params;
-      const { status } = req.body;
-      
-      const validStatuses = ["Pending", "Processing", "Shipped", "Delivered"];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ error: "Invalid status" });
-      }
-      
-      const order = await Order.findOne({ orderId });
-      if (!order) {
-        return res.status(404).json({ error: "Order not found" });
-      }
-      
-      // If cancelling, restore stock
-      if (status === "Cancelled" && order.status !== "Cancelled") {
-        for (const item of order.orderItems) {
-          await Product.findByIdAndUpdate(item.product, {
-            $inc: { stock: item.stock }
-          });
-        }
-      }
-      
-      order.status = status;
-      if (status === "Shipped") order.shippedDate = new Date();
-      if (status === "Delivered") order.deliveredDate = new Date();
-      
-      await order.save();
-      
-      res.json({ success: true, message: "Order status updated successfully" });
-    } catch (error) {
+    console.log(error);
 
-        console.log(error );
-        
-      console.error("Error in updateOrderStatus:", error);
-      res.status(500).json({ error: "Internal server error" });
+    console.error("Error in updateOrderStatus:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Verify Return Request
+const verifyReturnRequest = async (req, res) => {
+  try {
+
+    const { orderId, itemId, action } = req.query; // The action: 'accept' or 'reject'
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
     }
-  };
-  
-  // Verify Return Request
-  const verifyReturnRequest = async (req, res) => {
-    try {
 
-      const { orderId, itemId, action } = req.query; // The action: 'accept' or 'reject'
-      
-      const order = await Order.findOne({ orderId });
-      if (!order) {
-        return res.status(404).json({ error: "Order not found" });
-      }
 
-    
-    
-      if (action === "accept") {
 
-        order.orderItems.map(items=>{
-          items.status = 'Cancelled'
-        })
+    if (action === "accept") {
 
-        order.status = 'Returned';
-        order.isReturnRequested = false
-        
-        // Refund to wallet
-        const user = await User.findById(order.userId);
-        const refundAmount = order.finalAmount;
-        
-        // let wallet = await Wallet.findOne({ userId: order.userId });
-        // if (!wallet) {
-        //   wallet = new Wallet({
-        //     userId: order.userId,
-        //     balance: 0,
-        //     transactions: []
-        //   });
-        // }
-        
-        // wallet.balance += refundAmount;
-        // wallet.transactions.push({
-        //   type: "credit",
-        //   amount: refundAmount,
-        //   description: `Refund for order ${orderId}`,
-        //   date: new Date()
-        // });
-        
-        // await wallet.save();
-        
-      } else if (action === "reject") {
-        order.status = "Delivered"; 
-        order.isReturnRequested = false;
-      }
-      
-      await order.save();
-      
-      res.json({
-        success: true,
-        message: `Return request ${action}ed successfully`
-      });
-    } catch (error) {
-      console.error("Error in verifyReturnRequest:", error);
-      res.status(500).json({ error: "Internal server error" });
+      order.orderItems.map(items => {
+        items.status = 'Cancelled'
+      })
+
+      order.status = 'Returned';
+      order.isReturnRequested = false
+
+      // Refund to wallet
+      const user = await User.findById(order.userId);
+      const refundAmount = order.finalAmount;
+
+      // let wallet = await Wallet.findOne({ userId: order.userId });
+      // if (!wallet) {
+      //   wallet = new Wallet({
+      //     userId: order.userId,
+      //     balance: 0,
+      //     transactions: []
+      //   });
+      // }
+
+      // wallet.balance += refundAmount;
+      // wallet.transactions.push({
+      //   type: "credit",
+      //   amount: refundAmount,
+      //   description: `Refund for order ${orderId}`,
+      //   date: new Date()
+      // });
+
+      // await wallet.save();
+
+    } else if (action === "reject") {
+      order.status = "Delivered";
+      order.isReturnRequested = false;
     }
-  };
-  
-  // Clear Search/Filters
-  const clearFilters = async (req, res) => {
-    try {
-      res.redirect("/admin/orders?page=1");
-    } catch (error) {
-      console.error("Error in clearFilters:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  };  
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: `Return request ${action}ed successfully`
+    });
+  } catch (error) {
+    console.error("Error in verifyReturnRequest:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Clear Search/Filters
+const clearFilters = async (req, res) => {
+  try {
+    res.redirect("/admin/orders?page=1");
+  } catch (error) {
+    console.error("Error in clearFilters:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 module.exports = {

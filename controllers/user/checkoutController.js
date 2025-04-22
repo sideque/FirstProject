@@ -171,78 +171,78 @@ const placeOrder = async (req, res) => {
 };
 
 const loadOrderDetails = async (req, res) => {
-    try {
+  try {
 
-      const { id } = req.params;
-      const userId = req.session.user;
-      const userData = await User.findById(userId)
-      const order = await Order.findOne({ _id: id, userId }).populate('orderItems.product');
-      
-      console.log(order);
-      
-      if (!order) {
-        return res.redirect('/pageNotFound');
-      }
-       
-      const addressDoc = await Address.findOne({ userId });
-     
-      const selectedAddress = addressDoc ? addressDoc.address.find(addr => addr.isDefault) || addressDoc.address[0] : null;
-      
-     
-      res.render('order-details', {user:userData, order, address: selectedAddress });
-    } catch (error) {
-      console.error('Error loading order details:', error);
-      res.redirect('/pageNotFound');
+    const { id } = req.params;
+    const userId = req.session.user;
+    const userData = await User.findById(userId)
+    const order = await Order.findOne({ _id: id, userId }).populate('orderItems.product');
+
+    console.log(order);
+
+    if (!order) {
+      return res.redirect('/pageNotFound');
     }
-  };
 
-  const returnOrder = async (req, res) => {
-    try {
-      const { orderId, reason } = req.body;
-      const userId = req.session.user;
-  
-      const order = await Order.findOne({ _id: orderId, userId }).populate('orderItems.product');
-      if (!order) {
-        return res.json({ success: false, message: 'Order not found' });
-      }
-  
-      if (order.status !== 'Delivered' || order.isReturned || order.isReturnRequested) {
-        return res.json({ success: false, message: 'Order cannot be returned' });
-      }
-  
-      // Update order status and reason
-      order.status = 'Return Request';
-      order.isReturnRequested = true;
-      order.returnReason = reason;
-      await order.save();
-  
-      // Restore product quantities (optional: wait for admin approval)
-      for (const item of order.orderItems) {
-        const product = await Product.findById(item.product);
-        if (product) {
-          product.quantity += item.stock;
-          await product.save();
-        }
-      }
-  
-      res.json({ success: true, message: 'Return request submitted successfully' });
-    } catch (error) {
-      console.error('Error requesting return:', error);
-      res.json({ success: false, message: 'An error occurred' });
+    const addressDoc = await Address.findOne({ userId });
+
+    const selectedAddress = addressDoc ? addressDoc.address.find(addr => addr.isDefault) || addressDoc.address[0] : null;
+
+
+    res.render('order-details', { user: userData, order, address: selectedAddress });
+  } catch (error) {
+    console.error('Error loading order details:', error);
+    res.redirect('/pageNotFound');
+  }
+};
+
+const returnOrder = async (req, res) => {
+  try {
+    const { orderId, reason } = req.body;
+    const userId = req.session.user;
+
+    const order = await Order.findOne({ _id: orderId, userId }).populate('orderItems.product');
+    if (!order) {
+      return res.json({ success: false, message: 'Order not found' });
     }
-  };
 
-  
+    if (order.status !== 'Delivered' || order.isReturned || order.isReturnRequested) {
+      return res.json({ success: false, message: 'Order cannot be returned' });
+    }
+
+    // Update order status and reason
+    order.status = 'Return Request';
+    order.isReturnRequested = true;
+    order.returnReason = reason;
+    await order.save();
+
+    // Restore product quantities (optional: wait for admin approval)
+    for (const item of order.orderItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.stock;
+        await product.save();
+      }
+    }
+
+    res.json({ success: true, message: 'Return request submitted successfully' });
+  } catch (error) {
+    console.error('Error requesting return:', error);
+    res.json({ success: false, message: 'An error occurred' });
+  }
+};
+
+
 // Cancel Order
 const cancelOrder = async (req, res) => {
   try {
-    const { orderId } = req.body; 
+    const { orderId } = req.body;
     const userId = req.session.user;
 
     const order = await Order.findOne({ _id: orderId, userId });
 
     console.log(order);
-    
+
     if (!order) {
       return res.json({ success: false, message: 'Order not found' });
     }
@@ -274,7 +274,7 @@ const cancelOrder = async (req, res) => {
 
 const success = async (req, res) => {
   try {
-    
+
     // Get userId from session
     const userId = req.session.user;
     const userData = await User.findById(userId)
@@ -285,14 +285,14 @@ const success = async (req, res) => {
 
     let order = null;
 
-    
+
     if (req.query.orderId) {
       order = await Order.findOne({ orderId: req.query.orderId, userId })
-        .populate('userId') // Populate user details (name, email)
-        .populate('orderItems.product'); // Populate product details (productName, etc.)
+        .populate('userId') 
+        .populate('orderItems.product'); 
     }
 
-    // Option 2: Fallback to most recent order for user
+    
     if (!order) {
       order = await Order.findOne({ userId })
         .sort({ createdOn: -1 })
@@ -300,22 +300,22 @@ const success = async (req, res) => {
         .populate('orderItems.product');
     }
 
-    // If no order is found, render with an error message
+    
     if (!order) {
       return res.render('success', {
-        user:userData,
+        user: userData,
         order: null,
         address: null,
         message: 'No order found. Please contact support if you completed a purchase.',
       });
     }
 
-    // Render success.ejs with order and address
+    
     res.render('success', {
       order,
       address: order.address || null,
       message: null,
-      user:userData
+      user: userData
     });
   } catch (error) {
     console.error('Error in success route:', error);
@@ -329,8 +329,8 @@ module.exports = {
   loadCheckout,
   placeOrder,
   loadOrderDetails,
-  loadOrders, 
-  cancelOrder, 
+  loadOrders,
+  cancelOrder,
   success,
   returnOrder
 };

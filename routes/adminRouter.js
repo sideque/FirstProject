@@ -51,7 +51,6 @@ router.get("/edit-brand/:id", adminAuth, brandController.loadEditBrand);
 router.post("/edit-brand/:id", adminAuth, brandController.editBrand);
 
 // Product Management
-router.get("/products", adminAuth, productController.listProducts);
 router.get("/product", adminAuth, productController.getProductAddPage);
 router.get("/add-product", adminAuth, productController.getProductPage);
 router.post("/addProduct", adminAuth, upload.array("images", 3), productController.addProducts);

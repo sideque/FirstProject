@@ -477,49 +477,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- <% if (order.returnItems && order.returnItems.length > 0) { %>
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Return Items</h2>
-            </div>
             
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Product Name</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th>Reason</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% order.returnItems.forEach(item => { %>
-                                <tr>
-                                    <td>
-                                        <div class="product-image">
-                                            <img src="<%= item.image %>" alt="<%= item.name %>">
-                                        </div>
-                                    </td>
-                                    <td><%= item.name %></td>
-                                    <td><%= item.quantity %></td>
-                                    <td>₹<%= item.price.toFixed(2) %></td>
-                                    <td><%= item.reason || 'Not specified' %></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary">View Details</button>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <% } %> -->
             <% if (order.isReturnRequested) { %>
                 <div>
                     <p>Return reason: <%= order.returnReason %>
@@ -600,7 +558,7 @@
                 const buttons = document.querySelectorAll(`[onclick*='${orderId}']`);
                 buttons.forEach(button => button.disabled = true); // Disable buttons on action
 
-                console.log(orderId,action)
+                console.log(orderId, action)
                 fetch(`/admin/returnOrder?orderId=${orderId}&action=${action}`, {
                     method: 'GET',
                 })
