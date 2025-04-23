@@ -11,7 +11,7 @@ const couponSchema = new mongoose.Schema({
   couponCode: {
     type: String,
     required: true,
-    unique: true, // Added to prevent duplicate codes
+    unique: true, 
     match: /^[A-Z0-9]{6}$/, // Enforce 6 alphanumeric characters
     trim: true,
   },

@@ -74,7 +74,7 @@ router.get('/orders/clear',adminAuth, orderController.clearFilters);
 // Coupons Management
 router.get("/coupons", adminAuth, couponController.loadCoupon);
 router.post("/add-coupon", adminAuth, couponController.addingCoupon);
-router.get("/coupons/listing", adminAuth, couponController.couponListing);
+// router.get("/coupons/listing", adminAuth, couponController.couponListing);
 router.get('/get-coupon/:id', adminAuth, couponController.getEditData);
 router.post('/update-coupon/:couponId', adminAuth, couponController.updateCoupon);
 router.put('/unlist-coupon/:couponId', adminAuth, couponController.toggleCouponStatus);

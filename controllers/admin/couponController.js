@@ -199,8 +199,13 @@ const updateCoupon = async (req, res) => {
 
 const toggleCouponStatus = async (req, res) => {
     try {
+         
         const { couponId } = req.params;
-        const action = req.url.includes('list') ? true : false;
+
+        console.log(req.url)
+        
+        const action = req.url.includes('unlist') ? false : true;
+        
 
         if (!mongoose.Types.ObjectId.isValid(couponId)) {
             return res.status(400).json({ success: false, message: 'Invalid coupon ID' });
