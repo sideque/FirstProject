@@ -192,6 +192,21 @@
         margin-left: 3px;
     }
 
+    /* Filter Dropdown Styling */
+    .filter-dropdown {
+        background-color: #3a3a3a;
+        border: 1px solid #555;
+        color: #fff;
+        padding: 8px;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .filter-dropdown:focus {
+        border-color: #4CAF50;
+        outline: none;
+    }
+
     /* Responsive Styles */
     @media (max-width: 992px) {
         .sidebar {
@@ -230,13 +245,18 @@
   <%-include("../../views/partials/admin/admin-sidebar")%> 
   <%- include("../../views/partials/admin/admin-header") %>
   
-  
   <div class="main-content">  
     <!-- Coupons container -->
     <div class="coupons-container">
         <div class="coupons-header">
             <div class="coupons-title">Coupons</div>
-            <button class="add-button" data-bs-toggle="modal" data-bs-target="#addCouponModal">ADD COUPONS +</button>
+            <div>
+                <select id="listingFilter" class="filter-dropdown" onchange="filterCoupons()">
+                    <option value="listed" <%= listingStatus === true ? 'selected' : '' %>>Listed Coupons</option>
+                    <option value="unlisted" <%= listingStatus === false ? 'selected' : '' %>>Unlisted Coupons</option>
+                </select>
+                <button class="add-button" data-bs-toggle="modal" data-bs-target="#addCouponModal">ADD COUPONS +</button>
+            </div>
         </div>
 
         <table class="coupons-table">
@@ -266,18 +286,17 @@
                             <td>
                                 <%= items.validUpto.toLocaleDateString('en-US', { year: 'numeric' ,
                                 month: 'short' , day: 'numeric' }) %>
-
                             </td>
                             <td class="actions-column">
-                                <button class="action-btn edit-btn" data-bs-toggle="modal" onclick="editCoupon('<%= coupons._id %>')">
+                                <button class="action-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editCouponModal" onclick="editCoupon('<%= items._id %>')">
                                     Edit
                                 </button>
-                                <% if (coupons.isList) { %>
-                                    <button class="action-btn unlist-btn" onclick="toggleCouponStatus('<%= coupons._id %>', false)">
+                                <% if (items.isList) { %>
+                                    <button class="action-btn unlist-btn" onclick="toggleCouponStatus('<%= items._id %>', false)">
                                         Unlist
                                     </button>
                                 <% } else { %>
-                                    <button class="action-btn unlist-btn" onclick="toggleCouponStatus('<%= coupons._id %>', true)">
+                                    <button class="action-btn unlist-btn" onclick="toggleCouponStatus('<%= items._id %>', true)">
                                         List
                                     </button>
                                 <% } %>
@@ -345,6 +364,55 @@
     </div>
   </div>
 
+  <!-- Edit Coupon Modal -->
+  <div class="modal fade" id="editCouponModal" tabindex="-1" aria-labelledby="editCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editCouponModalLabel">Edit Coupon</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="editCouponForm" method="POST">
+          <input type="hidden" id="editCouponId" name="couponId">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="editCouponName" class="form-label required-field">Coupon Name</label>
+              <input type="text" class="form-control" id="editCouponName" name="couponName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editDescription" class="form-label required-field">Description</label>
+              <textarea class="form-control" id="editDescription" name="description" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="editCouponCode" class="form-label required-field">Coupon Code</label>
+              <input type="text" class="form-control" id="editCouponCode" name="couponCode" placeholder="It should be 6 characters including numbers and letters" minlength="6" maxlength="6" required>
+            </div>
+            <div class="mb-3">
+              <label for="editValidFrom" class="form-label required-field">Valid From</label>
+              <input type="date" class="form-control" id="editValidFrom" name="validFrom" required>
+            </div>
+            <div class="mb-3">
+              <label for="editValidUpto" class="form-label required-field">Valid Upto</label>
+              <input type="date" class="form-control" id="editValidUpto" name="validUpto" required>
+            </div>
+            <div class="mb-3">
+              <label for="editMinCartValue" class="form-label required-field">Minimum Cart Value</label>
+              <input type="number" class="form-control" id="editMinCartValue" name="minCartValue" min="0" required>
+            </div>
+            <div class="mb-3">
+              <label for="editOfferAmount" class="form-label required-field">Offer Amount</label>
+              <input type="number" class="form-control" id="editOfferAmount" name="offerAmount" min="0" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="close-btn" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="submit-btn">UPDATE COUPON</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Set default dates for Valid From (today) and Valid Upto (one month from today)
     document.addEventListener('DOMContentLoaded', function() {
@@ -361,6 +429,14 @@
       
       document.getElementById('validFrom').value = formatDate(today);
       document.getElementById('validUpto').value = formatDate(nextMonth);
+
+      // Add event listener for edit coupon code input
+      document.getElementById('editCouponCode').addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+        if (!/^[A-Z0-9]*$/.test(this.value)) {
+          this.value = this.value.replace(/[^A-Z0-9]/g, '');
+        }
+      });
     });
 
     // Form validation for coupon code (6 characters with letters and numbers)
@@ -371,7 +447,7 @@
       }
     });
 
-    // Handle form submission
+    // Handle form submission for adding a coupon
     document.getElementById('addCouponForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -417,105 +493,137 @@
       }
     });
 
-    // Function to edit coupon
+    // Function to fetch and populate the edit coupon modal
     async function editCoupon(couponId) {
       try {
         const response = await fetch(`/admin/get-coupon/${couponId}`);
         const result = await response.json();
-        
+
         if (result.success) {
-          // Open the modal with pre-filled data
-          const coupon = result.coupon;
-          // You could reuse the same modal or create a separate edit modal
-          // For this example, we'll adapt the existing modal
-          
-          document.getElementById('addCouponModalLabel').textContent = 'Edit Coupon';
-          document.getElementById('couponName').value = coupon.name;
-          document.getElementById('description').value = coupon.description;
-          document.getElementById('couponCode').value = coupon.code;
-          document.getElementById('validFrom').value = formatDate(new Date(coupon.validFrom));
-          document.getElementById('validUpto').value = formatDate(new Date(coupon.validUpto));
-          document.getElementById('minCartValue').value = coupon.minCartValue;
-          document.getElementById('offerAmount').value = coupon.amount;
-          
-          // Change the form action and add coupon ID
-          document.getElementById('addCouponForm').action = `/admin/update-coupon/${couponId}`;
-          document.querySelector('.submit-btn').textContent = 'UPDATE COUPON';
-          
-          // Open the modal
-          const modal = new bootstrap.Modal(document.getElementById('addCouponModal'));
-          modal.show();
+          const coupon = result.data;
+
+          // Populate the form fields
+          document.getElementById('editCouponId').value = coupon._id;
+          document.getElementById('editCouponName').value = coupon.couponName;
+          document.getElementById('editDescription').value = coupon.description;
+          document.getElementById('editCouponCode').value = coupon.couponCode;
+
+          // Format dates for input fields
+          const formatDate = date => {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+
+          document.getElementById('editValidFrom').value = formatDate(coupon.validFrom);
+          document.getElementById('editValidUpto').value = formatDate(coupon.validUpto);
+          document.getElementById('editMinCartValue').value = coupon.minCartValue;
+          document.getElementById('editOfferAmount').value = coupon.offerAmount;
         } else {
           Swal.fire({
             title: 'Error!',
-            text: result.message || 'Failed to fetch coupon details',
+            text: result.message || 'Failed to fetch coupon data',
             icon: 'error',
             confirmButtonColor: '#d33'
           });
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching coupon data:', error);
         Swal.fire({
           title: 'Error!',
-          text: 'Something went wrong',
+          text: 'Something went wrong while fetching coupon data',
           icon: 'error',
           confirmButtonColor: '#d33'
         });
       }
     }
 
-    // Format date helper function
-    function formatDate(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
+    // Handle form submission for editing a coupon
+    document.getElementById('editCouponForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const formDataObj = Object.fromEntries(formData.entries());
+      const couponId = formDataObj.couponId;
 
-    // Function to toggle coupon status (list/unlist)
-    async function toggleCouponStatus(couponId, isActive) {
-      const action = isActive ? 'list' : 'unlist';
-      const confirmAction = await Swal.fire({
-        title: 'Are you sure?',
-        text: `Do you want to ${action} this coupon?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: isActive ? '#4CAF50' : '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: `Yes, ${action} it!`,
-        cancelButtonText: 'Cancel'
-      });
-
-      if (confirmAction.isConfirmed) {
-        try {
-          const response = await fetch(`/admin/${action}-coupon/${couponId}`, { method: 'PUT' });
-          const result = await response.json();
-          
-          if (result.success) {
-            await Swal.fire({
-              title: 'Success!',
-              text: `Coupon ${action}ed successfully`,
-              icon: 'success',
-              confirmButtonColor: '#4CAF50'
-            });
+      try {
+        const response = await fetch(`/admin/update-coupon/${couponId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formDataObj)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          Swal.fire({
+            title: 'Success!',
+            text: 'Coupon updated successfully',
+            icon: 'success',
+            confirmButtonColor: '#4CAF50'
+          }).then(() => {
             location.reload();
-          } else {
-            Swal.fire({
-              title: 'Error!',
-              text: result.message || `Failed to ${action} coupon`,
-              icon: 'error',
-              confirmButtonColor: '#d33'
-            });
-          }
-        } catch (error) {
-          console.error('Error:', error);
+          });
+        } else {
           Swal.fire({
             title: 'Error!',
-            text: 'Something went wrong',
+            text: result.message || 'Failed to update coupon',
             icon: 'error',
             confirmButtonColor: '#d33'
           });
         }
+      } catch (error) {
+        console.error('Error updating coupon:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Something went wrong while updating the coupon',
+          icon: 'error',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+
+    // Function to toggle coupon status (list/unlist)
+    async function toggleCouponStatus(couponId, action) {
+      try {
+        const response = await fetch(`/admin/${action ? 'list' : 'unlist'}-coupon/${couponId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          Swal.fire({
+            title: 'Success!',
+            text: `Coupon ${action ? 'listed' : 'unlisted'} successfully`,
+            icon: 'success',
+            confirmButtonColor: '#4CAF50'
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: result.message || 'Failed to update coupon status',
+            icon: 'error',
+            confirmButtonColor: '#d33'
+          });
+        }
+      } catch (error) {
+        console.error('Error toggling coupon status:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Something went wrong',
+          icon: 'error',
+          confirmButtonColor: '#d33'
+        });
       }
     }
 
@@ -543,6 +651,12 @@
           Swal.fire('Error!', result.message || 'Something went wrong.', 'error');
         }
       }
+    }
+
+    // Function to filter coupons by listing status
+    function filterCoupons() {
+      const status = document.getElementById('listingFilter').value;
+      window.location.href = `/admin/coupons?status=${status}`;
     }
   </script>
 </body>
