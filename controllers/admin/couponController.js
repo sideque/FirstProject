@@ -9,13 +9,11 @@ const loadCoupon = async (req, res) => {
         const adminCoupon = await adminController.getAdminData(req);
         const search = req.query.search || "";
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
-        const listingStatus = req.query.status === 'unlisted' ? false : true; // Filter by listing status
+        const limit = 10;
 
-        let query = { isList: listingStatus };
+        let query = {};
         if (search) {
             query = {
-                isList: listingStatus,
                 $or: [
                     { couponName: { $regex: new RegExp(search, "i") } },
                     { couponCode: { $regex: new RegExp(search, "i") } }
@@ -43,13 +41,11 @@ const loadCoupon = async (req, res) => {
             coupons, 
             totalPages, 
             currentPage: page,
-            totalPages,
             totalCoupons,
             search,
             startPage,
             endPage,
-            adminCoupon,
-            listingStatus // Pass the current listing status to the frontend
+            adminCoupon
         });
     } catch (error) {
         console.error(error);

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose
+const { Schema } = mongoose;
 
 const offerSchema = new Schema({
   offerName: {
@@ -14,12 +14,13 @@ const offerSchema = new Schema({
   },
   discountType: {
     type: String,
-    enum: ['flat', 'percentage'],
+    enum: 'percentage',
     required: true
   },
-  discountAmount: {
+  offerAmount: {
     type: Number,
-    required: true
+    required: true,
+    min: 0
   },
   validFrom: {
     type: Date,
@@ -31,7 +32,7 @@ const offerSchema = new Schema({
   },
   offerType: {
     type: String,
-    enum: ['Category', 'Brand', 'Product'],
+    enum: ['Product', 'Category', 'Brand'],
     required: true
   },
   applicableTo: {
@@ -42,13 +43,13 @@ const offerSchema = new Schema({
   offerTypeRef: {
     type: String,
     required: true,
-    enum: ['Category', 'Brand', 'Product']
+    enum: ['Product', 'Category', 'Brand']
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
-  isActive: {
+  isList: {
     type: Boolean,
     default: true
   }

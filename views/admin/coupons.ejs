@@ -109,13 +109,20 @@
     }
 
     .action-btn.unlist-btn {
-        background-color: #4CAF50;
+        background-color: #ff0000;
     }
 
     .action-btn.unlist-btn:hover {
-        background-color: #3e8e41;
+        background-color: #c34c4c;
     }
 
+    .action-btn.list-btn {
+      background-color: #00ff08;
+    }
+
+    .action-btn.list-btn:hover {
+      background-color: #7bae7c;
+    }
     .action-btn a {
         color: white;
         text-decoration: none;
@@ -192,20 +199,8 @@
         margin-left: 3px;
     }
 
-    /* Filter Dropdown Styling */
-    .filter-dropdown {
-        background-color: #3a3a3a;
-        border: 1px solid #555;
-        color: #fff;
-        padding: 8px;
-        border-radius: 4px;
-        margin-right: 10px;
-    }
-
-    .filter-dropdown:focus {
-        border-color: #4CAF50;
-        outline: none;
-    }
+    
+    
 
     /* Responsive Styles */
     @media (max-width: 992px) {
@@ -251,10 +246,7 @@
         <div class="coupons-header">
             <div class="coupons-title">Coupons</div>
             <div>
-                <select id="listingFilter" class="filter-dropdown" onchange="filterCoupons()">
-                    <option value="listed" <%= listingStatus === true ? 'selected' : '' %>>Listed Coupons</option>
-                    <option value="unlisted" <%= listingStatus === false ? 'selected' : '' %>>Unlisted Coupons</option>
-                </select>
+               
                 <button class="add-button" data-bs-toggle="modal" data-bs-target="#addCouponModal">ADD COUPONS +</button>
             </div>
         </div>
@@ -296,7 +288,7 @@
                                         Unlist
                                     </button>
                                 <% } else { %>
-                                    <button class="action-btn unlist-btn" onclick="toggleCouponStatus('<%= items._id %>',true)">
+                                    <button class="action-btn list-btn" onclick="toggleCouponStatus('<%= items._id %>',true)">
                                         List
                                     </button>
                                 <% } %>
@@ -632,10 +624,7 @@
 
 
     // Function to filter coupons by listing status
-    function filterCoupons() {
-      const status = document.getElementById('listingFilter').value;
-      window.location.href = `/admin/coupons?status=${status}`;
-    }
+   
   </script>
 </body>
 </html>
