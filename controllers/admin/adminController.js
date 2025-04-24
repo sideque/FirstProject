@@ -108,7 +108,7 @@ const logout = async (req, res) => {
         console.log("unexpected error during logout", error);
         res.redirect("/admin/pageerror")
     }
-}
+};
 
 module.exports = {
     loadLogin,

@@ -8,10 +8,11 @@ const productController = require("../controllers/admin/productController");
 const orderController = require("../controllers/admin/orderController");
 const couponController = require('../controllers/admin/couponController'); 
 const offerController = require('../controllers/admin/offerController');
-const { userAuth, adminAuth } = require("../middlewares/auth");
+const salesController = require('../controllers/admin/salesController');
+const { adminAuth } = require("../middlewares/auth");
 const upload = require("../middlewares/multerConfig");
 
-// Route to load the admin login page
+// Existing routes (unchanged)
 router.get("/pageerror", adminController.pageerror);
 router.get("/login", adminController.loadLogin);
 router.post("/login", adminController.login);
@@ -64,12 +65,11 @@ router.delete("/delete-product-image/:productId/:imageName", adminAuth, productC
 router.get("/remove-duplicate-products", adminAuth, productController.removeDuplicateProducts);
 
 // Order Management
-router.get('/orders',adminAuth, orderController.loadOrder);
-router.get('/vieworder/:orderId',adminAuth, orderController.viewOrder);
-router.patch('/updateStatus/:orderId',adminAuth, orderController.updateOrderStatus);
-router.get('/returnOrder',adminAuth, orderController.verifyReturnRequest);
-router.get('/orders/clear',adminAuth, orderController.clearFilters);
-
+router.get('/orders', adminAuth, orderController.loadOrder);
+router.get('/vieworder/:orderId', adminAuth, orderController.viewOrder);
+router.patch('/updateStatus/:orderId', adminAuth, orderController.updateOrderStatus);
+router.get('/returnOrder', adminAuth, orderController.verifyReturnRequest);
+router.get('/orders/clear', adminAuth, orderController.clearFilters);
 
 // Coupons Management
 router.get("/coupons", adminAuth, couponController.loadCoupon);
@@ -90,6 +90,9 @@ router.get('/products', adminAuth, offerController.getProducts);
 router.get('/categories', adminAuth, offerController.getCategories);
 router.get('/brands', adminAuth, offerController.getBrands);
 
-
+// Sales Report Management
+router.get('/sale-report', adminAuth, salesController.loadSalesReport);
+router.get('/sale-report/excel', adminAuth, salesController.downloadExcel);
+router.get('/sale-report/pdf', adminAuth, salesController.downloadPDF);
 
 module.exports = router;
