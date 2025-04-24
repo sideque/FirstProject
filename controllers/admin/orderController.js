@@ -3,22 +3,17 @@ const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Wallet = require("../../models/walletSchema");
 
-
-
 const loadOrder = async (req, res) => {
   try {
-    console.log("Starting loadOrder...");
 
     // Get query parameters
-    const { status, date, page = 1 } = req.query;
+    const { status, date, page = 1, search = '' } = req.query; // Added search
     const limit = 10; // 10 orders per page
-    console.log("Query params:", { status, date, page });
 
     // Build query for filtering
     let query = {};
     if (status) {
       query.status = status;
-      console.log("Filtering by status:", status);
     }
     if (date) {
       const now = new Date();
@@ -34,14 +29,25 @@ const loadOrder = async (req, res) => {
           $lte: new Date(now.getFullYear(), now.getMonth(), 0),
         };
       }
-      console.log("Filtering by date:", date);
+    }
+    if (search) {
+      query.$or = [
+        { orderId: { $regex: new RegExp(search, 'i') } }, // Search by orderId
+        { userId: { $in: await User.find({ name: { $regex: new RegExp(search, 'i') } }).distinct('_id') } } // Search by customer name
+      ];
     }
 
+    const totalOrders = await Order.countDocuments(query); 
+    const totalPages = Math.ceil(totalOrders / limit); 
+    const skip = (page - 1) * limit; 
+
     // Pagination
-    const totalOrders = await Order.countDocuments(query);
-    const totalPages = Math.ceil(totalOrders / limit);
-    const skip = (page - 1) * limit;
-    console.log("Pagination:", { totalOrders, totalPages, skip, limit });
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
 
     // Fetch orders
     const orders = await Order.find(query)
@@ -55,19 +61,20 @@ const loadOrder = async (req, res) => {
       })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 }) // Ensures newest orders at top
       .lean();
-    console.log("Fetched orders:", orders.length);
+    // Log order dates to verify sorting
+    orders.forEach((order, index) => {
+    });
 
     // Format orders for template
     const formattedOrders = orders.map((order) => {
-      console.log("Formatting order:", order.orderId);
       return {
         ...order,
-        shippingAddress: order.address || { name: "Unknown" }, // Fallback
-        totalAmount: order.finalAmount || 0, // Fallback
+        shippingAddress: order.address || { name: "Unknown" }, 
+        totalAmount: order.finalAmount || 0, 
         orderDate: order.createdAt,
-        products: order.orderItems.map((item) => ({ // Map orderItems to products
+        products: order.orderItems.map((item) => ({
           ...item,
           productImage: item.product?.productImage?.[0] || "/images/placeholder.png",
         })),
@@ -81,13 +88,15 @@ const loadOrder = async (req, res) => {
       totalPages,
       statusFilter: status || "",
       dateFilter: date || "",
+      startPage, 
+      endPage,   
+      search // Added for pagination links
     });
   } catch (error) {
     console.error("Error in loadOrder:", error.message, error.stack);
     res.status(500).send("Something went wrong. Please try again.");
   }
 };
-
 
 const viewOrder = async (req, res) => {
   try {
@@ -108,9 +117,6 @@ const viewOrder = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Detailed debugging
-    console.log('Raw order:', JSON.stringify(order, null, 2));
-    console.log('Order items details:');
     order.orderItems.forEach((item, index) => {
       console.log(`OrderItem ${index}:`, {
         productId: item.product?._id || 'null',
@@ -146,7 +152,6 @@ const viewOrder = async (req, res) => {
         }))
     };
 
-
     if (formattedOrder.products.length === 0) {
       console.warn(`Order ${orderId} has no valid products after filtering`);
     }
@@ -157,9 +162,6 @@ const viewOrder = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-
-
 
 const updateOrderStatus = async (req, res) => {
   try {
@@ -193,18 +195,14 @@ const updateOrderStatus = async (req, res) => {
 
     res.json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
-
     console.log(error);
-
     console.error("Error in updateOrderStatus:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// Verify Return Request
 const verifyReturnRequest = async (req, res) => {
   try {
-
     const { orderId, itemId, action } = req.query; // The action: 'accept' or 'reject'
 
     const order = await Order.findOne({ orderId });
@@ -212,10 +210,7 @@ const verifyReturnRequest = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-
-
     if (action === "accept") {
-
       order.orderItems.map(items => {
         items.status = 'Cancelled'
       })
@@ -224,8 +219,8 @@ const verifyReturnRequest = async (req, res) => {
       order.isReturnRequested = false
 
       // Refund to wallet
-      const user = await User.findById(order.userId);
-      const refundAmount = order.finalAmount;
+      // const user = await User.findById(order.userId);
+      // const refundAmount = order.finalAmount;
 
       // let wallet = await Wallet.findOne({ userId: order.userId });
       // if (!wallet) {
@@ -263,7 +258,6 @@ const verifyReturnRequest = async (req, res) => {
   }
 };
 
-// Clear Search/Filters
 const clearFilters = async (req, res) => {
   try {
     res.redirect("/admin/orders?page=1");
@@ -272,7 +266,6 @@ const clearFilters = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 module.exports = {
   loadOrder,
