@@ -105,7 +105,13 @@ router.get('/orders', userAuth, checkoutController.loadOrders);
 router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);
 router.get('/success', userAuth, checkoutController.success);
-router.post("/order/return", userAuth, checkoutController.returnOrder);
+router.post('/order/return', userAuth, checkoutController.returnOrder);
+
+// coupon Management
+router.get('/applyCoupon', userAuth, cartController.couponApply);
+router.get('/cancel-coupon', userAuth, cartController.couponCancel);
+router.get('/coupons/available', userAuth, cartController.getAvailableCoupons);
+router.get('/check-applied-coupon', userAuth, cartController.checkAppliedCoupon);
 
 
 module.exports = router;

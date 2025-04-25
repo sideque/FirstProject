@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const Address = require("../../models/addressSchema");
 const Order = require('../../models/orderSchema');
+const Coupon = require('../../models/couponSchema');
 const env = require("dotenv").config();
 const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
@@ -176,10 +177,143 @@ const removeCartItem = async (req, res) => {
   }
 };
 
+
+
+//Coupon 
+const couponApply = async (req,res) => {
+  try {
+    
+    const couponCode = req.query.code;
+    const userId = req.session.user;
+
+    if (!couponCode) {
+      return res.status(400).json({ success:false, message: 'Coupon code is required'});
+    }
+
+    const coupon = await Coupon.findOne({ couponCode: couponCode });
+    if(!coupon) {
+      return res.status(400).json({ success: false, message: 'Invalid coupon code' });
+    }
+
+    const currentDate = new Date();
+    if(!coupon.isList || currentDate > coupon.validUpto || currentDate < coupon.validFrom) {
+      return res.status(400).json({ success: false, message: 'Coupon expired or not active.'})
+    }
+
+    const cart = await Cart.findOne({ userId: userId}).populate('items.productId');
+    if (!cart){
+      return res.status(400).json({ success:false, message: 'Cart not found'});
+    }
+
+    // Calculate cart total
+    let cartTotal = cart.items.reduce((total,item) => {
+      return total + (item.productId.salePrice * item.stock);
+    }, 0);
+
+    if (cartTotal < coupon.minCartValue) {
+      return res.status(400).json({
+        success:false,
+        message: `Cart total must be at least ₹${coupon.minCartValue} to use this coupon`,
+      });
+    }
+
+    const existingCoupon = req.session.couponApplied;
+    if (existingCoupon && existingCoupon.couponId.toString() === coupon._id.toString()) {
+      return res.json({ success:true, message: 'Coupon already applied.',offerAmount: coupon.offerAmount });
+    }
+
+    if (existingCoupon && coupon.offerAmount <= existingCoupon.offerAmount) {
+      return res.status(400).json({
+        success:'false',
+        message: 'A better coupon is already applied.'
+      });
+    }
+
+    req.session.couponApplied = {
+      couponId: coupon._id,
+      couponCode: coupon.couponCode,
+      offerAmount: coupon.couponCode,
+      minValue: coupon.minCartValue
+    };
+
+    return res.json({
+      success: true,
+      message: 'Coupon applied successfully.',
+      offerAmount: coupon.offerAmount
+    });
+
+  } catch (error) {
+    
+    console.error('Error applying coupon:', error);
+    return res.status(500).json({ success:false, message: 'An error occurred while applying the coupon.'})
+  }
+};
+
+const couponCancel = async (req, res) => {
+  try {
+      if (!req.session.couponApplied) {
+          return res.status(400).json({ success: false, message: 'No coupon applied to cancel.' });
+      }
+
+      req.session.couponApplied = null;
+
+      return res.json({ success: true, message: 'Coupon cancelled successfully.' });
+  } catch (error) {
+      console.error('Error cancelling coupon:', error);
+      return res.status(500).json({ success: false, message: 'An error occurred while cancelling the coupon.' });
+  }
+};
+
+const getAvailableCoupons = async (req,res) => {
+  try {
+    
+    const currentDate = new Date();
+    const coupons = await Coupon.find({
+      isList: true,
+      validFrom: { $lte: currentDate },
+      validUpto: { $gte: currentDate }
+    });
+
+    return res.json({ success: true, data: coupons});
+
+  } catch (error) {
+    console.error('Error fetching available coupons:', error);
+    return res.status(500).json({ success: false, message: 'An error occurred while fetching coupons.' });
+  }
+}
+
+const checkAppliedCoupon = async (req,res) => {
+  try {
+    
+    const couponApplied = req.session.couponApplied;
+
+    if(!couponApplied) {
+      return res.json({ success: false, message: 'No coupon applied.'})
+    }
+
+    const coupon = await Coupon.findById(couponApplied.couponId);
+      if (!coupon) {
+          req.session.couponApplied = null;
+          return res.json({ success: false, message: 'Applied coupon is invalid.' });
+      }    
+      return res.json({ success: true, coupon: { couponCode: coupon.couponCode, offerAmount: coupon.offerAmount } });
+
+  } catch (error) {
+
+    console.error('Error checking applied coupon:', error);
+    return res.status(500).json({ success: false, message: 'An error occurred while checking the applied coupon.' });
+    
+  }
+}
+
 module.exports = {
   loadCart,
   addToCart,
   updateCartItem,
   removeCartItem,
+  couponApply,
+  couponCancel,
+  getAvailableCoupons,
+  checkAppliedCoupon
 
 };
