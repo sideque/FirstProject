@@ -68,7 +68,8 @@
     top: 10px;
     right: 10px;
   }
-  .address-phone, .address-details {
+  .address-phone,
+  .address-details {
     margin: 5px 0;
     color: #555;
   }
@@ -137,7 +138,8 @@
     font-size: 1.1rem;
     margin-bottom: 5px;
   }
-  .product-meta, .product-price {
+  .product-meta,
+  .product-price {
     color: #555;
     font-size: 0.9rem;
   }
@@ -145,6 +147,9 @@
     display: flex;
     justify-content: space-between;
     margin: 10px 0;
+  }
+  .summary-row.discount {
+    color: #e63946;
   }
   .summary-row.total {
     font-weight: bold;
@@ -170,7 +175,11 @@
   <div class="container">
     <div class="row no-gutters slider-text align-items-center justify-content-center">
       <div class="col-md-9 ftco-animate text-center">
-        <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Cart</span> <span>Checkout</span></p>
+        <p class="breadcrumbs">
+          <span class="mr-2"><a href="/">Home</a></span>
+          <span>Cart</span>
+          <span>Checkout</span>
+        </p>
         <h1 class="mb-0 bread">Check Out</h1>
       </div>
     </div>
@@ -184,24 +193,37 @@
         <!-- Address Section -->
         <div class="checkout-section">
           <h2 class="section-title">Select Address Details</h2>
-
           <div class="address-cards">
             <% if (addresses && addresses.length > 0) { %>
               <% addresses.forEach((address) => { %>
                 <div class="address-card <%= address.isDefault ? 'selected' : '' %>">
-                  <input type="radio" name="address" class="address-radio" id="address<%= address._id %>" value="<%= address._id %>" <%= address.isDefault ? 'checked' : '' %>>
+                  <input
+                    type="radio"
+                    name="address"
+                    class="address-radio"
+                    id="address<%= address._id %>"
+                    value="<%= address._id %>"
+                    <%= address.isDefault ? 'checked' : '' %>
+                  >
                   <div class="address-name"><%= address.name %></div>
                   <% if (address.isDefault) { %>
                     <span class="default-badge">Default</span>
                   <% } %>
-                  <div class="address-phone"><%= address.phone %><%= address.altPhone ? ', ' + address.altPhone : '' %></div>
+                  <div class="address-phone">
+                    <%= address.phone %><%= address.altPhone ? ', ' + address.altPhone : '' %>
+                  </div>
                   <div class="address-details">
-                    Address: <%= address.addressLine1 %><%= address.addressLine2 ? ', ' + address.addressLine2 : '' %>, 
+                    Address: <%= address.addressLine1 %><%= address.addressLine2 ? ', ' + address.addressLine2 : '' %>,
                     <%= address.landMark ? address.landMark + ', ' : '' %>
                     <%= address.city %>, <%= address.state %>, pincode: <%= address.pincode %>
                   </div>
                   <div class="address-actions">
-                    <button class="address-btn" onclick="window.location.href='/userProfile#profile-addresses'">Edit</button>
+                    <button
+                      class="address-btn"
+                      onclick="window.location.href='/userProfile#profile-addresses'"
+                    >
+                      Edit
+                    </button>
                   </div>
                 </div>
               <% }) %>
@@ -212,8 +234,6 @@
               <i class="fa fa-plus"></i> Add Address
             </div>
           </div>
-
-
         </div>
 
         <!-- Payment Method Section -->
@@ -222,13 +242,19 @@
           <p class="mb-3">All transactions are secure and encrypted.</p>
           <div class="payment-methods">
             <div class="payment-method selected">
-              <input type="radio" name="payment" class="payment-radio" id="cod" value="Cash on Delivery" checked>
+              <input
+                type="radio"
+                name="payment"
+                class="payment-radio"
+                id="cod"
+                value="Cash on Delivery"
+                checked
+              >
               <div>
                 <div class="payment-label">Cash on Delivery</div>
                 <div class="payment-info">Pay with cash upon delivery</div>
               </div>
             </div>
-            <!-- Add more payment methods as needed -->
           </div>
         </div>
       </div>
@@ -238,11 +264,17 @@
         <% if (cart && cart.length > 0) { %>
           <% cart.forEach(item => { %>
             <div class="summary-product">
-              <img src="/Uploads/product-images/<%= item.image %>" alt="<%= item.name %>" class="product-image">
+              <img
+                src="/Uploads/product-images/<%= item.image %>"
+                alt="<%= item.name %>"
+                class="product-image"
+              >
               <div class="product-details">
                 <h3 class="product-name"><%= item.name %></h3>
                 <div class="product-meta">Quantity: <%= item.quantity %></div>
-                <div class="product-price"><%= (item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></div>
+                <div class="product-price">
+                  ₹<%= (item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+                </div>
               </div>
             </div>
           <% }) %>
@@ -250,14 +282,17 @@
           <p>No items in cart.</p>
         <% } %>
 
-
         <div class="summary-row">
           <span>Subtotal</span>
-          <span><%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          <span id="subtotal"><%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
         <div class="summary-row discount">
-          <span>Discount</span>
+          <span>Offer Discount</span>
           <span>-₹<%= discount.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+        </div>
+        <div class="summary-row discount">
+          <span>Coupon Discount</span>
+          <span id="coupon-discount">-₹<%= coupon.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
@@ -265,23 +300,22 @@
         </div>
         <div class="summary-row total">
           <span>Grand Total</span>
-          <span><%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          <span id="total"><%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
 
         <button class="order-btn" id="placeOrderBtn">Order Now</button>
       </div>
-
     </div>
   </div>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // Address selection
     const addressCards = document.querySelectorAll('.address-card');
     addressCards.forEach(card => {
-      card.addEventListener('click', function() {
+      card.addEventListener('click', function () {
         addressCards.forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
         const radio = this.querySelector('input[type="radio"]');
@@ -292,7 +326,7 @@
     // Payment method selection
     const paymentMethods = document.querySelectorAll('.payment-method');
     paymentMethods.forEach(method => {
-      method.addEventListener('click', function() {
+      method.addEventListener('click', function () {
         paymentMethods.forEach(m => m.classList.remove('selected'));
         this.classList.add('selected');
         const radio = this.querySelector('input[type="radio"]');
@@ -303,81 +337,154 @@
     // Add address button
     const addAddressBtn = document.getElementById('addAddressBtn');
     if (addAddressBtn) {
-      addAddressBtn.addEventListener('click', function() {
+      addAddressBtn.addEventListener('click', function () {
         window.location.href = '/userProfile#profile-addresses';
       });
+    }
+
+    // Check applied coupon on page load
+    async function checkAppliedCoupon() {
+      try {
+        console.log('Fetching applied coupon...');
+        const response = await fetch('/check-applied-coupon', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Coupon fetch result:', result);
+
+        const subtotalEl = document.getElementById('subtotal');
+        const couponDiscountEl = document.getElementById('coupon-discount');
+        const totalEl = document.getElementById('total');
+
+        if (!subtotalEl || !couponDiscountEl || !totalEl) {
+          throw new Error('One or more DOM elements not found');
+        }
+
+        const subtotal = parseFloat(subtotalEl.textContent.replace(/,/g, ''));
+        console.log('Parsed subtotal:', subtotal);
+
+        if (isNaN(subtotal)) {
+          throw new Error('Subtotal is not a valid number');
+        }
+
+        if (result.success && result.coupon) {
+          const couponDiscount = parseFloat(result.coupon.offerAmount);
+          console.log('Applied coupon discount:', couponDiscount);
+
+          if (isNaN(couponDiscount)) {
+            throw new Error('Coupon discount is not a valid number');
+          }
+
+          couponDiscountEl.textContent = `-₹${couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+          const newTotal = subtotal - couponDiscount - <%= discount %> + <%= shipping %>;
+          totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        } else {
+          console.log('No coupon applied:', result);
+          couponDiscountEl.textContent = '-₹0.00';
+          const newTotal = subtotal - <%= discount %> + <%= shipping %>;
+          totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+      } catch (error) {
+        console.error('Error checking applied coupon:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to check applied coupon: ' + error.message,
+          confirmButtonColor: '#82ae46',
+        });
+
+        // Fallback to no coupon state
+        const subtotalEl = document.getElementById('subtotal');
+        const couponDiscountEl = document.getElementById('coupon-discount');
+        const totalEl = document.getElementById('total');
+        if (subtotalEl && couponDiscountEl && totalEl) {
+          const subtotal = parseFloat(subtotalEl.textContent.replace(/,/g, '')) || 0;
+          couponDiscountEl.textContent = '-₹0.00';
+          const newTotal = subtotal - <%= discount %> + <%= shipping %>;
+          totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+      }
     }
 
     // Place order button
     const placeOrderBtn = document.getElementById('placeOrderBtn');
     if (placeOrderBtn) {
-      placeOrderBtn.addEventListener('click', async function() {
-        const selectedAddress = document.querySelector('.address-card.selected input[type="radio"]:checked');
-        if (!selectedAddress) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Select Address',
-            text: 'Please select a delivery address to continue.',
-            confirmButtonColor: '#82ae46',
-          });
-          return;
-        }
-
-        const selectedPayment = document.querySelector('.payment-method.selected input[type="radio"]:checked');
-        if (!selectedPayment) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Select Payment Method',
-            text: 'Please select a payment method to continue.',
-            confirmButtonColor: '#82ae46',
-          });
-          return;
-        }
-
-        const addressId = selectedAddress.value;
-        const paymentMethod = selectedPayment.value;
-
+      placeOrderBtn.addEventListener('click', async function () {
         try {
+          // Validate address selection
+          const selectedAddress = document.querySelector('.address-card.selected input[type="radio"]:checked');
+          if (!selectedAddress) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Select Address',
+              text: 'Please select a delivery address to continue.',
+              confirmButtonColor: '#82ae46',
+            });
+            return;
+          }
+
+          // Validate payment method selection
+          const selectedPayment = document.querySelector('.payment-method.selected input[type="radio"]:checked');
+          if (!selectedPayment) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Select Payment Method',
+              text: 'Please select a payment method to continue.',
+              confirmButtonColor: '#82ae46',
+            });
+            return;
+          }
+
+          const addressId = selectedAddress.value;
+          const paymentMethod = selectedPayment.value;
+
+          console.log('Placing order with:', { addressId, paymentMethod });
+
+          // Send order placement request
           const response = await fetch('/place-order', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              addressId,
-              paymentMethod,
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addressId, paymentMethod }),
           });
 
-          const data = await response.json();
-          if (data.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Order Placed!',
-              text: 'Your order has been successfully placed.',
-              confirmButtonColor: '#82ae46',
-            }).then(() => {
-              window.location.href = '/success';
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: data.message || 'Failed to place order. Please try again.',
-              confirmButtonColor: '#82ae46',
-            });
+          const result = await response.json();
+          console.log('Order placement result:', result);
+
+          if (!result.success) {
+            throw new Error(result.message || 'Failed to place order');
           }
+
+          // Redirect to success page with orderId
+          Swal.fire({
+            icon: 'success',
+            title: 'Order Placed',
+            text: result.message,
+            confirmButtonColor: '#82ae46',
+            timer: 2000,
+            showConfirmButton: false,
+          }).then(() => {
+            window.location.href = `/order/success?orderId=${result.orderId}`;
+          });
         } catch (error) {
           console.error('Error placing order:', error);
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'An error occurred while placing your order. Please try again.',
+            text: 'Failed to place order: ' + error.message,
             confirmButtonColor: '#82ae46',
           });
         }
       });
     }
+
+    // Initialize on page load
+    checkAppliedCoupon();
   });
 </script>
 

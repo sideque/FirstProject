@@ -1,4 +1,3 @@
-
 <%- include("../../views/partials/user/header") %>
 <style>
     /* Main Layout Adjustments */
@@ -214,6 +213,11 @@
         transform: scale(1.02);
     }
     
+    .checkout-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
     /* Empty Cart */
     .empty-cart {
         text-align: center;
@@ -267,8 +271,8 @@
         color: white;
     }
 
-      /* Coupon Styles */
-      .coupon-section {
+    /* Coupon Styles */
+    .coupon-section {
         margin-top: 15px;
         margin-bottom: 15px;
         position: relative;
@@ -497,7 +501,6 @@
             margin-top: 10px;
             width: 100%;
         }
-
     }
 </style>
 
@@ -516,7 +519,6 @@
     <div class="container">
         <% if (cartItems && cartItems.length > 0) { %>
             <div class="cart-container">
-                
                 <div class="cart-items">
                     <% let subtotal = 0; %>
                     <% let discount = 0; %>
@@ -572,37 +574,40 @@
                             <span>-₹<%= discount.toLocaleString() %></span>
                         </div>
                     <% } %>
-
                     <div class="summary-row discount">
                         <span>Coupon Discount</span>
-                        <span id="coupon-discount">-₹0</span>
+                        <span id="coupon-discount">-₹<%= coupon.toLocaleString() %></span>
                     </div>
-
-                   <div class="coupon-section">
+                    <div class="coupon-section">
                         <div class="coupon-input-group">
                             <input type="text" class="coupon-input" id="coupon-code" placeholder="Enter coupon code">
                             <button class="apply-coupon-btn" id="apply-coupon">Apply</button>
                         </div>
                         <button class="available-coupons-btn" id="show-available-coupons">Available Coupons</button>
                         <div class="applied-coupon" id="applied-coupon">
-                            Coupon <span id="applied-coupon-code">CODE10</span> applied! <span class="remove-coupon" id="remove-coupon">✕</span>
+                            Coupon <span id="applied-coupon-code"></span> applied! <span class="remove-coupon" id="remove-coupon">✕</span>
                         </div>
                     </div>
-
                     <div class="summary-row">
                         <span>Delivery</span>
                         <span>Free</span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span id="total">₹<%= (subtotal - discount).toLocaleString() %></span>
+                        <span id="total">₹<%= (subtotal - (discount + coupon)).toLocaleString() %></span>
                     </div>
-                    <button class="checkout-btn" onclick="window.location.href='/checkout'">Proceed to Checkout</button>
+                    <button
+                        class="checkout-btn"
+                        onclick="window.location.href='/checkout'"
+                        <%= cartItems.length === 0 ? 'disabled' : '' %>
+                    >
+                        Proceed to Checkout
+                    </button>
                 </div>
             </div>
 
-             <!-- Coupon Modal -->
-             <div id="coupon-modal" class="coupon-modal">
+            <!-- Coupon Modal -->
+            <div id="coupon-modal" class="coupon-modal">
                 <div class="coupon-modal-content">
                     <span class="close-modal">×</span>
                     <h2>Available Coupons</h2>
@@ -694,7 +699,7 @@
             });
         });
 
-        // Increase button (with Swal for invalid maxStock)
+        // Increase button
         increaseBtns.forEach(btn => {
             btn.addEventListener('click', async function () {
                 const cartItem = this.closest('.cart-item');
@@ -797,229 +802,218 @@
                 icon: 'success',
                 title: 'Cart added successfully',
                 confirmButtonColor: '#82ae46',
-                timer: 2000, // Auto close after 2 seconds
+                timer: 2000,
                 showConfirmButton: false
             });
-            // Remove the success parameter from URL
             window.history.replaceState({}, document.title, '/cart');
         }
 
+        // Coupon Modal Functions
+        const couponModal = document.getElementById('coupon-modal');
+        const showCouponsBtn = document.getElementById('show-available-coupons');
+        const closeModal = document.querySelector('.close-modal');
+        const couponInput = document.getElementById('coupon-code');
+        const applyCouponBtn = document.getElementById('apply-coupon');
+        const appliedCouponDiv = document.getElementById('applied-coupon');
+        const appliedCouponCode = document.getElementById('applied-coupon-code');
+        const removeCouponBtn = document.getElementById('remove-coupon');
+        const couponDiscountEl = document.getElementById('coupon-discount');
+        const totalEl = document.getElementById('total');
+        const subtotalEl = document.getElementById('subtotal');
+        const couponList = document.getElementById('coupon-list');
 
-           // Coupon Modal Functions
-            const couponModal = document.getElementById('coupon-modal');
-            const showCouponsBtn = document.getElementById('show-available-coupons');
-            const closeModal = document.querySelector('.close-modal');
-            const couponInput = document.getElementById('coupon-code');
-            const applyCouponBtn = document.getElementById('apply-coupon');
-            const appliedCouponDiv = document.getElementById('applied-coupon');
-            const appliedCouponCode = document.getElementById('applied-coupon-code');
-            const removeCouponBtn = document.getElementById('remove-coupon');
-            const couponDiscountEl = document.getElementById('coupon-discount');
-            const totalEl = document.getElementById('total');
-            const subtotalEl = document.getElementById('subtotal');
-            const couponList = document.getElementById('coupon-list');
-
-            // Fetch and display available coupons
-            async function fetchAvailableCoupons() {
-                try {
-                    const response = await fetch('/coupons/available', {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                    const result = await response.json();
-                    if (!result.success) {
-                        throw new Error(result.message || 'Failed to fetch coupons');
-                    }
-
-                    // Clear existing coupons
-                    couponList.innerHTML = '';
-
-                    // Populate coupons
-                    result.data.forEach(coupon => {
-                        const couponItem = document.createElement('div');
-                        couponItem.className = 'coupon-item';
-                        couponItem.innerHTML = `
-                            <div class="coupon-code">${coupon.couponCode}</div>
-                            <div class="coupon-details">
-                                <div class="coupon-title">${coupon.couponName}</div>
-                                <div class="coupon-description">${coupon.description}</div>
-                                <div class="coupon-expiry">Valid till: ${new Date(coupon.validUpto).toLocaleDateString()}</div>
-                                <div class="coupon-min-value">Min. Cart: ₹${coupon.minCartValue.toLocaleString()}</div>
-                                <div class="coupon-offer">Discount: ₹${coupon.offerAmount.toLocaleString()}</div>
-                            </div>
-                            <button class="use-coupon-btn" data-code="${coupon.couponCode}">Use Code</button>
-                        `;
-                        couponList.appendChild(couponItem);
-                    });
-
-                    // Reattach event listeners to new "Use Code" buttons
-                    document.querySelectorAll('.use-coupon-btn').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const code = this.getAttribute('data-code');
-                            couponInput.value = code;
-                            couponModal.style.display = 'none';
-                            applyCoupon(code);
-                        });
-                    });
-                } catch (error) {
-                    console.error('Error fetching coupons:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to load coupons: ' + error.message,
-                        confirmButtonColor: '#82ae46',
-                    });
+        // Fetch and display available coupons
+        async function fetchAvailableCoupons() {
+            try {
+                const response = await fetch('/coupons/available', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to fetch coupons');
                 }
+
+                couponList.innerHTML = '';
+
+                result.data.forEach(coupon => {
+                    const couponItem = document.createElement('div');
+                    couponItem.className = 'coupon-item';
+                    couponItem.innerHTML = `
+                        <div class="coupon-code">${coupon.couponCode}</div>
+                        <div class="coupon-details">
+                            <div class="coupon-title">${coupon.couponName}</div>
+                            <div class="coupon-description">${coupon.description}</div>
+                            <div class="coupon-expiry">Valid till: ${new Date(coupon.validUpto).toLocaleDateString()}</div>
+                            <div class="coupon-min-value">Min. Cart: ₹${coupon.minCartValue.toLocaleString()}</div>
+                            <div class="coupon-offer">Discount: ₹${coupon.offerAmount.toLocaleString()}</div>
+                        </div>
+                        <button class="use-coupon-btn" data-code="${coupon.couponCode}">Use Code</button>
+                    `;
+                    couponList.appendChild(couponItem);
+                });
+
+                document.querySelectorAll('.use-coupon-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const code = this.getAttribute('data-code');
+                        couponInput.value = code;
+                        couponModal.style.display = 'none';
+                        applyCoupon(code);
+                    });
+                });
+            } catch (error) {
+                console.error('Error fetching coupons:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load coupons: ' + error.message,
+                    confirmButtonColor: '#82ae46',
+                });
             }
+        }
 
-            // Check applied coupon on page load
-            async function checkAppliedCoupon() {
-                try {
-                    const response = await fetch('/check-applied-coupon', {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                    const result = await response.json();
-                    if (result.success && result.coupon) {
-                        // Update UI with applied coupon
-                        couponInput.value = result.coupon.couponCode;
-                        appliedCouponCode.textContent = result.coupon.couponCode;
-                        appliedCouponDiv.style.display = 'block';
-                        couponDiscountEl.textContent = `-₹${result.coupon.offerAmount.toLocaleString()}`;
-                        const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
-                        const newTotal = subtotal - result.coupon.offerAmount;
-                        totalEl.textContent = `₹${newTotal.toLocaleString()}`;
-                    } else {
-                        // No coupon applied
-                        appliedCouponDiv.style.display = 'none';
-                        couponDiscountEl.textContent = '-₹0';
-                        totalEl.textContent = subtotalEl.textContent;
-                    }
-                } catch (error) {
-                    console.error('Error checking applied coupon:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to check applied coupon: ' + error.message,
-                        confirmButtonColor: '#82ae46',
-                    });
-                }
-            }
-
-            // Apply coupon function
-            async function applyCoupon(code) {
-                try {
-                    const response = await fetch(`/applyCoupon?code=${encodeURIComponent(code)}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                    const result = await response.json();
-                    if (!result.success) {
-                        throw new Error(result.message || 'Failed to apply coupon');
-                    }
-
-                    // Update UI
-                    couponInput.value = code;
-                    appliedCouponCode.textContent = code;
+        // Check applied coupon on page load
+        async function checkAppliedCoupon() {
+            try {
+                const response = await fetch('/check-applied-coupon', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const result = await response.json();
+                if (result.success && result.coupon) {
+                    couponInput.value = result.coupon.couponCode;
+                    appliedCouponCode.textContent = result.coupon.couponCode;
                     appliedCouponDiv.style.display = 'block';
-                    couponDiscountEl.textContent = `-₹${result.offerAmount.toLocaleString()}`;
+                    couponDiscountEl.textContent = `-₹${result.coupon.offerAmount.toLocaleString()}`;
                     const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
-                    const newTotal = subtotal - result.offerAmount;
+                    const newTotal = subtotal - result.coupon.offerAmount;
                     totalEl.textContent = `₹${newTotal.toLocaleString()}`;
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Coupon Applied',
-                        text: result.message,
-                        confirmButtonColor: '#82ae46',
-                    });
-                } catch (error) {
-                    console.error('Error applying coupon:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message,
-                        confirmButtonColor: '#82ae46',
-                    });
-                }
-            }
-
-            // Remove coupon function
-            async function removeCoupon() {
-                try {
-                    const response = await fetch('/cancel-coupon', {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                    const result = await response.json();
-                    if (!result.success) {
-                        throw new Error(result.message || 'Failed to cancel coupon');
-                    }
-
-                    // Clear UI
+                } else {
                     appliedCouponDiv.style.display = 'none';
-                    couponInput.value = '';
                     couponDiscountEl.textContent = '-₹0';
                     totalEl.textContent = subtotalEl.textContent;
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Coupon Removed',
-                        text: result.message,
-                        confirmButtonColor: '#82ae46',
-                    });
-                } catch (error) {
-                    console.error('Error removing coupon:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message,
-                        confirmButtonColor: '#82ae46',
-                    });
                 }
+            } catch (error) {
+                console.error('Error checking applied coupon:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to check applied coupon: ' + error.message,
+                    confirmButtonColor: '#82ae46',
+                });
             }
-            // Event Listeners
-            showCouponsBtn.addEventListener('click', function () {
-                couponModal.style.display = 'block';
-                fetchAvailableCoupons();
-            });
+        }
 
-            closeModal.addEventListener('click', function () {
+        // Apply coupon function
+        async function applyCoupon(code) {
+            try {
+                const response = await fetch(`/applyCoupon?code=${encodeURIComponent(code)}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to apply coupon');
+                }
+
+                couponInput.value = code;
+                appliedCouponCode.textContent = code;
+                appliedCouponDiv.style.display = 'block';
+                couponDiscountEl.textContent = `-₹${result.offerAmount.toLocaleString()}`;
+                const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
+                const newTotal = subtotal - result.offerAmount;
+                totalEl.textContent = `₹${newTotal.toLocaleString()}`;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Coupon Applied',
+                    text: result.message,
+                    confirmButtonColor: '#82ae46',
+                });
+            } catch (error) {
+                console.error('Error applying coupon:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    confirmButtonColor: '#82ae46',
+                });
+            }
+        }
+
+        // Remove coupon function
+        async function removeCoupon() {
+            try {
+                const response = await fetch('/cancel-coupon', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to cancel coupon');
+                }
+
+                appliedCouponDiv.style.display = 'none';
+                couponInput.value = '';
+                couponDiscountEl.textContent = '-₹0';
+                totalEl.textContent = subtotalEl.textContent;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Coupon Removed',
+                    text: result.message,
+                    confirmButtonColor: '#82ae46',
+                });
+            } catch (error) {
+                console.error('Error removing coupon:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    confirmButtonColor: '#82ae46',
+                });
+            }
+        }
+
+        // Event Listeners
+        showCouponsBtn.addEventListener('click', function () {
+            couponModal.style.display = 'block';
+            fetchAvailableCoupons();
+        });
+
+        closeModal.addEventListener('click', function () {
+            couponModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target == couponModal) {
                 couponModal.style.display = 'none';
-            });
+            }
+        });
 
-            window.addEventListener('click', function (event) {
-                if (event.target == couponModal) {
-                    couponModal.style.display = 'none';
-                }
-            });
+        applyCouponBtn.addEventListener('click', function () {
+            const code = couponInput.value.trim();
+            if (code) {
+                applyCoupon(code);
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Empty Input',
+                    text: 'Please enter a coupon code',
+                    confirmButtonColor: '#82ae46',
+                });
+            }
+        });
 
-            applyCouponBtn.addEventListener('click', function () {
-                const code = couponInput.value.trim();
-                if (code) {
-                    applyCoupon(code);
-                } else {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Empty Input',
-                        text: 'Please enter a coupon code',
-                        confirmButtonColor: '#82ae46',
-                    });
-                }
-            });
+        removeCouponBtn.addEventListener('click', function () {
+            removeCoupon();
+        });
 
-            removeCouponBtn.addEventListener('click', function () {
-                removeCoupon();
-            });
-
-            // Initialize on page load
-            document.addEventListener('DOMContentLoaded', function () {
-                checkAppliedCoupon();
-            });
+        // Initialize on page load
+        checkAppliedCoupon();
 
 
         
-
         // Helper function for EJS template
         function getDeliveryDate(daysFromNow) {
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
