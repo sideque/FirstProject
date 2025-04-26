@@ -197,7 +197,6 @@
         body: JSON.stringify({ name, description })
     })
     .then(response => {
-        console.log("Response received:", response.status);
         if (!response.ok) {
             return response.json().then(err => {
                 throw new Error(err.error);
@@ -206,7 +205,6 @@
         return response.json();
     })
     .then(data => {
-        console.log("Data:", data);
         window.location.href = '/admin/brand';
     })
     .catch(error => {

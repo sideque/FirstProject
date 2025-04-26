@@ -98,13 +98,13 @@ router.post('/cart/add/:id', userAuth, cartController.addToCart);
 router.post('/cart/update', userAuth, cartController.updateCartItem);
 router.post('/cart/remove', userAuth, cartController.removeCartItem);
 
-// Checkout routes
+// Correct order
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
 router.get('/orders', userAuth, checkoutController.loadOrders);
 router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
+router.get('/order/success', userAuth, checkoutController.success);
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);
-router.get('/success', userAuth, checkoutController.success);
 router.post('/order/return', userAuth, checkoutController.returnOrder);
 
 // coupon Management

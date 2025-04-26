@@ -160,9 +160,9 @@ const userProfile = async (req, res) => {
       .sort({ createdOn: -1 });
 
     // Debug each order individually
-    orders.forEach(order => {
-      console.log('Individual order details:', order);
-    });
+    // orders.forEach(order => {
+    //   console.log('Individual order details:', order);
+    // });
 
     // Fetch addresses for the logged-in user
     const addressDoc = await Address.findOne({ userId: user._id });

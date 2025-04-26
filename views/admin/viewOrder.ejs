@@ -557,8 +557,6 @@
             function orderReturn(orderId, action) {
                 const buttons = document.querySelectorAll(`[onclick*='${orderId}']`);
                 buttons.forEach(button => button.disabled = true); // Disable buttons on action
-
-                console.log(orderId, action)
                 fetch(`/admin/returnOrder?orderId=${orderId}&action=${action}`, {
                     method: 'GET',
                 })

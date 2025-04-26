@@ -398,7 +398,7 @@ const loadShoppingPage = async (req, res) => {
             if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
         }
 
-        console.log('Product query:', JSON.stringify(query, null, 2));
+        // console.log('Product query:', JSON.stringify(query, null, 2));
 
         // Fetch products
         const productsData = await Product.find(query)

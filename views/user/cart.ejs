@@ -724,7 +724,6 @@
                     input.value = value;
                     try {
                         await updateCartQuantity(productId, value);
-                        console.log('Quantity increased to:', value);
                     } catch (error) {
                         input.value = value - 1;
                         Swal.fire({

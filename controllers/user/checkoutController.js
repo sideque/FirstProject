@@ -10,7 +10,6 @@ const { login } = require('./userController');
 const loadOrders = async (req, res) => {
   try {
     const userId = req.session.user;
-    console.log('Session User ID:', userId);
     if (!userId) {
       return res.redirect('/login');
     }
@@ -33,13 +32,13 @@ const loadOrders = async (req, res) => {
     const totalOrders = await Order.countDocuments({ userId: objectId });
     const totalPages = Math.ceil(totalOrders / limit);
 
-    console.log('Orders Data:', {
-      ordersCount: orders.length,
-      totalOrders,
-      totalPages,
-      page,
-      limit,
-    });
+    // console.log('Orders Data:', {
+    //   ordersCount: orders.length,
+    //   totalOrders,
+    //   totalPages,
+    //   page,
+    //   limit,
+    // });
 
     // Render orders page
     res.render('orders', {
@@ -60,7 +59,6 @@ const loadOrders = async (req, res) => {
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
-    console.log('Loading checkout for user:', userId);
     if (!userId) {
       console.log('No user session found, redirecting to login');
       return res.redirect('/login');
@@ -75,7 +73,6 @@ const loadCheckout = async (req, res) => {
     // Fetch addresses
     const addressDoc = await Address.findOne({ userId });
     const addresses = addressDoc ? addressDoc.address : [];
-    console.log('Addresses found:', addresses.length);
 
     // Fetch cart
     const cart = await Cart.findOne({ userId }).populate({
@@ -84,7 +81,6 @@ const loadCheckout = async (req, res) => {
     });
 
     if (!cart || !cart.items.length) {
-      console.log('Cart is empty or not found for user:', userId);
       return res.redirect('/cart?message=Cart is empty');
     }
 
@@ -93,7 +89,6 @@ const loadCheckout = async (req, res) => {
     const cartItems = cart.items
       .map(item => {
         if (!item.productId) {
-          console.log('Invalid cart item, missing productId:', item);
           return null;
         }
         subtotal += item.totalPrice;
@@ -106,7 +101,6 @@ const loadCheckout = async (req, res) => {
         };
       })
       .filter(item => item);
-    console.log('Cart items processed:', cartItems.length, 'Subtotal:', subtotal);
 
     // Check for applied coupon
     let coupon = 0;
@@ -119,9 +113,7 @@ const loadCheckout = async (req, res) => {
         new Date() >= couponData.validFrom
       ) {
         coupon = couponData.offerAmount;
-        console.log('Valid coupon applied:', couponData.couponCode, 'Discount:', coupon);
       } else {
-        console.log('Invalid or expired coupon, clearing session:', req.session.couponApplied);
         req.session.couponApplied = null;
       }
     } else {
@@ -222,17 +214,18 @@ const placeOrder = async (req, res) => {
       createdOn: new Date(),
     });
 
-    await order.save();
+    const newOrder = await order.save();
+    const orderId = newOrder.orderId
+
     await Cart.deleteOne({ userId });
 
     // Clear applied coupon after order placement
     req.session.couponApplied = null;
-    console.log('Order placed, coupon cleared');
-
+    
     res.json({
       success: true,
       message: 'Order placed successfully.',
-      orderId: order.orderId,
+      orderId: orderId,
     });
   } catch (error) {
     console.error('Error placing order:', {
@@ -247,14 +240,18 @@ const placeOrder = async (req, res) => {
   }
 };
 
+
+
 const loadOrderDetails = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.redirect('/pageNotFound');
+    }
+
     const userId = req.session.user;
     const userData = await User.findById(userId);
     const order = await Order.findOne({ _id: id, userId }).populate('orderItems.product');
-
-    console.log('Order details:', order);
 
     if (!order) {
       return res.redirect('/pageNotFound');
@@ -271,6 +268,7 @@ const loadOrderDetails = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
 
 const returnOrder = async (req, res) => {
   try {
@@ -315,8 +313,6 @@ const cancelOrder = async (req, res) => {
 
     const order = await Order.findOne({ _id: orderId, userId });
 
-    console.log(order);
-
     if (!order) {
       return res.json({ success: false, message: 'Order not found' });
     }
@@ -346,7 +342,7 @@ const cancelOrder = async (req, res) => {
 };
 
 const success = async (req, res) => {
-  try {
+  try { 
     // Get userId from session
     const userId = req.session.user;
     const userData = await User.findById(userId);

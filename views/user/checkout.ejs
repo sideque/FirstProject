@@ -345,7 +345,6 @@
     // Check applied coupon on page load
     async function checkAppliedCoupon() {
       try {
-        console.log('Fetching applied coupon...');
         const response = await fetch('/check-applied-coupon', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -367,7 +366,7 @@
         }
 
         const subtotal = parseFloat(subtotalEl.textContent.replace(/,/g, ''));
-        console.log('Parsed subtotal:', subtotal);
+   
 
         if (isNaN(subtotal)) {
           throw new Error('Subtotal is not a valid number');
@@ -385,7 +384,6 @@
           const newTotal = subtotal - couponDiscount - <%= discount %> + <%= shipping %>;
           totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         } else {
-          console.log('No coupon applied:', result);
           couponDiscountEl.textContent = '-₹0.00';
           const newTotal = subtotal - <%= discount %> + <%= shipping %>;
           totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
@@ -454,23 +452,24 @@
           });
 
           const result = await response.json();
-          console.log('Order placement result:', result);
 
-          if (!result.success) {
+          
+          // Redirect to success page with orderId
+          if(result.success){
+              Swal.fire({
+              icon: 'success',
+              title: 'Order Placed',
+              text: result.message,
+              confirmButtonColor: '#82ae46',
+              timer: 2000,
+              showConfirmButton: false,
+            }).then(() => {
+              window.location.href = `/order/success?orderId=${result.orderId}`;
+            });
+          }else{
             throw new Error(result.message || 'Failed to place order');
           }
-
-          // Redirect to success page with orderId
-          Swal.fire({
-            icon: 'success',
-            title: 'Order Placed',
-            text: result.message,
-            confirmButtonColor: '#82ae46',
-            timer: 2000,
-            showConfirmButton: false,
-          }).then(() => {
-            window.location.href = `/order/success?orderId=${result.orderId}`;
-          });
+          
         } catch (error) {
           console.error('Error placing order:', error);
           Swal.fire({

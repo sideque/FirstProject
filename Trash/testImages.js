@@ -51,7 +51,7 @@ async function checkProductImages() {
       // List files in the directory
       const files = fs.readdirSync(imageDir);
       console.log(`Files in directory (${files.length}):`);
-      files.forEach(file => console.log(`  ${file}`));
+      // files.forEach(file => console.log(`  ${file}`));
     }
 
   } catch (err) {
