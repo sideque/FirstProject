@@ -810,8 +810,6 @@ const getEditProduct = async (req, res) => {
             return res.redirect("/admin/product");
         }
 
-        console.log("Found product:", product.productName);
-
         if (product.productImage && product.productImage.length > 0) {
             product.productImage = product.productImage.map(img => {
                 if (img && img.startsWith('/uploads/product-images/')) {

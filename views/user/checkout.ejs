@@ -355,7 +355,6 @@
         }
 
         const result = await response.json();
-        console.log('Coupon fetch result:', result);
 
         const subtotalEl = document.getElementById('subtotal');
         const couponDiscountEl = document.getElementById('coupon-discount');
@@ -374,7 +373,6 @@
 
         if (result.success && result.coupon) {
           const couponDiscount = parseFloat(result.coupon.offerAmount);
-          console.log('Applied coupon discount:', couponDiscount);
 
           if (isNaN(couponDiscount)) {
             throw new Error('Coupon discount is not a valid number');

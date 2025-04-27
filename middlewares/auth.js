@@ -20,7 +20,6 @@ const userAuth = (req,res,next) =>{
 }
 
 const adminAuth = (req, res, next) => {
-    console.log("Admin Auth Check:", req.session.admin);
 
     if (req.session.admin && req.session.admin.isAdmin) { 
         User.findById(req.session.admin.id)

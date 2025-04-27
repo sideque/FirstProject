@@ -95,7 +95,8 @@ router.post('/quantityController', userAuth, productController.checkQuantity);
 
 // Cart
 router.get('/cart', userAuth, cartController.loadCart);
-router.post('/cart/add/:id', userAuth, cartController.addToCart);
+// router.post('/cart/add/:id', userAuth, cartController.addToCart);
+router.post('/cart/add', userAuth, cartController.addToCart); 
 router.post('/cart/update', userAuth, cartController.updateCartItem);
 router.post('/cart/remove', userAuth, cartController.removeCartItem);
 
@@ -117,5 +118,11 @@ router.get('/check-applied-coupon', userAuth, cartController.checkAppliedCoupon)
 //Offer Management
 router.get('/offer',userAuth,offerController.getProductOffers);
 // router.get('/cart/data', userAuth, cartController.getCartData);
+
+
+// WishList Management
+router.get('/wishlist', userAuth, cartController.loadWishlist);
+router.post('/addtowish', userAuth, cartController.addToWishList);
+router.post('/wishlist/remove', userAuth, cartController.removeFromWishlist);
 
 module.exports = router;

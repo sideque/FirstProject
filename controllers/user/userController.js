@@ -36,8 +36,6 @@ const loadHomePage = async (req, res) => {
             )
             .sort({ createdOn: -1 })
             .limit(4);
-            console.log("Categories:", categories);
-            console.log("Brands:", brands);
         
         const formattedProducts = productData.map((product) => {
             let images = [];
@@ -314,7 +312,6 @@ const loadShoppingPage = async (req, res) => {
 
         // Validate category and brand ObjectIds
         if (category && !mongoose.isValidObjectId(category)) {
-            console.log(`Invalid category ID: ${category}`);
             return res.redirect('/pageNotFound');
         }
         if (brand && !mongoose.isValidObjectId(brand)) {
@@ -373,7 +370,6 @@ const loadShoppingPage = async (req, res) => {
                 isDeleted: false 
             });
             if (!validBrand) {
-                console.log(`Brand not found or unlisted/deleted: ${brand}`);
                 return res.redirect('/pageNotFound');
             }
             query.brand = brand;

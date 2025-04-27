@@ -7,6 +7,7 @@ const Coupon = require('../../models/couponSchema');
 const env = require("dotenv").config();
 const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
+const Wishlist = require("../../models/wishlistSchema");
 const { success } = require("./checkoutController");
 const saltRounds = 10;
 
@@ -76,9 +77,19 @@ const addToCart = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Please log in' });
     }
 
-    const productId = req.params.id;
-    const quantity = req.body.quantity ? parseInt(req.body.quantity) : 1;
+    const { productId, quantity = 1, fromWishlist } = req.body;
+    const parsedQuantity = parseInt(quantity);
 
+    // Validate product exists and stock
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    if (product.quantity < parsedQuantity) {
+      return res.status(400).json({ success: false, message: 'Insufficient stock' });
+    }
+
+    // Add to cart
     let cart = await Cart.findOne({ userId: user._id });
     if (!cart) {
       cart = new Cart({ userId: user._id, items: [] });
@@ -86,29 +97,34 @@ const addToCart = async (req, res) => {
 
     const existingItem = cart.items.find(item => item.productId.toString() === productId);
     if (existingItem) {
-      existingItem.stock += quantity;
+      existingItem.stock += parsedQuantity;
       existingItem.totalPrice = existingItem.price * existingItem.stock;
     } else {
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(404).json({ success: false, message: 'Product not found' });
-      }
-
       cart.items.push({
         productId: productId,
-        stock: quantity,
+        stock: parsedQuantity,
         price: product.salePrice,
-        totalPrice: product.salePrice * quantity,
+        totalPrice: product.salePrice * parsedQuantity,
         status: 'placed',
         cancellationReason: 'none'
       });
     }
 
     await cart.save();
-    res.redirect(`/cart?success=true`);
+
+    // If added from wishlist, remove from wishlist
+    if (fromWishlist) {
+      const wishlist = await Wishlist.findOne({ userId: user._id });
+      if (wishlist) {
+        wishlist.products = wishlist.products.filter(item => item.productId.toString() !== productId);
+        await wishlist.save();
+      }
+    }
+
+    res.json({ success: true, message: 'Product added to cart' });
   } catch (error) {
     console.error('Error adding to cart:', error);
-    res.redirect('/pageNotFound');
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -130,10 +146,10 @@ const updateCartItem = async (req, res) => {
     if (!item) {
       return res.status(404).json({ success: false, message: 'Item not found' });
     }
-      // the change is stock to quantity
+    
     if (quantity > item.productId.quantity) {
       return res.status(400).json({
-        success: false,                         //also this changed stock to quatity
+        success: false,
         message: `Cannot increase. Only ${item.productId.quantity} items in stock.`,
       });
     }
@@ -161,7 +177,6 @@ const removeCartItem = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Please log in' });
     }
     const { productId } = req.body;
-    console.log('Removing item with productId:', productId);
     const cart = await Cart.findOne({ userId: user._id });
     if (!cart) {
       return res.status(404).json({ success: false, message: 'Cart not found' });
@@ -203,7 +218,6 @@ const couponApply = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cart not found' });
     }
 
-    // Calculate cart total
     let cartTotal = cart.items.reduce((total, item) => {
       return total + (item.productId.salePrice * item.stock);
     }, 0);
@@ -230,7 +244,7 @@ const couponApply = async (req, res) => {
     req.session.couponApplied = {
       couponId: coupon._id,
       couponCode: coupon.couponCode,
-      offerAmount: coupon.offerAmount, // this change ot couponCode to offerAmount
+      offerAmount: coupon.offerAmount,
       minValue: coupon.minCartValue
     };
 
@@ -248,11 +262,8 @@ const couponApply = async (req, res) => {
 const couponCancel = async (req, res) => {
   try {
     if (!req.session.couponApplied) {
-      console.log('No coupon applied to cancel for user:', req.session.user);
       return res.status(400).json({ success: false, message: 'No coupon applied to cancel.' });
     }
-
-    console.log('Cancelling coupon:', req.session.couponApplied);
     req.session.couponApplied = null;
 
     return res.json({ success: true, message: 'Coupon cancelled successfully.' });
@@ -287,13 +298,11 @@ const checkAppliedCoupon = async (req, res) => {
     const couponApplied = req.session.couponApplied;
 
     if (!couponApplied) {
-      console.log('No coupon applied for user:', req.session.user);
       return res.json({ success: false, message: 'No coupon applied.' });
     }
 
     const coupon = await Coupon.findById(couponApplied.couponId);
     if (!coupon || !coupon.isList || new Date() > coupon.validUpto || new Date() < coupon.validFrom) {
-      console.log('Invalid or expired coupon, clearing session:', couponApplied);
       req.session.couponApplied = null;
       return res.json({ success: false, message: 'Applied coupon is invalid or expired.' });
     }
@@ -316,6 +325,108 @@ const checkAppliedCoupon = async (req, res) => {
   }
 };
 
+const loadWishlist = async (req, res) => {
+  try {
+    const user = req.session.user;
+    if (!user || !user._id) {
+      return res.redirect('/login');
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 3;
+    const skip = (page - 1) * limit;
+
+    const wishlist = await Wishlist.findOne({ userId: user._id }).populate({
+      path: 'products.productId',
+      select: 'productName productImage salePrice originalPrice brand quantity',
+    });
+
+    const wishlistItems = wishlist && wishlist.products ? wishlist.products : [];
+    const totalItems = wishlistItems.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    const paginatedItems = wishlistItems.slice(skip, skip + limit);
+
+    const userData = await User.findById(user._id);
+
+    res.render('wishlist', {
+      wishlistItems: paginatedItems,
+      totalPages,
+      currentPage: page,
+      totalItems,
+      user: userData,
+    });
+  } catch (error) {
+    console.error('Error loading wishlist:', error);
+    res.redirect('/pageNotFound');
+  }
+};
+
+const addToWishList = async (req, res) => {
+  try {
+    const user = req.session.user;
+    if (!user || !user._id) {
+      return res.status(401).json({ success: false, message: 'Please log in' });
+    }
+
+    const { productId } = req.body;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    let wishlist = await Wishlist.findOne({ userId: user._id });
+    if (!wishlist) {
+      wishlist = new Wishlist({ userId: user._id, products: [] });
+    }
+
+    const existingItem = wishlist.products.find(item => item.productId.toString() === productId);
+    if (existingItem) {
+      return res.status(400).json({ success: false, message: 'Product already in wishlist' });
+    }
+
+    wishlist.products.push({
+      productId: productId,
+      addedOn: new Date(),
+    });
+
+    await wishlist.save();
+    res.json({ success: true, message: 'Product added to wishlist' });
+  } catch (error) {
+    console.error('Error adding to wishlist:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+const removeFromWishlist = async (req, res) => {
+  try {
+    const user = req.session.user;
+    if (!user || !user._id) {
+      return res.status(401).json({ success: false, message: 'Please log in' });
+    }
+
+    const { productId } = req.body;
+
+    const wishlist = await Wishlist.findOne({ userId: user._id });
+    if (!wishlist) {
+      return res.status(404).json({ success: false, message: 'Wishlist not found' });
+    }
+
+    const itemExists = wishlist.products.some(item => item.productId.toString() === productId);
+    if (!itemExists) {
+      return res.status(404).json({ success: false, message: 'Product not found in wishlist' });
+    }
+
+    wishlist.products = wishlist.products.filter(item => item.productId.toString() !== productId);
+    await wishlist.save();
+
+    res.json({ success: true, message: 'Product removed from wishlist' });
+  } catch (error) {
+    console.error('Error removing from wishlist:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 module.exports = {
   loadCart,
   addToCart,
@@ -324,5 +435,8 @@ module.exports = {
   couponApply,
   couponCancel,
   getAvailableCoupons,
-  checkAppliedCoupon
+  checkAppliedCoupon,
+  loadWishlist,
+  addToWishList,
+  removeFromWishlist
 };

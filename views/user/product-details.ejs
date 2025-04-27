@@ -260,6 +260,11 @@
       background: #e9ecef;
     }
 
+    .quantity-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
     .quantity-input {
       width: 60px;
       height: 40px;
@@ -287,7 +292,7 @@
       margin-bottom: 30px;
     }
 
-    .cart-btn, .buy-btn {
+    .cart-btn, .wish-btn {
       padding: 12px 25px;
       border-radius: 30px;
       font-weight: 600;
@@ -311,12 +316,18 @@
       transform: translateY(-2px);
     }
 
-    .buy-btn {
+    .cart-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .wish-btn {
       background: #82ae46;
       color: white;
     }
 
-    .buy-btn:hover {
+    .wish-btn:hover {
       background: #6d9338;
       transform: translateY(-2px);
     }
@@ -426,7 +437,7 @@
       color: #82ae46;
     }
 
-    .product .bottom-area {
+    .bottom-area {
       display: flex;
       justify-content: space-between;
       margin-top: 15px;
@@ -455,14 +466,19 @@
       color: white;
     }
 
-    .product .buy-now {
+    .product .add-to-cart:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .product .wishlist {
       background: #82ae46;
       color: white;
       width: 48%;
       text-align: center;
     }
 
-    .product .buy-now:hover {
+    .product .wishlist:hover {
       background: #6d9338;
     }
 
@@ -623,7 +639,7 @@
         flex-direction: column;
       }
 
-      .cart-btn, .buy-btn {
+      .cart-btn, .wish-btn {
         width: 100%;
       }
 
@@ -690,17 +706,17 @@
           </div>
 
           <!-- Offers Section -->
-        <% if (allOffers && allOffers.length > 0) { %>
-          <div class="offers-section">
-            <h3 class="offers-title">Available Offers</h3>
-            <% allOffers.forEach(offer => { %>
-              <div class="offer-item">
-                <span class="offer-name"><%= offer.offerName %></span>
-                <span class="offer-details"><%= offer.offerAmount %>% Off</span>
-              </div>
-            <% }) %>
-          </div>
-        <% } %>
+          <% if (allOffers && allOffers.length > 0) { %>
+            <div class="offers-section">
+              <h3 class="offers-title">Available Offers</h3>
+              <% allOffers.forEach(offer => { %>
+                <div class="offer-item">
+                  <span class="offer-name"><%= offer.offerName %></span>
+                  <span class="offer-details"><%= offer.offerAmount %>% Off</span>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
 
           <p class="product-description">
             <%= product.description %>
@@ -746,26 +762,23 @@
             <div class="quantity-container">
               <span class="quantity-label">Quantity:</span>
               <div class="quantity-input-group">
-                <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                <button class="quantity-btn" id="decreaseBtn" onclick="decreaseQuantity()">-</button>
                 <input type="number" min="1" max="<%= Math.min(product.quantity, 5) %>" value="1" class="quantity-input" id="quantity" readonly>
-                <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+                <button class="quantity-btn" id="increaseBtn" onclick="increaseQuantity()">+</button>
               </div>
               <span style="margin-left: 15px; color: #666;">Available: <%= product.quantity %></span>
             </div>
 
             <div class="product-actions">
-              <form action="/cart/add/<%= product._id %>" method="POST" style="width: 48%;">
+              <form id="cartForm" action="/cart/add/<%= product._id %>" method="POST" style="width: 48%;">
                 <input type="hidden" name="quantity" id="cartQuantity" value="1">
-                <button type="submit" class="cart-btn" style="width: 100%;">
+                <button type="submit" class="cart-btn" id="cartBtn" style="width: 100%;">
                   <i class="ion-ios-cart"></i> Add to Cart
                 </button>
               </form>
-              <form action="/buy/<%= product._id %>" method="POST" style="width: 48%;">
-                <input type="hidden" name="quantity" id="buyQuantity" value="1">
-                <button type="submit" class="buy-btn" style="width: 100%;">
-                  <i class="fa fa-heart"></i> Wishlist
-                </button>
-              </form>
+              <button class="wish-btn" style="width: 48%;" data-id="<%= product._id %>">
+                <i class="fa fa-heart"></i> Add to Wishlist
+              </button>
             </div>
           <% } %>
 
@@ -884,11 +897,11 @@
                     <h3><a href="/product?id=<%= relatedProduct._id %>"><%= relatedProduct.productName %></a></h3>
                     <div class="price">₹<%= relatedProduct.salePrice.toLocaleString() %></div>
                     <div class="bottom-area">
-                      <a href="/cart/add/<%= relatedProduct._id %>" class="btn add-to-cart">Add to cart</a>
-                      <a href="/wishlist/add/<%= relatedProduct._id %>" class="btn wishlist">
+                      <a href="#" class="btn add-to-cart" data-id="<%= relatedProduct._id %>" data-quantity="<%= relatedProduct.quantity %>">Add to cart</a>
+                      <a href="#" class="btn wishlist" data-id="<%= relatedProduct._id %>">
                         <i class="fa fa-heart"></i> Wishlist
                       </a>
-                    </div>                    
+                    </div>
                   </div>
                 </div>
               </div>
@@ -984,46 +997,38 @@
       });
     });
 
-    async function increaseQuantity() {
+    function increaseQuantity() {
       const quantityInput = document.getElementById('quantity');
+      const increaseBtn = document.getElementById('increaseBtn');
+      const maxQuantity = parseInt(quantityInput.max);
       const currentValue = parseInt(quantityInput.value);
-      const newValue = currentValue + 1;
 
-      try {
-        const response = await fetch('/quantityController', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            productId: '<%= product._id %>',
-            quantity: newValue
-          })
-        });
-
-        const result = await response.json();
-        if (result.valid) {
-          quantityInput.value = newValue;
-          updateHiddenQuantityInputs();
-        }
-      } catch (error) {
-        console.error('Error checking quantity:', error);
+      if (currentValue < maxQuantity) {
+        quantityInput.value = currentValue + 1;
+        updateHiddenQuantityInputs();
       }
+
+      increaseBtn.disabled = parseInt(quantityInput.value) >= maxQuantity;
+      document.getElementById('decreaseBtn').disabled = parseInt(quantityInput.value) <= 1;
     }
 
     function decreaseQuantity() {
       const quantityInput = document.getElementById('quantity');
+      const decreaseBtn = document.getElementById('decreaseBtn');
       const currentValue = parseInt(quantityInput.value);
+
       if (currentValue > 1) {
         quantityInput.value = currentValue - 1;
         updateHiddenQuantityInputs();
       }
+
+      decreaseBtn.disabled = parseInt(quantityInput.value) <= 1;
+      document.getElementById('increaseBtn').disabled = parseInt(quantityInput.value) >= parseInt(quantityInput.max);
     }
 
     function updateHiddenQuantityInputs() {
       const quantity = document.getElementById('quantity').value;
       document.getElementById('cartQuantity').value = quantity;
-      document.getElementById('buyQuantity').value = quantity;
     }
 
     document.getElementById('quantity')?.addEventListener('input', function(e) {
@@ -1046,7 +1051,260 @@
       evt.currentTarget.classList.add("active");
     }
 
-    document.addEventListener('DOMContentLoaded', initializeZoom);
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeZoom();
+
+      // Add to Cart functionality
+      const cartForm = document.getElementById('cartForm');
+      const cartBtn = document.getElementById('cartBtn');
+      if (cartForm && cartBtn) {
+        cartForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const quantity = parseInt(document.getElementById('cartQuantity').value);
+          const maxQuantity = parseInt(document.getElementById('quantity').max);
+          const productId = '<%= product._id %>';
+
+          if (quantity > maxQuantity) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Out of Stock',
+              text: `Only ${maxQuantity} items available in stock.`,
+              confirmButtonColor: '#82ae46',
+            });
+            return;
+          }
+
+          // Set loading state
+          cartBtn.classList.add('loading');
+          cartBtn.disabled = true;
+          const originalText = cartBtn.textContent;
+          cartBtn.textContent = 'Adding...';
+
+          fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId, quantity, fromWishlist: false }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Reset button state
+            cartBtn.classList.remove('loading');
+            cartBtn.disabled = false;
+            cartBtn.textContent = originalText;
+
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Added to Cart',
+                text: 'Item has been added to your cart successfully!',
+                confirmButtonColor: '#82ae46',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.reload();
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to add item to cart',
+                confirmButtonColor: '#82ae46',
+              });
+            }
+          })
+          .catch(error => {
+            // Reset button state
+            cartBtn.classList.remove('loading');
+            cartBtn.disabled = false;
+            cartBtn.textContent = originalText;
+
+            console.error('Error adding to cart:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong. Please try again later.',
+              confirmButtonColor: '#82ae46',
+            });
+          });
+        });
+      }
+
+      // Add to Wishlist button event listener
+      const wishBtn = document.querySelector('.wish-btn');
+      if (wishBtn) {
+        wishBtn.addEventListener('click', function() {
+          const productId = this.dataset.id;
+
+          fetch('/addtowish', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Added to Wishlist',
+                text: data.message,
+                confirmButtonColor: '#82ae46',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to add to wishlist',
+                confirmButtonColor: '#82ae46',
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error adding to wishlist:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong. Please try again later.',
+              confirmButtonColor: '#82ae46',
+            });
+          });
+        });
+      }
+
+      // Add to Wishlist for related products
+      const wishlistBtns = document.querySelectorAll('.wishlist');
+      wishlistBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const productId = this.dataset.id;
+
+          fetch('/addtowish', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Added to Wishlist',
+                text: data.message,
+                confirmButtonColor: '#82ae46',
+                timer: 2000,
+                showConfirmButton: false
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to add to wishlist',
+                confirmButtonColor: '#82ae46',
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error adding to wishlist:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong. Please try again later.',
+              confirmButtonColor: '#82ae46',
+            });
+          });
+        });
+      });
+
+      // Add to Cart for related products
+      const addToCartBtns = document.querySelectorAll('.add-to-cart');
+      addToCartBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const productId = this.dataset.id;
+          const availableStock = parseInt(this.dataset.quantity);
+
+          if (availableStock <= 0) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Out of Stock',
+              text: 'This item is out of stock and cannot be added to the cart.',
+              confirmButtonColor: '#82ae46',
+            });
+            return;
+          }
+
+          btn.classList.add('loading');
+          btn.disabled = true;
+          const originalText = btn.textContent;
+          btn.textContent = 'Adding...';
+
+          fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId, quantity: 1, fromWishlist: false }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            btn.textContent = originalText;
+
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Added to Cart',
+                text: 'Item has been added to your cart successfully!',
+                confirmButtonColor: '#82ae46',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.reload();
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to add item to cart',
+                confirmButtonColor: '#82ae46',
+              });
+            }
+          })
+          .catch(error => {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            btn.textContent = originalText;
+            console.error('Error adding to cart:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Something went wrong. Please try again later.',
+              confirmButtonColor: '#82ae46',
+            });
+          });
+        });
+      });
+
+      // Check for error in URL params (e.g., insufficient stock)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('error') === 'insufficient_stock') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Out of Stock',
+          text: `Only <%= product.quantity %> items available in stock.`,
+          confirmButtonColor: '#82ae46',
+        });
+        window.history.replaceState({}, document.title, '/product?id=<%= product._id %>');
+      }
+    });
   </script>
 </body>
 </html>
