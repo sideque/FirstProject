@@ -14,7 +14,7 @@ const offerSchema = new Schema({
   },
   discountType: {
     type: String,
-    enum: 'percentage',
+    enum: ['percentage'], 
     required: true
   },
   offerAmount: {

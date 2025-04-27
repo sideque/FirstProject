@@ -19,7 +19,6 @@ function generateOtp() {
   return otp;
 }
 
-
 // sendVerificationEmail 
 const sendVerificationEmail = async (email, otp) => {
   try {
@@ -50,8 +49,6 @@ const sendVerificationEmail = async (email, otp) => {
     return false;
   }
 };
-
-
 
 // getForgotPassPage
 const getForgotPassPage = async (req, res) => {
@@ -89,8 +86,6 @@ const forgotEmailValid = async (req, res) => {
   }
 };
 
-
-
 // verifyForgotPassOtp
 const verifyForgotPassOtp = async (req, res) => {
   try {
@@ -106,7 +101,6 @@ const verifyForgotPassOtp = async (req, res) => {
   }
 };
 
-
 //getResetPassPage
 const getResetPassPage = async (req, res) => {
   try {
@@ -115,7 +109,6 @@ const getResetPassPage = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
-
 
 // postNewPassword
 const postNewPassword = async (req, res) => {
@@ -135,7 +128,6 @@ const postNewPassword = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
-
 
 // userProfile
 const userProfile = async (req, res) => {
@@ -179,8 +171,6 @@ const userProfile = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
-
-
 
 const postUserNewPassword = async (req, res) => {
   try {
@@ -416,8 +406,6 @@ const getAddressForEdit = async (req, res) => {
   }
 };
 
-
-
 const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.body;
@@ -437,9 +425,6 @@ const cancelOrder = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
-
-
-
 
 const editEmail = async (req, res) => {
   try {

@@ -86,7 +86,7 @@
                             <select class="form-control" id="brand" name="brand">
                                 <option value="" selected disabled>Select a Brand</option>
                                 <% for(let i=0; i<brand.length; i++) { %>
-                                    <option value="<%= brand[i]._id %>" <%= (brand[i].name === product.brand) ? 'selected' : '' %>><%= brand[i].name %></option>
+                                    <option value="<%= brand[i]._id %>" <%= (brand[i].name === product.brand.name) ? 'selected' : '' %>><%= brand[i].name %></option>
                                 <% } %>
                             </select>
                             <div id="brand-error" class="error-message"></div>

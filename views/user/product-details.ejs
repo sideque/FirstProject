@@ -126,7 +126,7 @@
       font-size: 26px;
       font-weight: 600;
       color: #82ae46;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .product-price .old-price {
@@ -144,6 +144,43 @@
       border-radius: 20px;
       font-size: 14px;
       margin-left: 10px;
+    }
+
+    .offers-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .offers-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .offer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .offer-item:last-child {
+      border-bottom: none;
+    }
+
+    .offer-name {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .offer-details {
+      font-size: 14px;
+      font-weight: 500;
+      color: #82ae46;
     }
 
     .product-description {
@@ -603,10 +640,8 @@
   </style>
 </head>
 <body>
-  <!-- Header would be included here -->
   <%- include("../../views/partials/user/header") %>
 
-  <!-- Hero Section -->
   <div class="hero-wrap hero-bread" style="background-image: url('/images/p28.jpg');">
     <div class="container">
       <div class="row no-gutters slider-text align-items-center justify-content-center">
@@ -618,11 +653,9 @@
     </div>
   </div>
 
-  <!-- Product Detail Section -->
   <section class="ftco-section bg-light">
     <div class="container">
       <div class="product-detail-row">
-        <!-- Product Images Column -->
         <div class="product-images-col">
           <div class="product-gallery zoom-container">
             <img src="/Uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : '/images/placeholder.jpg' %>" 
@@ -643,10 +676,9 @@
           </div>
         </div>
 
-        <!-- Product Info Column -->
         <div class="product-info-col">
           <h2 class="product-title"><%= product.productName %></h2>
-          <span class="product-brand"><%= product.brand %></span>
+          <span class="product-brand"><%= product.brand ? product.brand.name : 'N/A' %></span>
           <div class="product-price">
             ₹<%= product.salePrice.toLocaleString() %>
             <% if (product.regularPrice && product.salePrice < product.regularPrice) { %>
@@ -656,11 +688,24 @@
               <% } %>
             <% } %>
           </div>
+
+          <!-- Offers Section -->
+        <% if (allOffers && allOffers.length > 0) { %>
+          <div class="offers-section">
+            <h3 class="offers-title">Available Offers</h3>
+            <% allOffers.forEach(offer => { %>
+              <div class="offer-item">
+                <span class="offer-name"><%= offer.offerName %></span>
+                <span class="offer-details"><%= offer.offerAmount %>% Off</span>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+
           <p class="product-description">
             <%= product.description %>
           </p>
 
-          <!-- Product Specifications -->
           <div class="specifications">
             <h3 class="spec-title">Specifications</h3>
             <div class="spec-list">
@@ -695,7 +740,6 @@
             </div>
           </div>
 
-          <!-- Quantity Selector or Out of Stock Message -->
           <% if (product.quantity <= 0 || product.status === 'out of stock' || product.isBlocked) { %>
             <div class="out-of-stock">Out of Stock</div>
           <% } else { %>
@@ -709,7 +753,6 @@
               <span style="margin-left: 15px; color: #666;">Available: <%= product.quantity %></span>
             </div>
 
-            <!-- Action Buttons -->
             <div class="product-actions">
               <form action="/cart/add/<%= product._id %>" method="POST" style="width: 48%;">
                 <input type="hidden" name="quantity" id="cartQuantity" value="1">
@@ -720,13 +763,12 @@
               <form action="/buy/<%= product._id %>" method="POST" style="width: 48%;">
                 <input type="hidden" name="quantity" id="buyQuantity" value="1">
                 <button type="submit" class="buy-btn" style="width: 100%;">
-                  <i class="ion-ios-basket"></i> Buy Now
+                  <i class="fa fa-heart"></i> Wishlist
                 </button>
               </form>
             </div>
           <% } %>
 
-          <!-- Additional Info -->
           <div class="additional-info">
             <p><strong>Availability:</strong> 
               <% if (product.quantity <= 0 || product.status === 'out of stock' || product.isBlocked) { %>
@@ -743,14 +785,12 @@
         </div>
       </div>
 
-      <!-- Product Tabs (Description and Reviews) -->
       <div class="product-tabs">
         <div class="tabs-nav">
           <button class="tab-btn active" onclick="openTab(event, 'description')">Description</button>
           <button class="tab-btn" onclick="openTab(event, 'specifications')">Specifications</button>
           <button class="tab-btn" onclick="openTab(event, 'reviews')">Reviews</button>
         </div>
-        <!-- Description Tab -->
         <div id="description" class="tab-content active">
           <p><%= product.description %></p>
           <% if (product.features && product.features.length > 0) { %>
@@ -762,7 +802,6 @@
             </ul>
           <% } %>
         </div>
-        <!-- Specifications Tab -->
         <div id="specifications" class="tab-content">
           <div class="spec-list" style="grid-template-columns: repeat(1, 1fr);">
             <% if (product.processor || product.ram || product.storage || product.camera) { %>
@@ -795,7 +834,6 @@
             <% } %>
           </div>
         </div>
-        <!-- Reviews Tab -->
         <div id="reviews" class="tab-content">
           <% if (product.reviews && product.reviews.length > 0) { %>
             <% product.reviews.forEach(review => { %>
@@ -827,7 +865,6 @@
         </div>
       </div>
 
-      <!-- Related Products Section -->
       <div class="related-products">
         <h2 class="section-title">Related Products</h2>
         <div class="product-grid">
@@ -843,13 +880,15 @@
                     <div class="overlay"></div>
                   </a>
                   <div class="text">
-                    <div class="cat"><%= relatedProduct.brand %></div>
-                    <h3><a href="/product/<%= relatedProduct._id %>"><%= relatedProduct.productName %></a></h3>
+                    <div class="cat"><%= relatedProduct.brand ? relatedProduct.brand.name : 'N/A' %></div>
+                    <h3><a href="/product?id=<%= relatedProduct._id %>"><%= relatedProduct.productName %></a></h3>
                     <div class="price">₹<%= relatedProduct.salePrice.toLocaleString() %></div>
                     <div class="bottom-area">
                       <a href="/cart/add/<%= relatedProduct._id %>" class="btn add-to-cart">Add to cart</a>
-                      <a href="/buy/<%= relatedProduct._id %>" class="btn buy-now">Buy now</a>
-                    </div>
+                      <a href="/wishlist/add/<%= relatedProduct._id %>" class="btn wishlist">
+                        <i class="fa fa-heart"></i> Wishlist
+                      </a>
+                    </div>                    
                   </div>
                 </div>
               </div>
@@ -862,11 +901,9 @@
     </div>
   </section>
 
-  <!-- Footer would be included here -->
   <%- include("../../views/partials/user/footer") %>
 
   <script>
-    // Zoom Functionality
     function initializeZoom() {
       const containers = document.querySelectorAll('.zoom-container');
       containers.forEach(container => {
@@ -927,7 +964,6 @@
       lens.style.backgroundPosition = `${bgPosX}px ${bgPosY}px`;
     }
 
-    // Image Switching
     function changeMainImage(src) {
       const mainImage = document.getElementById('mainImage');
       mainImage.src = src;
@@ -942,14 +978,12 @@
       initializeZoom();
     }
 
-    // Attach click events to thumbnails
     document.querySelectorAll('.thumbnail').forEach(thumb => {
       thumb.addEventListener('click', () => {
         changeMainImage(thumb.src);
       });
     });
 
-    // Quantity Handling
     async function increaseQuantity() {
       const quantityInput = document.getElementById('quantity');
       const currentValue = parseInt(quantityInput.value);
@@ -972,7 +1006,6 @@
           quantityInput.value = newValue;
           updateHiddenQuantityInputs();
         }
-        // No alert; silently ignore if quantity is invalid
       } catch (error) {
         console.error('Error checking quantity:', error);
       }
@@ -993,13 +1026,11 @@
       document.getElementById('buyQuantity').value = quantity;
     }
 
-    // Prevent manual input changes
     document.getElementById('quantity')?.addEventListener('input', function(e) {
-      e.preventDefault(); // Ignore manual input
-      this.value = this.value; // Revert to current value
+      e.preventDefault();
+      this.value = this.value;
     });
 
-    // Tab Functionality
     function openTab(evt, tabName) {
       let tabcontent = document.getElementsByClassName("tab-content");
       for (let i = 0; i < tabcontent.length; i++) {
@@ -1015,7 +1046,6 @@
       evt.currentTarget.classList.add("active");
     }
 
-    // Initialize Zoom on Page Load
     document.addEventListener('DOMContentLoaded', initializeZoom);
   </script>
 </body>

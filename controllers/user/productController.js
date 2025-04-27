@@ -3,6 +3,7 @@ const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
 const Brand = require("../../models/brandSchema");
 const Offer = require("../../models/offerSchema");
+const { getProductOffers } = require('../user/offerController');
 
 const productController = async (req, res) => {
   try {
@@ -49,7 +50,7 @@ const productController = async (req, res) => {
       .lean();
 
     // Fetch offers applicable to this product, its category, or its brand
-    const offers = await Offer.find({
+    const allOffers = await Offer.find({
       isList: true,
       validFrom: { $lte: new Date() }, // Offer has started
       validUpto: { $gte: new Date() }, // Offer has not expired
@@ -63,39 +64,51 @@ const productController = async (req, res) => {
     // Determine the best offer (highest percentage discount)
     let bestOffer = null;
     let discountAmount = 0;
+    let discountedPrice = product.salePrice;
 
-    if (offers.length > 0) {
+    if (allOffers.length > 0) {
       // Calculate discount for each offer and find the best one
-      bestOffer = offers.reduce((best, offer) => {
+      bestOffer = allOffers.reduce((best, offer) => {
         const currentDiscount = (product.salePrice * offer.offerAmount) / 100; // Percentage-based discount
-
         if (!best || currentDiscount > best.discount) {
           return { ...offer, discount: currentDiscount };
         }
         return best;
       }, null);
 
-      // Set discountAmount for the best offer
-      discountAmount = bestOffer.discount;
+      // Set discountAmount and discountedPrice for the best offer
+      if (bestOffer) {
+        discountAmount = bestOffer.discount;
+        discountedPrice = product.salePrice - discountAmount;
+      }
 
-      // Map offers to match template expectations (discountType, discountAmount)
-      offers.forEach(offer => {
-        offer.discountType = 'percentage'; // Already set in schema
+      // Map offers to match template expectations (ensure consistency)
+      allOffers.forEach(offer => {
+        offer.discountType = offer.discountType || 'percentage'; // Ensure discountType is set
         offer.discountAmount = offer.offerAmount; // Map offerAmount to discountAmount for template
       });
 
       // Update bestOffer to match template expectations
-      bestOffer.discountType = 'percentage';
-      bestOffer.discountAmount = bestOffer.offerAmount;
+      if (bestOffer) {
+        bestOffer.discountType = bestOffer.discountType || 'percentage';
+        bestOffer.discountAmount = bestOffer.offerAmount;
+      }
     }
+
+    // Prepare product data with discounted price and offer percentage
+    const productWithOffer = {
+      ...product,
+      salePrice: discountedPrice,
+      productOffer: bestOffer ? bestOffer.offerAmount : 0,
+    };
 
     res.render("product-details", {
       user: userData,
-      product,
+      product: productWithOffer,
       relatedProducts: relatedProducts.filter(p => p.brand),
-      bestOffer, // Pass best offer
-      offers, // Pass all applicable offers
-      discountAmount // Pass calculated discount amount
+      bestOffer, 
+      allOffers, 
+      discountAmount, 
     });
 
   } catch (error) {
@@ -103,7 +116,6 @@ const productController = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
 
 const checkQuantity = async (req, res) => {
   try {
@@ -139,8 +151,6 @@ const checkQuantity = async (req, res) => {
     return res.status(500).json({ valid: false, message: 'Internal server error' });
   }
 };
-
-
 
 
 module.exports = {

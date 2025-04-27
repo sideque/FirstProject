@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/user/userController');
 const profileController = require('../controllers/user/profileController');
 const checkoutController = require('../controllers/user/checkoutController');
+const offerController = require('../controllers/user/offerController');
 const { userAuth } = require('../middlewares/auth');
 const passport = require('passport');
 const productController = require('../controllers/user/productController');
@@ -113,5 +114,8 @@ router.get('/cancel-coupon', userAuth, cartController.couponCancel);
 router.get('/coupons/available', userAuth, cartController.getAvailableCoupons);
 router.get('/check-applied-coupon', userAuth, cartController.checkAppliedCoupon);
 
+//Offer Management
+router.get('/offer',userAuth,offerController.getProductOffers);
+// router.get('/cart/data', userAuth, cartController.getCartData);
 
 module.exports = router;

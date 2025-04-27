@@ -188,110 +188,98 @@ const addProducts = async (req, res) => {
             camera,
         } = req.body;
 
-        // Validate required fields
         if (!productName || !description || !brand || !category || !regularPrice || !salePrice || !quantity) {
             return res.status(400).json({
                 success: false,
-                message: "Please fill in all required fields"
+                message: "Please fill in all required fields",
             });
         }
 
-        // Check if product already exists
         const existingProduct = await Product.findOne({ productName });
         if (existingProduct) {
             return res.status(400).json({
                 success: false,
-                message: "Product with this name already exists"
+                message: "Product with this name already exists",
             });
         }
 
-        // Validate images
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Please upload at least one image"
+                message: "Please upload at least one image",
             });
         }
 
-        // Process images
         const images = [];
-        try {
-            for (const file of req.files) {
 
-                // Validate file type
-                if (!file.mimetype.startsWith('image/')) {
-                    throw new Error(`Invalid file type: ${file.mimetype}`);
-                }
-
-                // Validate file size (max 10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    throw new Error(`File too large: ${file.originalname}`);
-                }
-
-                const filename = file.filename;
-                images.push(filename);
+        for (const file of req.files) {
+            if (!file.mimetype.startsWith('image/')) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid file type: ${file.originalname}`,
+                });
             }
 
-            // // Get category ID
-            // const categoryObj = await Category.findOne({ name: category });
-            // if (!categoryObj) {
-            //     return res.status(400).json({
-            //         success: false,
-            //         message: "Invalid category name"
-            //     });
-            // }
-
-            // Create new product
-            const newProduct = new Product({
-                productName,
-                description,
-                brand,
-                category,
-                regularPrice,
-                salePrice,
-                productOffer: parseFloat(discount) || 0,
-                quantity: parseInt(quantity) || 0,
-                productImage: images,
-                isBlocked: false,
-                status: "Available",
-                processor: processor || '',
-                ram: ram || '',
-                storage: storage || '',
-                camera: camera || ''
-            });
-
-            await newProduct.save();
-
-            res.status(201).json({
-                success: true,
-                message: "Product added successfully",
-                product: newProduct
-            });
-        } catch (error) {
-            console.error('Error processing images:', error);
-            // Clean up any uploaded files if there was an error
-            for (const image of images) {
-                try {
-                    const imagePath = path.join(process.cwd(), 'uploads', 'product-images', image);
-                    if (fs.existsSync(imagePath)) {
-                        fs.unlinkSync(imagePath);
-                    }
-                } catch (cleanupError) {
-                    console.error('Error cleaning up file:', cleanupError);
-                }
+            if (file.size > 10 * 1024 * 1024) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File too large: ${file.originalname}`,
+                });
             }
-            return res.status(500).json({
+
+            images.push(file.filename);
+        }
+
+        // ✅ Brand name മുതൽ Brand ObjectId കിട്ടണം
+        const brandObj = await Brand.findOne({ name: brand });
+        if (!brandObj) {
+            return res.status(400).json({
                 success: false,
-                message: "Error processing images. Please try again.",
-                error: error.message
+                message: "Invalid brand name",
             });
         }
+
+        // ✅ Category name മുതൽ Category ObjectId കിട്ടണം
+        const categoryObj = await Category.findOne({ name: category });
+        if (!categoryObj) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category name",
+            });
+        }
+
+        const newProduct = new Product({
+            productName,
+            description,
+            brand: brandObj._id, // ✅ Brand ObjectId കൊടുക്കണം
+            category: categoryObj._id,
+            regularPrice,
+            salePrice,
+            quantity,
+            productOffer: parseFloat(discount) || 0,
+            productImage: images,
+            isBlocked: false,
+            status: "Available",
+            processor: processor || '',
+            ram: ram || '',
+            storage: storage || '',
+            camera: camera || '',
+        });
+
+        await newProduct.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Product added successfully",
+            product: newProduct,
+        });
+
     } catch (error) {
         console.error('Error adding product:', error);
         res.status(500).json({
             success: false,
             message: "Error adding product",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -309,15 +297,15 @@ const listProducts = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
 
-        // let searchQuery = {};
-        // if (search) {
-        //     searchQuery = {
-        //         $or: [
-        //             { productName: { $regex: new RegExp(search, "i") } },
-        //             { description: { $regex: new RegExp(search, "i") } }
-        //         ]
-        //     };
-        // }
+        let searchQuery = {};
+        if (search) {
+            searchQuery = {
+                $or: [
+                    { productName: { $regex: new RegExp(search, "i") } },
+                    { description: { $regex: new RegExp(search, "i") } }
+                ]
+            };
+        }
 
         const totalProducts = await Product.countDocuments(searchQuery);
         const totalPages = Math.ceil(totalProducts / limit);
@@ -471,8 +459,6 @@ const deleteProductImage = async (req, res) => {
         });
     }
 };
-
-
 
 const updateProduct = async (req, res) => {
     try {

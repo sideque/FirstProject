@@ -117,7 +117,7 @@ const login = async (req,res)=>{
         console.error("login error",error);
         res.render("login",{message:"login failed. Please try again later"})
     }
-}
+};
 
 const loadSignup = async (req,res)=>{
     try{
@@ -130,7 +130,7 @@ const loadSignup = async (req,res)=>{
 
 function generateotp(){
     return Math.floor(100000 +Math.random()*900000).toString();
-}
+};
 
 async function sendVerificationEmail(email,otp){
     try {
@@ -192,7 +192,7 @@ async function sendVerificationEmail(email,otp){
         
         
     }
- }
+ };
 
  const securePassword = async(password)=>{
     try {
@@ -260,9 +260,6 @@ async function sendVerificationEmail(email,otp){
         return res.status(500).json({ success: false, message: "An error occurred" });
     }
 };
-
-
-
 
  const resendOtp = async (req,res)=>{
     try {

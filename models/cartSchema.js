@@ -32,6 +32,10 @@ const cartSchema = new Schema({
         cancellationReason:{
             type:String,
             default:"none"
+        },
+        discountedPrice: {
+            type: Number,
+            default: 0
         }
     }]
 } ,{timestamps:true});

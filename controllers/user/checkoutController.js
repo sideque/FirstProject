@@ -5,7 +5,7 @@ const Product = require('../../models/productSchema');
 const Cart = require('../../models/cartSchema');
 const Coupon = require('../../models/couponSchema');
 const mongoose = require('mongoose');
-const { login } = require('./userController');
+const { getProductOffers } = require('./offerController'); 
 
 const loadOrders = async (req, res) => {
   try {
@@ -18,29 +18,17 @@ const loadOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Convert userId to ObjectId
     const objectId = new mongoose.Types.ObjectId(userId);
 
-    // Fetch orders
     const orders = await Order.find({ userId: objectId })
       .skip(skip)
       .limit(limit)
       .populate('orderItems.product')
       .sort({ createdOn: -1 });
 
-    // Count total orders
     const totalOrders = await Order.countDocuments({ userId: objectId });
     const totalPages = Math.ceil(totalOrders / limit);
 
-    // console.log('Orders Data:', {
-    //   ordersCount: orders.length,
-    //   totalOrders,
-    //   totalPages,
-    //   page,
-    //   limit,
-    // });
-
-    // Render orders page
     res.render('orders', {
       orders,
       currentPage: page,
@@ -48,10 +36,7 @@ const loadOrders = async (req, res) => {
       limit,
     });
   } catch (error) {
-    console.error('Error loading orders:', {
-      message: error.message,
-      stack: error.stack,
-    });
+    console.error('Error loading orders:', error);
     res.redirect('/pageNotFound');
   }
 };
@@ -60,49 +45,59 @@ const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
     if (!userId) {
-      console.log('No user session found, redirecting to login');
       return res.redirect('/login');
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      console.log('User not found for ID:', userId);
       return res.redirect('/login');
     }
 
-    // Fetch addresses
     const addressDoc = await Address.findOne({ userId });
     const addresses = addressDoc ? addressDoc.address : [];
 
-    // Fetch cart
     const cart = await Cart.findOne({ userId }).populate({
       path: 'items.productId',
-      select: 'productName productImage salePrice quantity',
+      select: 'productName productImage salePrice quantity category brand',
     });
 
     if (!cart || !cart.items.length) {
       return res.redirect('/cart?message=Cart is empty');
     }
 
-    // Calculate totals
     let subtotal = 0;
-    const cartItems = cart.items
-      .map(item => {
-        if (!item.productId) {
-          return null;
+    const cartItems = await Promise.all(
+      cart.items.map(async (item) => {
+        if (!item.productId) return null;
+        
+        // Get offers for this product
+        const { bestOffer } = await getProductOffers(
+          item.productId._id,
+          item.productId.category,
+          item.productId.brand
+        );
+
+        let price = item.productId.salePrice;
+        if (bestOffer && bestOffer.discountType === 'percentage') {
+          price = price * (1 - bestOffer.offerAmount / 100);
         }
-        subtotal += item.totalPrice;
+
+        subtotal += price * item.stock;
         return {
           productId: item.productId._id,
           name: item.productId.productName,
-          price: item.productId.salePrice,
+          price,
+          originalPrice: item.productId.salePrice,
           image: item.productId.productImage[0],
           quantity: item.stock,
+          offer: bestOffer ? {
+            name: bestOffer.offerName,
+            percentage: bestOffer.offerAmount,
+          } : null,
         };
       })
-      .filter(item => item);
+    ).then(items => items.filter(item => item));
 
-    // Check for applied coupon
     let coupon = 0;
     if (req.session.couponApplied) {
       const couponData = await Coupon.findById(req.session.couponApplied.couponId);
@@ -116,8 +111,6 @@ const loadCheckout = async (req, res) => {
       } else {
         req.session.couponApplied = null;
       }
-    } else {
-      console.log('No coupon applied');
     }
 
     res.render('checkout', {
@@ -126,17 +119,66 @@ const loadCheckout = async (req, res) => {
       cart: cartItems,
       subtotal,
       shipping: 0,
-      discount: 0,
+      discount: coupon,
       total: subtotal - coupon,
       coupon,
     });
   } catch (error) {
-    console.error('Error loading checkout page:', {
-      message: error.message,
-      stack: error.stack,
-      userId: req.session.user,
-    });
+    console.error('Error loading checkout page:', error);
     res.redirect('/cart?message=An error occurred, please try again');
+  }
+};
+
+const loadProductDetails = async (req, res) => {
+  try {
+    const productId = req.query.id;
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.redirect('/pageNotFound');
+    }
+
+    const product = await Product.findById(productId)
+      .populate('category')
+      .populate('brand');
+
+    if (!product) {
+      return res.redirect('/pageNotFound');
+    }
+
+    // Get offers for the product
+    const { bestOffer, allOffers } = await getProductOffers(
+      product._id,
+      product.category ? product.category._id : null,
+      product.brand ? product.brand._id : null
+    );
+
+    // Apply best offer to salePrice if applicable
+    let discountedPrice = product.salePrice;
+    let offerPercentage = 0;
+    if (bestOffer && bestOffer.discountType === 'percentage') {
+      offerPercentage = bestOffer.offerAmount;
+      discountedPrice = product.salePrice * (1 - bestOffer.offerAmount / 100);
+    }
+
+    // Get related products
+    const relatedProducts = await Product.find({
+      category: product.category ? product.category._id : null,
+      _id: { $ne: product._id },
+    })
+      .limit(4)
+      .select('productName productImage salePrice brand productOffer');
+
+    res.render('product-details', {
+      product: {
+        ...product.toObject(),
+        salePrice: discountedPrice,
+        productOffer: offerPercentage,
+      },
+      relatedProducts,
+      allOffers,
+    });
+  } catch (error) {
+    console.error('Error loading product details:', error);
+    res.redirect('/pageNotFound');
   }
 };
 
@@ -144,19 +186,16 @@ const placeOrder = async (req, res) => {
   try {
     const { addressId, paymentMethod } = req.body;
     const userId = req.session.user;
-    console.log('Placing order for user:', userId, 'Address:', addressId, 'Payment:', paymentMethod);
 
     const addressDoc = await Address.findOne({ userId });
     const selectedAddress = addressDoc?.address.find(addr => addr._id.toString() === addressId);
 
     if (!selectedAddress) {
-      console.log('Invalid address selected:', addressId);
       return res.json({ success: false, message: 'Invalid address selected' });
     }
 
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart || !cart.items.length) {
-      console.log('Cart is empty for user:', userId);
       return res.json({ success: false, message: 'Cart is empty' });
     }
 
@@ -166,25 +205,35 @@ const placeOrder = async (req, res) => {
     for (const item of cart.items) {
       const product = item.productId;
       if (!product || product.quantity < item.stock) {
-        console.log('Out of stock item:', product?.productName || 'Unknown');
         return res.json({
           success: false,
           message: `${product?.productName || 'Item'} is out of stock`,
         });
       }
 
+      // Get best offer for this product
+      const { bestOffer } = await getProductOffers(
+        product._id,
+        product.category,
+        product.brand
+      );
+
+      let price = product.salePrice;
+      if (bestOffer && bestOffer.discountType === 'percentage') {
+        price = price * (1 - bestOffer.offerAmount / 100);
+      }
+
       orderItems.push({
         product: product._id,
         stock: item.stock,
-        price: product.salePrice,
+        price,
       });
 
-      totalPrice += product.salePrice * item.stock;
+      totalPrice += price * item.stock;
       product.quantity -= item.stock;
       await product.save();
     }
 
-    // Apply coupon discount if present
     let discount = 0;
     if (req.session.couponApplied) {
       const couponData = await Coupon.findById(req.session.couponApplied.couponId);
@@ -195,7 +244,6 @@ const placeOrder = async (req, res) => {
         new Date() >= couponData.validFrom
       ) {
         discount = couponData.offerAmount;
-        console.log('Applying coupon discount:', discount);
       }
     }
 
@@ -215,32 +263,24 @@ const placeOrder = async (req, res) => {
     });
 
     const newOrder = await order.save();
-    const orderId = newOrder.orderId
+    const orderId = newOrder.orderId;
 
     await Cart.deleteOne({ userId });
-
-    // Clear applied coupon after order placement
     req.session.couponApplied = null;
-    
+
     res.json({
       success: true,
       message: 'Order placed successfully.',
       orderId: orderId,
     });
   } catch (error) {
-    console.error('Error placing order:', {
-      message: error.message,
-      stack: error.stack,
-      userId: req.session.user,
-    });
+    console.error('Error placing order:', error);
     res.json({
       success: false,
       message: 'An error occurred while placing the order.',
     });
   }
 };
-
-
 
 const loadOrderDetails = async (req, res) => {
   try {
@@ -269,7 +309,6 @@ const loadOrderDetails = async (req, res) => {
   }
 };
 
-
 const returnOrder = async (req, res) => {
   try {
     const { orderId, reason } = req.body;
@@ -284,13 +323,11 @@ const returnOrder = async (req, res) => {
       return res.json({ success: false, message: 'Order cannot be returned' });
     }
 
-    // Update order status and reason
     order.status = 'Return Request';
     order.isReturnRequested = true;
     order.returnReason = reason;
     await order.save();
 
-    // Restore product quantities (optional: wait for admin approval)
     for (const item of order.orderItems) {
       const product = await Product.findById(item.product);
       if (product) {
@@ -321,11 +358,9 @@ const cancelOrder = async (req, res) => {
       return res.json({ success: false, message: 'Cannot cancel order in this status' });
     }
 
-    // Update order status
     order.status = 'Cancelled';
     await order.save();
 
-    // Restore product quantities
     for (const item of order.orderItems) {
       const product = await Product.findById(item.product);
       if (product) {
@@ -342,12 +377,10 @@ const cancelOrder = async (req, res) => {
 };
 
 const success = async (req, res) => {
-  try { 
-    // Get userId from session
+  try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
     if (!userId) {
-      console.error('No user ID in session');
       return res.redirect('/login');
     }
 
@@ -397,4 +430,5 @@ module.exports = {
   cancelOrder,
   success,
   returnOrder,
+  loadProductDetails,
 };
