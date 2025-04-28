@@ -66,6 +66,8 @@ const loadCheckout = async (req, res) => {
     }
 
     let subtotal = 0;
+    let offerDiscount = 0;
+
     const cartItems = await Promise.all(
       cart.items.map(async (item) => {
         if (!item.productId) return null;
@@ -78,11 +80,14 @@ const loadCheckout = async (req, res) => {
         );
 
         let price = item.productId.salePrice;
+        let originalPrice = item.productId.salePrice;
+
         if (bestOffer && bestOffer.discountType === 'percentage') {
           price = price * (1 - bestOffer.offerAmount / 100);
+          offerDiscount += (originalPrice - price) * item.stock;
         }
 
-        subtotal += price * item.stock;
+        subtotal += originalPrice * item.stock;
         return {
           productId: item.productId._id,
           name: item.productId.productName,
@@ -113,14 +118,18 @@ const loadCheckout = async (req, res) => {
       }
     }
 
+    // Ensure total is calculated as subtotal minus offerDiscount and coupon
+    const total = Math.max(0, subtotal - offerDiscount - coupon); // Prevent negative total
+
     res.render('checkout', {
       user,
       addresses,
       cart: cartItems,
       subtotal,
+      offerDiscount,
       shipping: 0,
       discount: coupon,
-      total: subtotal - coupon,
+      total,
       coupon,
     });
   } catch (error) {
@@ -159,21 +168,48 @@ const loadProductDetails = async (req, res) => {
       discountedPrice = product.salePrice * (1 - bestOffer.offerAmount / 100);
     }
 
-    // Get related products
+    // Get related products with originalPrice
     const relatedProducts = await Product.find({
       category: product.category ? product.category._id : null,
       _id: { $ne: product._id },
     })
       .limit(4)
-      .select('productName productImage salePrice brand productOffer');
+      .select('productName productImage salePrice originalPrice brand productOffer')
+      .populate('brand');
+
+    // Apply offers to related products
+    const processedRelatedProducts = await Promise.all(
+      relatedProducts.map(async (relatedProduct) => {
+        const { bestOffer: relatedBestOffer } = await getProductOffers(
+          relatedProduct._id,
+          relatedProduct.category ? relatedProduct.category._id : null,
+          relatedProduct.brand ? relatedProduct.brand._id : null
+        );
+
+        let relatedDiscountedPrice = relatedProduct.salePrice;
+        let relatedOfferPercentage = 0;
+        if (relatedBestOffer && relatedBestOffer.discountType === 'percentage') {
+          relatedOfferPercentage = relatedBestOffer.offerAmount;
+          relatedDiscountedPrice = relatedProduct.salePrice * (1 - relatedBestOffer.offerAmount / 100);
+        }
+
+        return {
+          ...relatedProduct.toObject(),
+          salePrice: relatedDiscountedPrice,
+          originalPrice: relatedProduct.salePrice, // Original price before discount
+          productOffer: relatedOfferPercentage,
+        };
+      })
+    );
 
     res.render('product-details', {
       product: {
         ...product.toObject(),
         salePrice: discountedPrice,
+        originalPrice: product.salePrice, // Original price before discount
         productOffer: offerPercentage,
       },
-      relatedProducts,
+      relatedProducts: processedRelatedProducts,
       allOffers,
     });
   } catch (error) {

@@ -504,7 +504,7 @@
     }
 </style>
 
-<div class="hero-wrap hero-bread" style="background-image: url('/images/p554.jpg');">
+<div class="hero-wrap hero-bread" style="background-image: url('/images/ss2.jpg');">
     <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
             <div class="col-md-9 ftco-animate text-center">
@@ -535,7 +535,7 @@
                                 <div class="item-details">
                                     <div>
                                         <h3 class="item-title"><%= item.productId.productName || 'Unnamed Product' %></h3>
-                                        <p class="item-seller">Seller: <%= item.productId.brand || 'Brand' %></p>
+                                        <p class="item-seller">Seller: <%= item.productId.brand.name || 'Brand' %></p>
                                         <p class="item-delivery">Delivery by <%= getDeliveryDate(5) %> | Free</p>
                                         <p class="item-stock">In Stock (<%= item.productId.quantity || 4 %> available)</p>
                                     </div>
@@ -564,20 +564,54 @@
                 
                 <div class="order-summary">
                     <h2 class="summary-title">Order Summary</h2>
+                    
+                    <!-- Product Items with Smaller Images -->
+                    <% if (cartItems && cartItems.length > 0) { %>
+                        <% cartItems.forEach(item => { %>
+                            <div class="summary-product" style="display: flex; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                                <img
+                                    src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
+                                    alt="<%= item.productId.productName %>"
+                                    style="width: 60px; height: 60px; object-fit: contain; margin-right: 15px;"
+                                >
+                                <div style="flex: 1;">
+                                    <h3 style="font-size: 14px; margin: 0 0 5px 0;"><%= item.productId.productName %></h3>
+                                    <div style="font-size: 12px; color: #666;">Qty: <%= item.stock %></div>
+                                    <% if (item.offer && item.offer.percentage > 0) { %>
+                                        <div style="font-size: 12px; color: #e63946;"><%= item.offer.percentage %>% OFF</div>
+                                        <div style="font-size: 14px; font-weight: 600; color: #82ae46;">
+                                            ₹<%= Math.round(item.price * item.stock).toLocaleString('en-IN') %>
+                                            <span style="font-size: 12px; color: #999; text-decoration: line-through; margin-left: 5px;">₹<%= (item.originalPrice * item.stock).toLocaleString('en-IN') %></span>
+                                        </div>
+                                    <% } else { %>
+                                        <div style="font-size: 14px; font-weight: 600; color: #82ae46;">
+                                            ₹<%= (item.price * item.stock).toLocaleString('en-IN') %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p>No items in cart.</p>
+                    <% } %>
+                    
+                    <!-- Order Calculation -->
                     <div class="summary-row">
                         <span>Subtotal (<%= cartItems.reduce((acc, item) => acc + (item.stock || 0), 0) %> items)</span>
-                        <span id="subtotal">₹<%= subtotal.toLocaleString() %></span>
+                        <span id="subtotal">₹<%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
                     </div>
-                    <% if (discount > 0) { %>
+                    <% if (offerDiscount > 0) { %>
                         <div class="summary-row discount">
                             <span>Offer Discount</span>
-                            <span>-₹<%= discount.toLocaleString() %></span>
+                            <span id="offer-discount">-₹<%= offerDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
                         </div>
                     <% } %>
                     <div class="summary-row discount">
                         <span>Coupon Discount</span>
-                        <span id="coupon-discount">-₹<%= coupon.toLocaleString() %></span>
+                        <span id="coupon-discount">-₹<%= coupon.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
                     </div>
+                    
+                    <!-- Coupon Section -->
                     <div class="coupon-section">
                         <div class="coupon-input-group">
                             <input type="text" class="coupon-input" id="coupon-code" placeholder="Enter coupon code">
@@ -588,14 +622,18 @@
                             Coupon <span id="applied-coupon-code"></span> applied! <span class="remove-coupon" id="remove-coupon">✕</span>
                         </div>
                     </div>
+                    
+                    <!-- Final Calculation -->
                     <div class="summary-row">
                         <span>Delivery</span>
                         <span>Free</span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span id="total">₹<%= (subtotal - (discount + coupon)).toLocaleString() %></span>
+                        <span id="total">₹<%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
                     </div>
+                    
+                    <!-- Checkout Button -->
                     <button
                         class="checkout-btn"
                         onclick="window.location.href='/checkout'"
@@ -604,6 +642,7 @@
                         Proceed to Checkout
                     </button>
                 </div>
+                
             </div>
 
             <!-- Coupon Modal -->
@@ -662,10 +701,22 @@
                 }
                 console.log('Cart updated:', result);
 
-                // Update subtotal and total dynamically
-                if (result.total) {
-                    document.getElementById('subtotal').textContent = `₹${result.total.toLocaleString()}`;
-                    document.getElementById('total').textContent = `₹${result.total.toLocaleString()}`;
+                // Update subtotal, offerDiscount, coupon, and total dynamically
+                if (result.subtotal !== undefined) {
+                    document.getElementById('subtotal').textContent = `₹${result.subtotal.toLocaleString('en-IN')}`;
+                }
+                if (result.offerDiscount !== undefined) {
+                    const offerDiscountEl = document.getElementById('offer-discount');
+                    if (offerDiscountEl) {
+                        offerDiscountEl.parentElement.style.display = result.offerDiscount > 0 ? 'flex' : 'none';
+                        offerDiscountEl.textContent = `-₹${result.offerDiscount.toLocaleString('en-IN')}`;
+                    }
+                }
+                if (result.coupon !== undefined) {
+                    document.getElementById('coupon-discount').textContent = `-₹${result.coupon.toLocaleString('en-IN')}`;
+                }
+                if (result.total !== undefined) {
+                    document.getElementById('total').textContent = `₹${result.total.toLocaleString('en-IN')}`;
                 }
 
                 return result;
@@ -819,6 +870,7 @@
         const couponDiscountEl = document.getElementById('coupon-discount');
         const totalEl = document.getElementById('total');
         const subtotalEl = document.getElementById('subtotal');
+        const offerDiscountEl = document.getElementById('offer-discount');
         const couponList = document.getElementById('coupon-list');
 
         // Fetch and display available coupons
@@ -883,14 +935,23 @@
                     couponInput.value = result.coupon.couponCode;
                     appliedCouponCode.textContent = result.coupon.couponCode;
                     appliedCouponDiv.style.display = 'block';
-                    couponDiscountEl.textContent = `-₹${result.coupon.offerAmount.toLocaleString()}`;
+                    couponDiscountEl.textContent = `-₹${result.coupon.offerAmount.toLocaleString('en-IN')}`;
+                    
+                    // Calculate new total
                     const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
-                    const newTotal = subtotal - result.coupon.offerAmount;
-                    totalEl.textContent = `₹${newTotal.toLocaleString()}`;
+                    const offerDiscount = offerDiscountEl ? parseFloat(offerDiscountEl.textContent.replace('-₹', '').replace(/,/g, '')) : 0;
+                    const couponDiscount = result.coupon.offerAmount;
+                    const newTotal = subtotal - offerDiscount - couponDiscount;
+                    totalEl.textContent = `₹${newTotal.toLocaleString('en-IN')}`;
                 } else {
                     appliedCouponDiv.style.display = 'none';
                     couponDiscountEl.textContent = '-₹0';
-                    totalEl.textContent = subtotalEl.textContent;
+                    
+                    // Calculate total without coupon
+                    const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
+                    const offerDiscount = offerDiscountEl ? parseFloat(offerDiscountEl.textContent.replace('-₹', '').replace(/,/g, '')) : 0;
+                    const newTotal = subtotal - offerDiscount;
+                    totalEl.textContent = `₹${newTotal.toLocaleString('en-IN')}`;
                 }
             } catch (error) {
                 console.error('Error checking applied coupon:', error);
@@ -918,10 +979,14 @@
                 couponInput.value = code;
                 appliedCouponCode.textContent = code;
                 appliedCouponDiv.style.display = 'block';
-                couponDiscountEl.textContent = `-₹${result.offerAmount.toLocaleString()}`;
+                couponDiscountEl.textContent = `-₹${result.offerAmount.toLocaleString('en-IN')}`;
+                
+                // Calculate new total
                 const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
-                const newTotal = subtotal - result.offerAmount;
-                totalEl.textContent = `₹${newTotal.toLocaleString()}`;
+                const offerDiscount = offerDiscountEl ? parseFloat(offerDiscountEl.textContent.replace('-₹', '').replace(/,/g, '')) : 0;
+                const couponDiscount = result.offerAmount;
+                const newTotal = subtotal - offerDiscount - couponDiscount;
+                totalEl.textContent = `₹${newTotal.toLocaleString('en-IN')}`;
 
                 Swal.fire({
                     icon: 'success',
@@ -955,7 +1020,12 @@
                 appliedCouponDiv.style.display = 'none';
                 couponInput.value = '';
                 couponDiscountEl.textContent = '-₹0';
-                totalEl.textContent = subtotalEl.textContent;
+                
+                // Calculate total without coupon
+                const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
+                const offerDiscount = offerDiscountEl ? parseFloat(offerDiscountEl.textContent.replace('-₹', '').replace(/,/g, '')) : 0;
+                const newTotal = subtotal - offerDiscount;
+                totalEl.textContent = `₹${newTotal.toLocaleString('en-IN')}`;
 
                 Swal.fire({
                     icon: 'success',
@@ -1011,8 +1081,6 @@
         // Initialize on page load
         checkAppliedCoupon();
 
-
-        
         // Helper function for EJS template
         function getDeliveryDate(daysFromNow) {
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

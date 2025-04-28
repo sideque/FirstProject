@@ -12,7 +12,7 @@ const cartController = require('../controllers/user/cartController');
 
 
 router.use((req, res, next) => {
-    console.log('Route:', req.path, 'Session:', req.session.user);
+    // console.log('Route:', req.path, 'Session:', req.session.user);
     next();
 });
 

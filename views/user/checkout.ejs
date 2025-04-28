@@ -281,30 +281,33 @@
         <% } else { %>
           <p>No items in cart.</p>
         <% } %>
-
+      
         <div class="summary-row">
           <span>Subtotal</span>
-          <span id="subtotal"><%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          <span id="subtotal">₹<%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
-        <div class="summary-row discount">
-          <span>Offer Discount</span>
-          <span>-₹<%= discount.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
-        </div>
+        <% if (offerDiscount > 0) { %>
+          <div class="summary-row discount">
+            <span>Offer Discount</span>
+            <span id="offer-discount">-₹<%= offerDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          </div>
+        <% } %>
         <div class="summary-row discount">
           <span>Coupon Discount</span>
           <span id="coupon-discount">-₹<%= coupon.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
         <div class="summary-row">
           <span>Shipping</span>
-          <span><%= shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          <span id="shipping">₹<%= shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
         <div class="summary-row total">
           <span>Grand Total</span>
-          <span id="total"><%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          <span id="total">₹<%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
         </div>
-
+      
         <button class="order-btn" id="placeOrderBtn">Order Now</button>
       </div>
+      
     </div>
   </div>
 </section>
@@ -357,18 +360,21 @@
         const result = await response.json();
 
         const subtotalEl = document.getElementById('subtotal');
+        const offerDiscountEl = document.getElementById('offer-discount');
         const couponDiscountEl = document.getElementById('coupon-discount');
+        const shippingEl = document.getElementById('shipping');
         const totalEl = document.getElementById('total');
 
-        if (!subtotalEl || !couponDiscountEl || !totalEl) {
+        if (!subtotalEl || !couponDiscountEl || !shippingEl || !totalEl) {
           throw new Error('One or more DOM elements not found');
         }
 
-        const subtotal = parseFloat(subtotalEl.textContent.replace(/,/g, ''));
-   
+        const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, ''));
+        const offerDiscount = offerDiscountEl ? parseFloat(offerDiscountEl.textContent.replace('-₹', '').replace(/,/g, '')) : 0;
+        const shipping = parseFloat(shippingEl.textContent.replace('₹', '').replace(/,/g, ''));
 
-        if (isNaN(subtotal)) {
-          throw new Error('Subtotal is not a valid number');
+        if (isNaN(subtotal) || isNaN(offerDiscount) || isNaN(shipping)) {
+          throw new Error('One or more values (subtotal, offerDiscount, shipping) is not a valid number');
         }
 
         if (result.success && result.coupon) {
@@ -379,11 +385,11 @@
           }
 
           couponDiscountEl.textContent = `-₹${couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-          const newTotal = subtotal - couponDiscount - <%= discount %> + <%= shipping %>;
+          const newTotal = subtotal - offerDiscount - couponDiscount + shipping;
           totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         } else {
           couponDiscountEl.textContent = '-₹0.00';
-          const newTotal = subtotal - <%= discount %> + <%= shipping %>;
+          const newTotal = subtotal - offerDiscount + shipping;
           totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         }
       } catch (error) {
@@ -397,12 +403,16 @@
 
         // Fallback to no coupon state
         const subtotalEl = document.getElementById('subtotal');
+        const offerDiscountEl = document.getElementById('offer-discount');
         const couponDiscountEl = document.getElementById('coupon-discount');
+        const shippingEl = document.getElementById('shipping');
         const totalEl = document.getElementById('total');
-        if (subtotalEl && couponDiscountEl && totalEl) {
-          const subtotal = parseFloat(subtotalEl.textContent.replace(/,/g, '')) || 0;
+        if (subtotalEl && couponDiscountEl && shippingEl && totalEl) {
+          const subtotal = parseFloat(subtotalEl.textContent.replace('₹', '').replace(/,/g, '')) || 0;
+          const offerDiscount = offerDiscountEl ? parseFloat(offerDiscountEl.textContent.replace('-₹', '').replace(/,/g, '')) : 0;
+          const shipping = parseFloat(shippingEl.textContent.replace('₹', '').replace(/,/g, '')) || 0;
           couponDiscountEl.textContent = '-₹0.00';
-          const newTotal = subtotal - <%= discount %> + <%= shipping %>;
+          const newTotal = subtotal - offerDiscount + shipping;
           totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
         }
       }
@@ -451,10 +461,9 @@
 
           const result = await response.json();
 
-          
           // Redirect to success page with orderId
-          if(result.success){
-              Swal.fire({
+          if (result.success) {
+            Swal.fire({
               icon: 'success',
               title: 'Order Placed',
               text: result.message,
@@ -464,10 +473,9 @@
             }).then(() => {
               window.location.href = `/order/success?orderId=${result.orderId}`;
             });
-          }else{
+          } else {
             throw new Error(result.message || 'Failed to place order');
           }
-          
         } catch (error) {
           console.error('Error placing order:', error);
           Swal.fire({

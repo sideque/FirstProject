@@ -135,7 +135,7 @@
       font-size: 18px;
       margin-left: 10px;
     }
-
+      
     .product-offer {
       display: inline-block;
       background: #e63946;
@@ -658,7 +658,7 @@
 <body>
   <%- include("../../views/partials/user/header") %>
 
-  <div class="hero-wrap hero-bread" style="background-image: url('/images/p28.jpg');">
+  <div class="hero-wrap hero-bread" style="background-image: url('/images/ss4.jpg');">
     <div class="container">
       <div class="row no-gutters slider-text align-items-center justify-content-center">
         <div class="col-md-9 ftco-animate text-center">
@@ -895,7 +895,12 @@
                   <div class="text">
                     <div class="cat"><%= relatedProduct.brand ? relatedProduct.brand.name : 'N/A' %></div>
                     <h3><a href="/product?id=<%= relatedProduct._id %>"><%= relatedProduct.productName %></a></h3>
-                    <div class="price">₹<%= relatedProduct.salePrice.toLocaleString() %></div>
+                    <div class="price">
+                      ₹<%= relatedProduct.salePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+                      <% if (relatedProduct.originalPrice && relatedProduct.salePrice < relatedProduct.originalPrice) { %>
+                        <span class="old-price">₹<%= relatedProduct.originalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+                      <% } %>
+                    </div>
                     <div class="bottom-area">
                       <a href="#" class="btn add-to-cart" data-id="<%= relatedProduct._id %>" data-quantity="<%= relatedProduct.quantity %>">Add to cart</a>
                       <a href="#" class="btn wishlist" data-id="<%= relatedProduct._id %>">
@@ -911,6 +916,8 @@
           <% } %>
         </div>
       </div>
+
+
     </div>
   </section>
 
