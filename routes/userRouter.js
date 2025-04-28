@@ -125,4 +125,8 @@ router.get('/wishlist', userAuth, cartController.loadWishlist);
 router.post('/addtowish', userAuth, cartController.addToWishList);
 router.post('/wishlist/remove', userAuth, cartController.removeFromWishlist);
 
+// Wallet Management
+router.get('/wallet', userAuth, profileController.loadWallet);
+router.post('/wallet/add-money', userAuth, profileController.addMoney); 
+
 module.exports = router;

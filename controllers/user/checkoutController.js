@@ -2,6 +2,8 @@ const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
 const Product = require('../../models/productSchema');
+const PaymentMethod = require('../../models/paymentSchema');
+const Wallet = require('../../models/walletSchema');
 const Cart = require('../../models/cartSchema');
 const Coupon = require('../../models/couponSchema');
 const mongoose = require('mongoose');
@@ -65,14 +67,15 @@ const loadCheckout = async (req, res) => {
       return res.redirect('/cart?message=Cart is empty');
     }
 
+    const wallet = await Wallet.findOne({ userId }).lean();
+
     let subtotal = 0;
     let offerDiscount = 0;
 
     const cartItems = await Promise.all(
       cart.items.map(async (item) => {
         if (!item.productId) return null;
-        
-        // Get offers for this product
+
         const { bestOffer } = await getProductOffers(
           item.productId._id,
           item.productId.category,
@@ -95,13 +98,15 @@ const loadCheckout = async (req, res) => {
           originalPrice: item.productId.salePrice,
           image: item.productId.productImage[0],
           quantity: item.stock,
-          offer: bestOffer ? {
-            name: bestOffer.offerName,
-            percentage: bestOffer.offerAmount,
-          } : null,
+          offer: bestOffer
+            ? {
+                name: bestOffer.offerName,
+                percentage: bestOffer.offerAmount,
+              }
+            : null,
         };
       })
-    ).then(items => items.filter(item => item));
+    ).then((items) => items.filter((item) => item));
 
     let coupon = 0;
     if (req.session.couponApplied) {
@@ -118,8 +123,7 @@ const loadCheckout = async (req, res) => {
       }
     }
 
-    // Ensure total is calculated as subtotal minus offerDiscount and coupon
-    const total = Math.max(0, subtotal - offerDiscount - coupon); // Prevent negative total
+    const total = Math.max(0, subtotal - offerDiscount - coupon);
 
     res.render('checkout', {
       user,
@@ -131,6 +135,8 @@ const loadCheckout = async (req, res) => {
       discount: coupon,
       total,
       coupon,
+      wallet,
+      csrfToken: req.csrfToken ? req.csrfToken() : '', // Pass CSRF token if enabled
     });
   } catch (error) {
     console.error('Error loading checkout page:', error);
@@ -224,7 +230,7 @@ const placeOrder = async (req, res) => {
     const userId = req.session.user;
 
     const addressDoc = await Address.findOne({ userId });
-    const selectedAddress = addressDoc?.address.find(addr => addr._id.toString() === addressId);
+    const selectedAddress = addressDoc?.address.find((addr) => addr._id.toString() === addressId);
 
     if (!selectedAddress) {
       return res.json({ success: false, message: 'Invalid address selected' });
@@ -247,12 +253,7 @@ const placeOrder = async (req, res) => {
         });
       }
 
-      // Get best offer for this product
-      const { bestOffer } = await getProductOffers(
-        product._id,
-        product.category,
-        product.brand
-      );
+      const { bestOffer } = await getProductOffers(product._id, product.category, product.brand);
 
       let price = product.salePrice;
       if (bestOffer && bestOffer.discountType === 'percentage') {
@@ -283,16 +284,43 @@ const placeOrder = async (req, res) => {
       }
     }
 
+    const finalAmount = Math.max(0, totalPrice - discount);
+
+    // Handle Wallet Payment
+    if (paymentMethod === 'Wallet') {
+      const wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        return res.json({ success: false, message: 'Wallet not found' });
+      }
+      if (wallet.balance < finalAmount) {
+        return res.json({ success: false, message: 'Insufficient wallet balance' });
+      }
+
+      // Deduct from wallet
+      wallet.balance -= finalAmount;
+      wallet.transactions.push({
+        amount: finalAmount,
+        type: 'debit',
+        paymentMethod: 'Wallet',
+        transactionId: `TXN${Date.now()}`,
+        orderId: `ORD${Date.now()}`,
+        description: `Payment for order ORD${Date.now()}`,
+        date: new Date(),
+      });
+      await wallet.save();
+    }
+
     const order = new Order({
       orderId: `ORD${Date.now()}`,
       userId,
       orderItems,
       totalPrice,
       discount,
-      finalAmount: totalPrice - discount,
+      finalAmount,
+      // finalAmount: totalPrice - discount
       address: selectedAddress,
       paymentMethod,
-      paymentStatus: 'Pending',
+      paymentStatus: paymentMethod === 'Wallet' ? 'Completed' : 'Pending',
       status: 'Processing',
       invoiceDate: new Date(),
       createdOn: new Date(),
@@ -317,6 +345,7 @@ const placeOrder = async (req, res) => {
     });
   }
 };
+
 
 const loadOrderDetails = async (req, res) => {
   try {
@@ -364,6 +393,30 @@ const returnOrder = async (req, res) => {
     order.returnReason = reason;
     await order.save();
 
+    // Refund to wallet if payment was via wallet
+    if (order.paymentMethod === 'Wallet') {
+      let wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+
+      wallet.balance += order.finalAmount;
+      wallet.transactions.push({
+        amount: order.finalAmount,
+        type: 'credit',
+        paymentMethod: 'Refund',
+        transactionId: `TXN${Date.now()}`,
+        orderId: order.orderId,
+        description: `Refund for order ${order.orderId}`,
+        date: new Date(),
+      });
+      await wallet.save();
+    }
+
     for (const item of order.orderItems) {
       const product = await Product.findById(item.product);
       if (product) {
@@ -385,7 +438,6 @@ const cancelOrder = async (req, res) => {
     const userId = req.session.user;
 
     const order = await Order.findOne({ _id: orderId, userId });
-
     if (!order) {
       return res.json({ success: false, message: 'Order not found' });
     }
@@ -396,6 +448,30 @@ const cancelOrder = async (req, res) => {
 
     order.status = 'Cancelled';
     await order.save();
+
+    // Refund to wallet if payment was via wallet
+    if (order.paymentMethod === 'Wallet') {
+      let wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+
+      wallet.balance += order.finalAmount;
+      wallet.transactions.push({
+        amount: order.finalAmount,
+        type: 'credit',
+        paymentMethod: 'Refund',
+        transactionId: `TXN${Date.now()}`,
+        orderId: order.orderId,
+        description: `Refund for canceled order ${order.orderId}`,
+        date: new Date(),
+      });
+      await wallet.save();
+    }
 
     for (const item of order.orderItems) {
       const product = await Product.findById(item.product);

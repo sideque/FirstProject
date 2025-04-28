@@ -10,6 +10,7 @@ const Product = require("../../models/productSchema");
 const Wishlist = require("../../models/wishlistSchema");
 const { success } = require("./checkoutController");
 const saltRounds = 10;
+const { getProductOffers } = require('./offerController'); 
 
 const loadCart = async (req, res) => {
   try {
@@ -48,7 +49,7 @@ const loadCart = async (req, res) => {
       cartItems.map(async (item) => {
         if (!item.productId) return null;
 
-        const { getProductOffers } = require('./offerController'); 
+        
         const { bestOffer } = await getProductOffers(
           item.productId._id,
           item.productId.category ? item.productId.category._id : null,
@@ -120,7 +121,6 @@ const loadCart = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
-
 
 const addToCart = async (req, res) => {
   try {

@@ -3,6 +3,8 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const Address = require("../../models/addressSchema");
 const Order = require('../../models/orderSchema');
+const Wallet = require("../../models/walletSchema");
+const Payment = require("../../models/paymentSchema");
 const env = require("dotenv").config();
 const upload = require("../../middlewares/multerConfig");
 const saltRounds = 10;
@@ -527,6 +529,94 @@ const resendOtp = async (req, res) => {
   }
 };
 
+const loadWallet = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      req.session.userMessage = 'Please log in to view your wallet';
+      return res.redirect('/login');
+    }
+
+    const findUser = await User.findById(req.session.user).lean();
+    if (!findUser) {
+      req.session.userMessage = 'User not found';
+      return res.redirect('/login');
+    }
+
+    let wallet = await Wallet.findOne({ userId: findUser._id }).lean();
+    if (!wallet) {
+      const newWallet = new Wallet({
+        userId: findUser._id,
+        balance: 0,
+        transactions: [],
+      });
+      await newWallet.save();
+      wallet = newWallet.toObject();
+      req.session.userMessage = 'Wallet created successfully with zero balance';
+    }
+
+    const paymentMethods = await Payment.find({ userId: findUser._id }).lean();
+
+    const perPage = 10;
+    const currentPage = parseInt(req.query.page) || 1;
+    const transactions = wallet.transactions || [];
+    const totalTransactions = transactions.length;
+
+    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const startIndex = (currentPage - 1) * perPage;
+    const paginatedTransactions = transactions.slice(startIndex, startIndex + perPage);
+
+    return res.render('wallet', {
+      user: findUser,
+      wallet,
+      transactions: paginatedTransactions,
+      totalTransactions,
+      perPage,
+      currentPage,
+      paymentMethods, 
+      message: req.session.userMessage || '',
+    });
+  } catch (error) {
+    console.error('Error loading wallet:', error);
+    req.session.userMessage = 'An error occurred while loading your wallet';
+    return res.redirect('/pageNotFound');
+  }
+};
+
+const addMoney = async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Please log in' });
+    }
+
+    const { amount, paymentMethod } = req.body;
+    if (!amount || amount < 100) {
+      return res.status(400).json({ success: false, message: 'Amount must be at least ₹100' });
+    }
+
+    const wallet = await Wallet.findOne({ userId: req.session.user });
+    if (!wallet) {
+      return res.status(404).json({ success: false, message: 'Wallet not found' });
+    }
+
+    wallet.balance += parseFloat(amount);
+    wallet.transactions.push({
+      amount: parseFloat(amount),
+      type: 'credit',
+      paymentMethod,
+      transactionId: `TXN${Date.now()}`,
+      description: `Added ₹${amount} via ${paymentMethod}`,
+      date: new Date(),
+    });
+
+    await wallet.save();
+    return res.json({ success: true, message: 'Money added successfully' });
+  } catch (error) {
+    console.error('Error adding money:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
 module.exports = {
   getForgotPassPage,
   forgotEmailValid,
@@ -546,5 +636,6 @@ module.exports = {
   cancelOrder,
   editEmail,
   verifyEmailOtp,
-  
+  loadWallet,
+  addMoney,
 };

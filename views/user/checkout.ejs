@@ -89,30 +89,36 @@
     border-radius: 8px;
   }
   .payment-methods {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
   }
   .payment-method {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
     display: flex;
     align-items: center;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
     cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .payment-method:hover {
+    border-color: #82ae46;
   }
   .payment-method.selected {
     border-color: #82ae46;
-    background: #f8fff8;
+    background-color: rgba(130, 174, 70, 0.05);
   }
   .payment-radio {
-    margin-right: 10px;
+    margin-right: 15px;
   }
   .payment-label {
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 16px;
   }
   .payment-info {
-    color: #555;
-    font-size: 0.9rem;
+    font-size: 14px;
+    color: #666;
   }
   .summary-title {
     font-size: 1.5rem;
@@ -188,127 +194,149 @@
 
 <section class="ftco-section bg-light">
   <div class="container">
-    <div class="checkout-container">
-      <div class="checkout-main">
-        <!-- Address Section -->
-        <div class="checkout-section">
-          <h2 class="section-title">Select Address Details</h2>
-          <div class="address-cards">
-            <% if (addresses && addresses.length > 0) { %>
-              <% addresses.forEach((address) => { %>
-                <div class="address-card <%= address.isDefault ? 'selected' : '' %>">
-                  <input
-                    type="radio"
-                    name="address"
-                    class="address-radio"
-                    id="address<%= address._id %>"
-                    value="<%= address._id %>"
-                    <%= address.isDefault ? 'checked' : '' %>
-                  >
-                  <div class="address-name"><%= address.name %></div>
-                  <% if (address.isDefault) { %>
-                    <span class="default-badge">Default</span>
-                  <% } %>
-                  <div class="address-phone">
-                    <%= address.phone %><%= address.altPhone ? ', ' + address.altPhone : '' %>
-                  </div>
-                  <div class="address-details">
-                    Address: <%= address.addressLine1 %><%= address.addressLine2 ? ', ' + address.addressLine2 : '' %>,
-                    <%= address.landMark ? address.landMark + ', ' : '' %>
-                    <%= address.city %>, <%= address.state %>, pincode: <%= address.pincode %>
-                  </div>
-                  <div class="address-actions">
-                    <button
-                      class="address-btn"
-                      onclick="window.location.href='/userProfile#profile-addresses'"
+    <form id="checkoutForm" action="/place-order" method="POST">
+      <!-- CSRF Token (if required) -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="checkout-container">
+        <div class="checkout-main">
+          <!-- Address Section -->
+          <div class="checkout-section">
+            <h2 class="section-title">Select Address Details</h2>
+            <div class="address-cards">
+              <% if (addresses && addresses.length > 0) { %>
+                <% addresses.forEach((address) => { %>
+                  <div class="address-card <%= address.isDefault ? 'selected' : '' %>">
+                    <input
+                      type="radio"
+                      name="addressId"
+                      class="address-radio"
+                      id="address<%= address._id %>"
+                      value="<%= address._id %>"
+                      <%= address.isDefault ? 'checked' : '' %>
                     >
-                      Edit
-                    </button>
+                    <div class="address-name"><%= address.name %></div>
+                    <% if (address.isDefault) { %>
+                      <span class="default-badge">Default</span>
+                    <% } %>
+                    <div class="address-phone">
+                      <%= address.phone %><%= address.altPhone ? ', ' + address.altPhone : '' %>
+                    </div>
+                    <div class="address-details">
+                      Address: <%= address.addressLine1 %><%= address.addressLine2 ? ', ' + address.addressLine2 : '' %>,
+                      <%= address.landMark ? address.landMark + ', ' : '' %>
+                      <%= address.city %>, <%= address.state %>, pincode: <%= address.pincode %>
+                    </div>
+                    <div class="address-actions">
+                      <button
+                        type="button"
+                        class="address-btn"
+                        onclick="window.location.href='/userProfile#profile-addresses'"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <p>No addresses found. Please add an address.</p>
+              <% } %>
+              <div class="add-address-btn" id="addAddressBtn">
+                <i class="fa fa-plus"></i> Add Address
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method Section -->
+          <div class="checkout-section">
+            <h2 class="section-title">Payment Method</h2>
+            <p class="mb-3">All transactions are secure and encrypted.</p>
+            <div class="payment-methods">
+              <!-- Cash on Delivery -->
+              <div class="payment-method selected">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  class="payment-radio"
+                  id="cod"
+                  value="Cash on Delivery"
+                  checked
+                >
+                <div>
+                  <div class="payment-label">Cash on Delivery</div>
+                  <div class="payment-info">Pay with cash upon delivery</div>
+                </div>
+              </div>
+              <!-- Wallet -->
+              <div class="payment-method">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  class="payment-radio"
+                  id="wallet"
+                  value="Wallet"
+                >
+                <div>
+                  <div class="payment-label">Wallet</div>
+                  <div class="payment-info">
+                    Available Balance: ₹<%= wallet && wallet.balance ? wallet.balance.toLocaleString('en-IN') : '0' %>
                   </div>
                 </div>
-              <% }) %>
-            <% } else { %>
-              <p>No addresses found. Please add an address.</p>
-            <% } %>
-            <div class="add-address-btn" id="addAddressBtn">
-              <i class="fa fa-plus"></i> Add Address
-            </div>
-          </div>
-        </div>
-
-        <!-- Payment Method Section -->
-        <div class="checkout-section">
-          <h2 class="section-title">Payment Method</h2>
-          <p class="mb-3">All transactions are secure and encrypted.</p>
-          <div class="payment-methods">
-            <div class="payment-method selected">
-              <input
-                type="radio"
-                name="payment"
-                class="payment-radio"
-                id="cod"
-                value="Cash on Delivery"
-                checked
-              >
-              <div>
-                <div class="payment-label">Cash on Delivery</div>
-                <div class="payment-info">Pay with cash upon delivery</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="order-summary">
-        <h2 class="summary-title">Order Summary</h2>
-        <% if (cart && cart.length > 0) { %>
-          <% cart.forEach(item => { %>
-            <div class="summary-product">
-              <img
-                src="/Uploads/product-images/<%= item.image %>"
-                alt="<%= item.name %>"
-                class="product-image"
-              >
-              <div class="product-details">
-                <h3 class="product-name"><%= item.name %></h3>
-                <div class="product-meta">Quantity: <%= item.quantity %></div>
-                <div class="product-price">
-                  ₹<%= (item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h2 class="summary-title">Order Summary</h2>
+          <% if (cart && cart.length > 0) { %>
+            <% cart.forEach(item => { %>
+              <div class="summary-product">
+                <img
+                  src="/Uploads/product-images/<%= item.image %>"
+                  alt="<%= item.name %>"
+                  class="product-image"
+                >
+                <div class="product-details">
+                  <h3 class="product-name"><%= item.name %></h3>
+                  <div class="product-meta">Quantity: <%= item.quantity %></div>
+                  <div class="product-price">
+                    ₹<%= (item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+                  </div>
                 </div>
               </div>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p>No items in cart.</p>
-        <% } %>
-      
-        <div class="summary-row">
-          <span>Subtotal</span>
-          <span id="subtotal">₹<%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
-        </div>
-        <% if (offerDiscount > 0) { %>
-          <div class="summary-row discount">
-            <span>Offer Discount</span>
-            <span id="offer-discount">-₹<%= offerDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+            <% }) %>
+          <% } else { %>
+            <p>No items in cart.</p>
+          <% } %>
+
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="subtotal">₹<%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
           </div>
-        <% } %>
-        <div class="summary-row discount">
-          <span>Coupon Discount</span>
-          <span id="coupon-discount">-₹<%= coupon.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          <% if (offerDiscount > 0) { %>
+            <div class="summary-row discount">
+              <span>Offer Discount</span>
+              <span id="offer-discount">-₹<%= offerDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+            </div>
+          <% } %>
+          <div class="summary-row discount">
+            <span>Coupon Discount</span>
+            <span id="coupon-discount">-₹<%= coupon.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span id="shipping">₹<%= shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          </div>
+          <div class="summary-row total">
+            <span>Grand Total</span>
+            <span id="total">₹<%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
+          </div>
+
+          <button type="button" class="order-btn" id="placeOrderBtn">Order Now</button>
         </div>
-        <div class="summary-row">
-          <span>Shipping</span>
-          <span id="shipping">₹<%= shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
-        </div>
-        <div class="summary-row total">
-          <span>Grand Total</span>
-          <span id="total">₹<%= total.toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></span>
-        </div>
-      
-        <button class="order-btn" id="placeOrderBtn">Order Now</button>
       </div>
-      
-    </div>
+    </form>
   </div>
 </section>
 
@@ -379,11 +407,9 @@
 
         if (result.success && result.coupon) {
           const couponDiscount = parseFloat(result.coupon.offerAmount);
-
           if (isNaN(couponDiscount)) {
             throw new Error('Coupon discount is not a valid number');
           }
-
           couponDiscountEl.textContent = `-₹${couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
           const newTotal = subtotal - offerDiscount - couponDiscount + shipping;
           totalEl.textContent = `₹${newTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
@@ -401,7 +427,6 @@
           confirmButtonColor: '#82ae46',
         });
 
-        // Fallback to no coupon state
         const subtotalEl = document.getElementById('subtotal');
         const offerDiscountEl = document.getElementById('offer-discount');
         const couponDiscountEl = document.getElementById('coupon-discount');
@@ -421,47 +446,67 @@
     // Place order button
     const placeOrderBtn = document.getElementById('placeOrderBtn');
     if (placeOrderBtn) {
-      placeOrderBtn.addEventListener('click', async function () {
+      placeOrderBtn.addEventListener('click', async function (e) {
+        e.preventDefault();
+
+        // Validate address selection
+        const selectedAddress = document.querySelector('.address-card.selected input[type="radio"]:checked');
+        if (!selectedAddress) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Select Address',
+            text: 'Please select a delivery address to continue.',
+            confirmButtonColor: '#82ae46',
+          });
+          return;
+        }
+
+        // Validate payment method selection
+        const selectedPayment = document.querySelector('.payment-method.selected input[type="radio"]:checked');
+        if (!selectedPayment) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Select Payment Method',
+            text: 'Please select a payment method to continue.',
+            confirmButtonColor: '#82ae46',
+          });
+          return;
+        }
+
+        // Validate wallet balance for Wallet payment
+        const total = <%= total %>;
+        const walletBalance = <%= wallet && wallet.balance ? wallet.balance : 0 %>;
+        if (selectedPayment.value === 'Wallet' && walletBalance < total) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Insufficient Wallet Balance',
+            text: 'Your wallet balance is insufficient. Please add money or choose another payment method.',
+            confirmButtonColor: '#82ae46',
+          });
+          return;
+        }
+
+        const addressId = selectedAddress.value;
+        const paymentMethod = selectedPayment.value;
+
+        console.log('Submitting order:', { addressId, paymentMethod });
+
         try {
-          // Validate address selection
-          const selectedAddress = document.querySelector('.address-card.selected input[type="radio"]:checked');
-          if (!selectedAddress) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Select Address',
-              text: 'Please select a delivery address to continue.',
-              confirmButtonColor: '#82ae46',
-            });
-            return;
-          }
-
-          // Validate payment method selection
-          const selectedPayment = document.querySelector('.payment-method.selected input[type="radio"]:checked');
-          if (!selectedPayment) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Select Payment Method',
-              text: 'Please select a payment method to continue.',
-              confirmButtonColor: '#82ae46',
-            });
-            return;
-          }
-
-          const addressId = selectedAddress.value;
-          const paymentMethod = selectedPayment.value;
-
-          console.log('Placing order with:', { addressId, paymentMethod });
-
-          // Send order placement request
           const response = await fetch('/place-order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': '<%= csrfToken %>', // Include CSRF token if required
+            },
             body: JSON.stringify({ addressId, paymentMethod }),
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
           const result = await response.json();
 
-          // Redirect to success page with orderId
           if (result.success) {
             Swal.fire({
               icon: 'success',
@@ -474,18 +519,25 @@
               window.location.href = `/order/success?orderId=${result.orderId}`;
             });
           } else {
-            throw new Error(result.message || 'Failed to place order');
+            Swal.fire({
+              icon: 'error',
+              title: 'Order Failed',
+              text: result.message || 'Failed to place order',
+              confirmButtonColor: '#82ae46',
+            });
           }
         } catch (error) {
           console.error('Error placing order:', error);
           Swal.fire({
             icon: 'error',
-            title: 'Error',
-            text: 'Failed to place order: ' + error.message,
+            title: 'Order Failed',
+            text: 'An error occurred while placing the order: ' + error.message,
             confirmButtonColor: '#82ae46',
           });
         }
       });
+    } else {
+      console.error('placeOrderBtn not found');
     }
 
     // Initialize on page load
