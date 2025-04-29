@@ -74,9 +74,7 @@ const customerunBlocked = async (req, res) => {
     } catch (error) {
         res.redirect("/admin/pageerror");
     }
-}
-
-
+};
 
 module.exports = {
     customerInfo,

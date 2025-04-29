@@ -96,7 +96,7 @@ const loadAddCategory = (req, res) => {
         console.log(error.message);
         res.redirect('/admin/pageerror');
     }
-}
+};
 
 const addCategoryOffer = async (req, res) => {
     try {

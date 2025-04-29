@@ -352,7 +352,7 @@
     }
 </style>
 
-<div class="hero-wrap hero-bread" style="background-image: url('/images/ss.jpg');">
+<div class="hero-wrap hero-bread" style="background-image: url('/images/ss5.jpg');">
     <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
             <div class="col-md-9 ftco-animate text-center">
@@ -377,14 +377,6 @@
               </div>
               <div class="balance-amount">₹<%= wallet.balance.toLocaleString('en-IN') %></div>
               <div class="card-number">**** **** **** <%= user.phone ? user.phone.substring(user.phone.length - 4) : '1234' %></div>
-              <div class="card-actions">
-                <button class="action-btn" id="addMoneyBtn">
-                  <i class="fas fa-plus"></i> Add Money
-                </button>
-                <button class="action-btn" id="transferBtn">
-                  <i class="fas fa-arrow-right"></i> Transfer
-                </button>
-              </div>
             </div>
           </div>
   
@@ -468,40 +460,6 @@
               </div>
             <% } %>
           </div>
-  
-          <!-- Payment Methods (unchanged) -->
-          <!-- <div class="payment-methods">
-            <h3 class="section-title">Payment Methods</h3>
-            <div class="payment-cards">
-              <% if (paymentMethods && paymentMethods.length > 0) { %>
-                <% paymentMethods.forEach(function(method) { %>
-                  <div class="payment-card <%= method.isDefault ? 'default' : '' %>">
-                    <div class="payment-icon">
-                      <% if (method.type === 'credit-card') { %>
-                        <i class="fas fa-credit-card"></i>
-                      <% } else if (method.type === 'paypal') { %>
-                        <i class="fab fa-paypal"></i>
-                      <% } else if (method.type === 'bank') { %>
-                        <i class="fas fa-university"></i>
-                      <% } %>
-                    </div>
-                    <div class="payment-info">
-                      <h4 class="payment-name">
-                        <%= method.type.replace('-', ' ').toUpperCase() %>
-                        <% if (method.isDefault) { %>
-                          <span class="default-badge">Default</span>
-                        <% } %>
-                      </h4>
-                      <div class="payment-details"><%= method.details %></div>
-                    </div>
-                  </div>
-                <% }); %>
-              <% } %>
-              <div class="add-payment-btn">
-                <i class="fas fa-plus"></i> Add Payment Method
-              </div>
-            </div>
-          </div> -->
 
 
         </div>

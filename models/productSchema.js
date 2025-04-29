@@ -46,7 +46,7 @@ const productSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["Available", "out of stock", "Discountinued"],
+        enum: ["Available", "out of stock", "Discontinued"],
         required: true,
         default: "Available"
     },
@@ -69,6 +69,14 @@ const productSchema = new Schema({
     createdOn: { 
         type: Date, 
         default: Date.now 
+    },
+    isListed: { // Add this field
+        type: Boolean,
+        default: true
+    },
+    isDeleted: { // Add this field
+        type: Boolean,
+        default: false
     }
 
     

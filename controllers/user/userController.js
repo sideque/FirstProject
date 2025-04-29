@@ -83,7 +83,6 @@ const loadLogin = async (req, res) => {
     }
 };
 
-
 const login = async (req,res)=>{
     try{
         const {email,password} = req.body;
@@ -124,7 +123,7 @@ const loadSignup = async (req,res)=>{
         console.log("Signup page not found",error);
         res.status(500).send("Server error")
     }
-}
+};
 
 function generateotp(){
     return Math.floor(100000 +Math.random()*900000).toString();
@@ -158,8 +157,9 @@ async function sendVerificationEmail(email,otp){
         return false;
         
     }
-}
- const signup = async(req,res)=>{
+};
+
+const signup = async(req,res)=>{
     try {
         const {name,phone,email,password,confirmPassword}=req.body
         if(password!==confirmPassword){
@@ -190,9 +190,9 @@ async function sendVerificationEmail(email,otp){
         
         
     }
- };
+};
 
- const securePassword = async(password)=>{
+const securePassword = async(password)=>{
     try {
         
         const passwordHash = await bcrypt.hash(password,10);
@@ -202,12 +202,9 @@ async function sendVerificationEmail(email,otp){
     } catch (error) {
         
     }
- }
+};
 
-
-
-
- const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
 
@@ -259,7 +256,7 @@ async function sendVerificationEmail(email,otp){
     }
 };
 
- const resendOtp = async (req,res)=>{
+const resendOtp = async (req,res)=>{
     try {
         
         const {email} = req.session.userData;
@@ -285,9 +282,9 @@ async function sendVerificationEmail(email,otp){
         res.status(500).json({success:false,message:"Internal Server Error. Please try again"})
 
     }
- }
+};
 
- const logout = async (req,res)=>{
+const logout = async (req,res)=>{
     try{
         req.session.destroy((error)=>{
             if(error){
@@ -315,7 +312,6 @@ const loadShoppingPage = async (req, res) => {
             return res.redirect('/pageNotFound');
         }
         if (brand && !mongoose.isValidObjectId(brand)) {
-            console.log(`Invalid brand ID: ${brand}`);
             return res.redirect('/pageNotFound');
         }
 
@@ -353,7 +349,6 @@ const loadShoppingPage = async (req, res) => {
                 isDeleted: false 
             });
             if (!validCategory) {
-                console.log(`Category not found or unlisted/deleted: ${category}`);
                 return res.redirect('/pageNotFound');
             }
             query.category = category;

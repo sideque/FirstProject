@@ -82,7 +82,7 @@ const addBrand = async (req,res) => {
         console.log(error.message);
         return res.status(500).json({ error:"Internal server error"})
     }
-}
+};
 
 const loadAddBrand = (req,res) => {
     try {
@@ -93,7 +93,7 @@ const loadAddBrand = (req,res) => {
         console.log(error.message);
         res.redirect('/admin/pageerror');
     }
-}
+};
 
 const addBrandOffer = async (req, res) => {
     try {
@@ -166,8 +166,7 @@ const removeBrandOffer = async (req, res) => {
         console.error("Error removing brand offer:", error);
         res.status(500).json({status: false, message: "Internal Server Error"});
     }
-}
-
+};
 
 const deleteBrand = async (req, res) => {
     try {
@@ -275,7 +274,7 @@ const getListBrand = async (req,res) =>{
         res.redirect("/admin/pageerror");
 
     }
-}
+};
 
 const getUnlistBrand = async (req,res) =>{
     try {
@@ -289,7 +288,7 @@ const getUnlistBrand = async (req,res) =>{
         res.redirect("/admin/pageerror")
 
     }
-}
+};
 
 
 module.exports = {

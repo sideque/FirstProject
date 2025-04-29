@@ -49,7 +49,6 @@
             cursor: not-allowed;
         }
 
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--dark-color);
@@ -228,6 +227,18 @@
             border: 1px solid rgba(155, 89, 182, 0.5);
         }
 
+        .status-return-accepted {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+
+        .status-return-rejected {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+
         /* Button Styles */
         .btn {
             border-radius: 6px;
@@ -396,24 +407,39 @@
                         </div>
 
                         <div class="col-md-4">
-                            <select class="form-select status-selector">
-                                <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>>Delivered
-                                </option>
-                                <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending
-                                </option>
-                                <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>
-                                    >Processing</option>
-                                <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped
-                                </option>
-                                <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>>Cancelled
-                                </option>
-                                <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %>>Returned
-                                </option>
-                            </select>
-
-                            <button class="btn btn-primary w-100" onclick="updateStatus('<%= order.orderId %>')">Update
-                                Status</button>
+                            <% if (order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped') { %>
+                                <!-- Normal status update -->
+                                <select class="form-select status-selector" id="status-<%= order.orderId %>">
+                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                    <option value="Return Accepted" <%= order.status === 'Return Accepted' ? 'selected' : '' %>>Return Accepted</option>
+                                    <option value="Return Rejected" <%= order.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
+                                </select>
+                                <button class="btn btn-primary w-100 mt-2" onclick="updateStatus('<%= order.orderId %>')">Update Status</button>
+                        
+                            <% } else if (order.status === 'Returned' || order.status === 'Return Requested') { %>
+                                <!-- Admin action for returned orders -->
+                                <select class="form-select status-selector" id="status-<%= order.orderId %>">
+                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                    <option value="Return Accepted" <%= order.status === 'Return Accepted' ? 'selected' : '' %>>Return Accepted</option>
+                                    <option value="Return Rejected" <%= order.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
+                                </select>
+                        
+                            <% } else { %>
+                                <!-- Final status display -->
+                                <p class="text-success fw-bold">Status: <%= order.status %></p>
+                            <% } %>
                         </div>
+                                   
                     </div>
                 </div>
             </div>

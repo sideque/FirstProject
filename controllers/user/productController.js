@@ -11,7 +11,6 @@ const productController = async (req, res) => {
     const userData = await User.findById(userId);
     const productId = req.query.id;
 
-    // Fetch product ONLY if it's not blocked, brand and category are listed and not deleted
     const product = await Product.findOne({
       _id: productId,
       isBlocked: false,
@@ -31,7 +30,7 @@ const productController = async (req, res) => {
 
     // Reject if product, category, or brand is missing (meaning they didn’t match)
     if (!product || !product.category || !product.brand) {
-      return res.status(404).render("404"); // or send("Product not available")
+      return res.status(404).render("404"); 
     }
 
     // Fetch related products (with proper filters)

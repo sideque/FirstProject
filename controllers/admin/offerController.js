@@ -52,8 +52,6 @@ const loadOffers = async (req, res) => {
     }
 };
 
-
-// Add a new offer
 const addOffer = async (req, res) => {
     try {
         const {
@@ -101,7 +99,6 @@ const addOffer = async (req, res) => {
     }
 };
 
-// Get an offer for editing
 const getOffer = async (req, res) => {
     try {
         const offer = await Offer.findById(req.params.id).populate('applicableTo', 'productName name');
@@ -115,7 +112,6 @@ const getOffer = async (req, res) => {
     }
 };
 
-// Update an offer
 const updateOffer = async (req, res) => {
     try {
         const {
@@ -169,7 +165,6 @@ const updateOffer = async (req, res) => {
     }
 };
 
-// List an offer
 const listOffer = async (req, res) => {
     try {
         const offer = await Offer.findByIdAndUpdate(
@@ -187,7 +182,6 @@ const listOffer = async (req, res) => {
     }
 };
 
-// Unlist an offer
 const unlistOffer = async (req, res) => {
     try {
         const offer = await Offer.findByIdAndUpdate(
@@ -205,7 +199,6 @@ const unlistOffer = async (req, res) => {
     }
 };
 
-// Get products for dropdown
 const getProducts = async (req, res) => {
     try {
         const categories = await Category.find({ isListed: true, isDeleted: false });
@@ -227,7 +220,6 @@ const getProducts = async (req, res) => {
     }
 };
 
-// Get categories for dropdown
 const getCategories = async (req, res) => {
     try {
         const categories = await Category.find({ isDeleted: false, isListed: true }).select('name _id');
@@ -238,7 +230,6 @@ const getCategories = async (req, res) => {
     }
 };
 
-// Get brands for dropdown
 const getBrands = async (req, res) => {
     try {
         const brands = await Brand.find({ isDeleted: false, isListed: true }).select('name _id');

@@ -7,7 +7,7 @@ const path = require("path");
 const sharp = require("sharp");
 const adminController = require('./adminController');
 
-// Function to check for duplicate products
+
 const checkForDuplicateProducts = async () => {
     try {
 

@@ -7,8 +7,8 @@ const loadOrder = async (req, res) => {
   try {
 
     // Get query parameters
-    const { status, date, page = 1, search = '' } = req.query; // Added search
-    const limit = 10; // 10 orders per page
+    const { status, date, page = 1, search = '' } = req.query; 
+    const limit = 10; 
 
     // Build query for filtering
     let query = {};
@@ -61,7 +61,7 @@ const loadOrder = async (req, res) => {
       })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }) // Ensures newest orders at top
+      .sort({ createdAt: -1 }) 
       .lean();
     // Log order dates to verify sorting
     orders.forEach((order, index) => {
@@ -219,27 +219,32 @@ const verifyReturnRequest = async (req, res) => {
       order.isReturnRequested = false
 
       // Refund to wallet
-      // const user = await User.findById(order.userId);
-      // const refundAmount = order.finalAmount;
+      const user = await User.findById(order.userId);
+      const refundAmount = order.finalAmount;
 
-      // let wallet = await Wallet.findOne({ userId: order.userId });
-      // if (!wallet) {
-      //   wallet = new Wallet({
-      //     userId: order.userId,
-      //     balance: 0,
-      //     transactions: []
-      //   });
-      // }
+      let wallet = await Wallet.findOne({ userId: order.userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          transactionId,
+          orderId:order.orderId,
+          userId: order.userId,
+          balance: 0,
+          transactions: [],
+         });
+      }
 
-      // wallet.balance += refundAmount;
-      // wallet.transactions.push({
-      //   type: "credit",
-      //   amount: refundAmount,
-      //   description: `Refund for order ${orderId}`,
-      //   date: new Date()
-      // });
+      wallet.balance += refundAmount;
+      wallet.transactions.push({
+        type: "credit",
+        amount: refundAmount,
+        orderId:order.orderId,  
+        paymentMethod:order.paymentMethod,
+        transactionId:`TXN${Date.now()}`,
+        description: `Refund for order ${orderId}`,
+        date: new Date()
+      });
 
-      // await wallet.save();
+      await wallet.save();
 
     } else if (action === "reject") {
       order.status = "Delivered";

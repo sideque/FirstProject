@@ -582,15 +582,10 @@ const loadWallet = async (req, res) => {
   }
 };
 
-const addMoney = async (req, res) => {
+const getTransactionDetails = async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ success: false, message: 'Please log in' });
-    }
-
-    const { amount, paymentMethod } = req.body;
-    if (!amount || amount < 100) {
-      return res.status(400).json({ success: false, message: 'Amount must be at least ₹100' });
     }
 
     const wallet = await Wallet.findOne({ userId: req.session.user });
@@ -598,20 +593,16 @@ const addMoney = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Wallet not found' });
     }
 
-    wallet.balance += parseFloat(amount);
-    wallet.transactions.push({
-      amount: parseFloat(amount),
-      type: 'credit',
-      paymentMethod,
-      transactionId: `TXN${Date.now()}`,
-      description: `Added ₹${amount} via ${paymentMethod}`,
-      date: new Date(),
-    });
+    const transaction = wallet.transactions.find(
+      (t) => t._id.toString() === req.params.id
+    );
+    if (!transaction) {
+      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    }
 
-    await wallet.save();
-    return res.json({ success: true, message: 'Money added successfully' });
+    return res.json({ success: true, transaction });
   } catch (error) {
-    console.error('Error adding money:', error);
+    console.error('Error fetching transaction:', error);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -637,5 +628,5 @@ module.exports = {
   editEmail,
   verifyEmailOtp,
   loadWallet,
-  addMoney,
+  getTransactionDetails,
 };

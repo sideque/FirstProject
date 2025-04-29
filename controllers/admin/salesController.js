@@ -3,7 +3,7 @@ const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const mongoose = require('mongoose');
 
-// Load Sales Report Page
+
 const loadSalesReport = async (req, res) => {
     try {
         const { range, start, end, page = 1 } = req.query;
@@ -78,7 +78,6 @@ const loadSalesReport = async (req, res) => {
     }
 };
 
-// Calculate Sales Summary
 const calculateSales = (orders) => {
     let totalSales = 0;
     let cancelOrReturn = 0;
@@ -103,7 +102,6 @@ const calculateSales = (orders) => {
     };
 };
 
-// Download Excel Report
 const downloadExcel = async (req, res) => {
     try {
         const { range, start, end } = req.query;
@@ -184,7 +182,6 @@ const downloadExcel = async (req, res) => {
     }
 };
 
-// Download PDF Report
 const downloadPDF = async (req, res) => {
     try {
         const { range, start, end } = req.query;
@@ -271,7 +268,6 @@ const downloadPDF = async (req, res) => {
     }
 };
 
-// Helper: Fetch Report Data
 const getReportData = async (range, start, end) => {
     let filter = {};
     if (range && range !== 'custom') {

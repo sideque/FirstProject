@@ -21,14 +21,14 @@ const getAdminData = async (req) => {
 
 const pageerror = async (req, res) => {
     res.render("admin-error")
-}
+};
 
 const loadLogin = (req, res) => {
     if (req.session.admin) {
         return res.redirect("/admin");
     }
     res.render("admin-login", { message: null });
-}
+};
 
 const login = async (req, res) => {
     try {
@@ -93,7 +93,6 @@ const loadDashboard = async (req, res) => {
         res.redirect("/admin/pageerror");
     }
 };
-
 
 const logout = async (req, res) => {
     try {

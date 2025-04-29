@@ -36,7 +36,6 @@ router.get(
         failureFlash: true,
     }),
     (req, res) => {
-        console.log('Google callback - User:', req.user);
         if (req.user && req.user._id) {
             req.session.user = req.user._id;
             req.session.save((err) => {
@@ -108,6 +107,7 @@ router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
 router.get('/order/success', userAuth, checkoutController.success);
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);
 router.post('/order/return', userAuth, checkoutController.returnOrder);
+router.post('/verify-razorpay-payment', userAuth, checkoutController.verifyRazorpayPayment);
 
 // coupon Management
 router.get('/applyCoupon', userAuth, cartController.couponApply);
@@ -127,6 +127,6 @@ router.post('/wishlist/remove', userAuth, cartController.removeFromWishlist);
 
 // Wallet Management
 router.get('/wallet', userAuth, profileController.loadWallet);
-router.post('/wallet/add-money', userAuth, profileController.addMoney); 
+router.get('/wallet/transaction/:id', userAuth, profileController.getTransactionDetails);
 
 module.exports = router;
