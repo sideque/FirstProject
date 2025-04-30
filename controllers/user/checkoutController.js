@@ -548,6 +548,8 @@ const cancelOrder = async (req, res) => {
       return res.json({ success: false, message: 'Cannot cancel order in this status' });
     }
 
+    order.cancelOrReturn = order.finalAmount;
+    order.revokedCoupon = order.couponDiscount;
     order.status = 'Cancelled';
     await order.save();
 

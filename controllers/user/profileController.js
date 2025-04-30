@@ -412,14 +412,17 @@ const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.body;
     const userId = req.session.user;
-    const order = await Order.findOne({ _id: orderId, address: userId });
+    // const order = await Order.findOne({ _id: orderId, address: userId });
+    const order = await Order.findOne({ _id: orderId, userId: userId });
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
     if (order.status !== 'Processing') {
       return res.status(400).json({ success: false, message: 'Order cannot be canceled' });
     }
-    order.status = 'Canceled';
+    order.cancelOrReturn = order.finalAmount;
+    order.revokedCoupon = order.couponDiscount;
+    order.status = 'Cancelled';
     await order.save();
     res.redirect('/userProfile');
   } catch (error) {

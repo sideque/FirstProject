@@ -216,7 +216,9 @@ const verifyReturnRequest = async (req, res) => {
       })
 
       order.status = 'Returned';
-      order.isReturnRequested = false
+      order.isReturnRequested = false;
+      order.cancelOrReturn = order.finalAmount;
+      order.revokedCoupon = order.couponDiscount;
 
       // Refund to wallet
       const user = await User.findById(order.userId);
