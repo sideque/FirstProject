@@ -10,7 +10,6 @@ const productController = require('../controllers/user/productController');
 const upload = require('../middlewares/multerConfig');
 const cartController = require('../controllers/user/cartController');
 
-
 router.use((req, res, next) => {
     // console.log('Route:', req.path, 'Session:', req.session.user);
     next();
@@ -43,7 +42,7 @@ router.get(
                     console.error('Session save error:', err);
                     return res.redirect('/signup?error=session_save_failed');
                 }
-                req.session.user = req.user
+                req.session.user = req.user;
                 res.redirect('/');
             });
         } else {
@@ -57,7 +56,7 @@ router.get(
     }
 );
 
-router.get('/login', userController.loadLogin); 
+router.get('/login', userController.loadLogin);
 router.post('/login', userController.login);
 router.get('/logout', userController.logout);
 
@@ -94,12 +93,11 @@ router.post('/quantityController', userAuth, productController.checkQuantity);
 
 // Cart
 router.get('/cart', userAuth, cartController.loadCart);
-// router.post('/cart/add/:id', userAuth, cartController.addToCart);
-router.post('/cart/add', userAuth, cartController.addToCart); 
+router.post('/cart/add', userAuth, cartController.addToCart);
 router.post('/cart/update', userAuth, cartController.updateCartItem);
 router.post('/cart/remove', userAuth, cartController.removeCartItem);
 
-// Correct order
+// Order
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
 router.get('/orders', userAuth, checkoutController.loadOrders);
@@ -108,17 +106,17 @@ router.get('/order/success', userAuth, checkoutController.success);
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);
 router.post('/order/return', userAuth, checkoutController.returnOrder);
 router.post('/verify-razorpay-payment', userAuth, checkoutController.verifyRazorpayPayment);
+router.post('/retry-order', userAuth, checkoutController.retryOrder);
+router.get('/paymentfailedpage', userAuth, checkoutController.paymentFailed); 
 
-// coupon Management
+// Coupon Management
 router.get('/applyCoupon', userAuth, cartController.couponApply);
 router.get('/cancel-coupon', userAuth, cartController.couponCancel);
 router.get('/coupons/available', userAuth, cartController.getAvailableCoupons);
 router.get('/check-applied-coupon', userAuth, cartController.checkAppliedCoupon);
 
-//Offer Management
-router.get('/offer',userAuth,offerController.getProductOffers);
-// router.get('/cart/data', userAuth, cartController.getCartData);
-
+// Offer Management
+router.get('/offer', userAuth, offerController.getProductOffers);
 
 // WishList Management
 router.get('/wishlist', userAuth, cartController.loadWishlist);

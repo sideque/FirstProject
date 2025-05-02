@@ -271,7 +271,7 @@
                       <div class="order-header">
                         <div class="order-id">Order #<%= order.orderId %></div>
                         <div class="order-date"><%= new Date(order.createdOn).toLocaleDateString('en-US') %></div>
-                        <div class="order-status status-<%= order.status.toLowerCase() %>"><%= order.status %></div>
+                        <div class="order-status status-<%= order.status.toLowerCase().replace(' ', '-') %>"><%= order.status %></div>
                       </div>
                       <div class="order-body">
                         <% order.orderItems.slice(0, 1).forEach(function(item) { %>
@@ -281,7 +281,7 @@
                               <div class="product-details">
                                 <div class="product-name"><%= item.product.productName || 'Unknown' %></div>
                                 <div class="product-meta">Qty: <%= item.stock %></div>
-                                <div class="product-price">₹<%= item.price.toLocaleString('en-IN') %></div>
+                                <div class="product-price">₹<%= (item.price * item.stock).toLocaleString('en-IN') %></div>
                               </div>
                             </div>
                           <% } %>

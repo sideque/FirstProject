@@ -563,9 +563,9 @@
             amount: data.razorpayOrder.amount,
             currency: data.razorpayOrder.currency,
             order_id: data.razorpayOrder.id,
-            name: 'Your Shop Name',
+            name: 'MobiVault',
             description: 'Order Payment',
-            image: '/images/logo.png',
+            image: '/images/admin-logo.png', 
             handler: async function (response) {
               try {
                 const verifyResponse = await fetch('/verify-razorpay-payment', {
@@ -606,7 +606,9 @@
                   text: error.message || 'Unable to verify payment. Please contact support.',
                   confirmButtonColor: '#82ae46',
                 }).then(() => {
-                  window.location.href = `/paymentfailedpage?error=${encodeURIComponent(error.message || 'Verification failed')}`;
+                  window.location.href = `/paymentfailedpage?error=${encodeURIComponent(
+                    error.message || 'Verification failed'
+                  )}`;
                 });
               }
             },
@@ -636,7 +638,9 @@
                   text: 'You cancelled the payment. Please try again to complete your order.',
                   confirmButtonColor: '#82ae46',
                 }).then(() => {
-                  window.location.href = `/paymentfailedpage?error=${encodeURIComponent('Payment cancelled by user')}`;
+                  window.location.href = `/paymentfailedpage?error=${encodeURIComponent(
+                    'Payment cancelled by user'
+                  )}`;
                 });
               },
             },
@@ -651,7 +655,9 @@
               text: response.error.description || 'Payment failed. Please try again.',
               confirmButtonColor: '#82ae46',
             }).then(() => {
-              window.location.href = `/paymentfailedpage?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
+              window.location.href = `/paymentfailedpage?error=${encodeURIComponent(
+                response.error.description || 'Payment failed'
+              )}`;
             });
           });
           rzp.open();
