@@ -16,7 +16,7 @@ const razorpay = new Razorpay({
 });
 
 const createRazorpayOrder = async (amount, userId) => {
-  const roundedAmount = Math.round(parseFloat(amount) * 100); // Convert to paise and round
+  const roundedAmount = Math.round(parseFloat(amount) * 100); 
   const options = {
     amount: roundedAmount,
     currency: 'INR',

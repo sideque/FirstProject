@@ -106,14 +106,11 @@ const downloadExcel = async (req, res) => {
     try {
         const { range, start, end } = req.query;
 
-        // Fetch report data
         const { report, salesSummary, totalOrders } = await getReportData(range, start, end);
 
-        // Create Excel workbook
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
 
-        // Define columns
         worksheet.columns = [
             { header: 'Order ID', key: 'orderId', width: 30 },
             { header: 'Amount', key: 'amount', width: 15 },

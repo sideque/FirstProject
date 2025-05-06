@@ -3,12 +3,12 @@ const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Wallet = require("../../models/walletSchema");
 
+
 const loadOrder = async (req, res) => {
   try {
-
     // Get query parameters
-    const { status, date, page = 1, search = '' } = req.query; 
-    const limit = 10; 
+    const { status, date, page = 1, search = '', sort = 'asc' } = req.query; 
+    const limit = 10;
 
     // Build query for filtering
     let query = {};
@@ -32,14 +32,14 @@ const loadOrder = async (req, res) => {
     }
     if (search) {
       query.$or = [
-        { orderId: { $regex: new RegExp(search, 'i') } }, // Search by orderId
-        { userId: { $in: await User.find({ name: { $regex: new RegExp(search, 'i') } }).distinct('_id') } } // Search by customer name
+        { orderId: { $regex: new RegExp(search, 'i') } },
+        { userId: { $in: await User.find({ name: { $regex: new RegExp(search, 'i') } }).distinct('_id') } },
       ];
     }
 
-    const totalOrders = await Order.countDocuments(query); 
-    const totalPages = Math.ceil(totalOrders / limit); 
-    const skip = (page - 1) * limit; 
+    const totalOrders = await Order.countDocuments(query);
+    const totalPages = Math.ceil(totalOrders / limit);
+    const skip = (page - 1) * limit;
 
     // Pagination
     const maxPagesToShow = 5;
@@ -49,7 +49,10 @@ const loadOrder = async (req, res) => {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    // Fetch orders
+    
+    const sortOrder = sort === 'desc' ? 1 : -1; // asc for oldest first, desc for newest first
+
+    // Fetch orders with dynamic sorting
     const orders = await Order.find(query)
       .populate({
         path: "orderItems.product",
@@ -61,18 +64,23 @@ const loadOrder = async (req, res) => {
       })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }) 
+      .sort({ createdAt: sortOrder }) 
       .lean();
+
     // Log order dates to verify sorting
     orders.forEach((order, index) => {
+      console.log(`Order ${index + 1}:`, {
+        orderId: order.orderId,
+        orderDate: new Date(order.createdAt).toISOString(),
+      });
     });
 
     // Format orders for template
     const formattedOrders = orders.map((order) => {
       return {
         ...order,
-        shippingAddress: order.address || { name: "Unknown" }, 
-        totalAmount: order.finalAmount || 0, 
+        shippingAddress: order.address || { name: "Unknown" },
+        totalAmount: order.finalAmount || 0,
         orderDate: order.createdAt,
         products: order.orderItems.map((item) => ({
           ...item,
@@ -88,9 +96,10 @@ const loadOrder = async (req, res) => {
       totalPages,
       statusFilter: status || "",
       dateFilter: date || "",
-      startPage, 
-      endPage,   
-      search // Added for pagination links
+      startPage,
+      endPage,
+      search,
+      sort, 
     });
   } catch (error) {
     console.error("Error in loadOrder:", error.message, error.stack);
@@ -133,7 +142,7 @@ const viewOrder = async (req, res) => {
       customerName: order.address?.name || 'N/A',
       customerEmail: order.userId?.email || 'N/A',
       products: order.orderItems
-        .filter(item => item.product) // Skip items with null product
+        .filter(item => item.product) 
         .map(item => ({
           name: item.product.name || item.product.productName || 'N/A',
           image: item.product.productImage?.[0] || '/images/placeholder.png',
@@ -144,7 +153,7 @@ const viewOrder = async (req, res) => {
       returnItems: order.orderItems
         .filter(item => item.product && (item.status === 'Returned' || item.status === 'Return Request'))
         .map(item => ({
-          name: item.product.name || item.product.productName || 'N/A', // Support both fields
+          name: item.product.name || item.product.productName || 'N/A', 
           image: item.product.productImage?.[0] || '/images/placeholder.png',
           quantity: item.stock,
           price: item.price,
@@ -203,7 +212,7 @@ const updateOrderStatus = async (req, res) => {
 
 const verifyReturnRequest = async (req, res) => {
   try {
-    const { orderId, itemId, action } = req.query; // The action: 'accept' or 'reject'
+    const { orderId, itemId, action } = req.query; 
 
     const order = await Order.findOne({ orderId });
     if (!order) {

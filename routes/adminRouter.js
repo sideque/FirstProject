@@ -12,17 +12,21 @@ const salesController = require('../controllers/admin/salesController');
 const { adminAuth } = require("../middlewares/auth");
 const upload = require("../middlewares/multerConfig");
 
-// Existing routes (unchanged)
-router.get("/pageerror", adminController.pageerror);
-router.get("/login", adminController.loadLogin);
-router.post("/login", adminController.login);
-router.get("/", adminAuth, adminController.loadDashboard);
-router.get("/logout", adminController.logout);
+// Admin Routes
+router.get('/pageerror', adminController.pageerror);
+router.get('/login', adminController.loadLogin);
+router.post('/login', adminController.login);
+router.get('/dashboard', adminAuth, adminController.loadDashboard);
+router.get('/dashboard/data/:filter', adminAuth, adminController.getChartData);
+router.get('/order-details', adminAuth, adminController.getOrderDetails);
+router.get('/download-excel', adminAuth, adminController.downloadExcel);
+router.get('/logout', adminAuth, adminController.logout);
 
 // Customer Management
 router.get("/users", adminAuth, customerController.customerInfo);
 router.get("/blockCustomer", adminAuth, customerController.customerBlocked);
 router.get("/unblockCustomer", adminAuth, customerController.customerunBlocked);
+router.get("/user-wallet/:id", adminAuth, customerController.getWalletDetails);
 
 // Category Management
 router.get("/category", adminAuth, categoryController.categoryInfo);

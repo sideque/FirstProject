@@ -34,7 +34,7 @@ const walletSchema = new Schema({
         type: String,
       },
       paymentMethod: {
-        type: String, // Add paymentMethod to match template
+        type: String, 
       },
       date: {
         type: Date,

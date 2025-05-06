@@ -230,7 +230,6 @@ const addProducts = async (req, res) => {
             images.push(file.filename);
         }
 
-        // ✅ Brand name മുതൽ Brand ObjectId കിട്ടണം
         const brandObj = await Brand.findOne({ name: brand });
         if (!brandObj) {
             return res.status(400).json({
@@ -239,7 +238,6 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // ✅ Category name മുതൽ Category ObjectId കിട്ടണം
         const categoryObj = await Category.findOne({ name: category });
         if (!categoryObj) {
             return res.status(400).json({
@@ -251,7 +249,7 @@ const addProducts = async (req, res) => {
         const newProduct = new Product({
             productName,
             description,
-            brand: brandObj._id, // ✅ Brand ObjectId കൊടുക്കണം
+            brand: brandObj._id, 
             category: categoryObj._id,
             regularPrice,
             salePrice,

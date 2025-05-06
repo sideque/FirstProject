@@ -1,31 +1,51 @@
-
-
-  .sidebar {
+.sidebar {
     position: fixed;
     left: 0;
     top: 0;
-    height: 100%;
+    height: 100vh;
     width: 250px;
-    background-color: #2A2A2A;
+    background-color: #1a1a1a;
     color: #fff;
     overflow-y: auto;
     transition: all 0.3s;
     z-index: 100;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-}
-
-.sidebar-menu {
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+  }
+  
+  .sidebar h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #ffffff;
+  }
+  
+  .sidebar a {
+    color: #a1a1a1;
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  
+  .sidebar a:hover {
+    background: #2c2c2c;
+    color: #ffffff;
+  }
+  
+  .sidebar-menu {
     padding: 0;
     margin: 0;
     list-style: none;
-}
-
-.sidebar-menu li {
+  }
+  
+  .sidebar-menu li {
     position: relative;
     margin: 5px 0;
-}
-
-.sidebar-menu li a {
+  }
+  
+  .sidebar-menu li a {
     padding: 12px 20px;
     color: #b3b3b3;
     text-decoration: none;
@@ -33,117 +53,107 @@
     align-items: center;
     transition: all 0.3s;
     font-weight: 500;
-}
-
-.sidebar-menu li a:hover, .sidebar-menu li a.active {
+  }
+  
+  .sidebar-menu li a:hover,
+  .sidebar-menu li a.active {
     color: #fff;
     background-color: rgba(151, 71, 255, 0.2);
     border-left: 4px solid #9747FF;
-}
-
-.sidebar-menu li a.active {
-    color: #fff;
-    background-color: rgba(151, 71, 255, 0.2);
-    border-left: 4px solid #9747FF;
-}
-
-.sidebar-menu li a .fas, .sidebar-menu li a .far, .sidebar-menu li svg {
-    margin-right: 10px;
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-}
-
-.sidebar-menu .logout {
-    margin-top: 40px;
-}
-
-.app-logo {
-  padding: 20px;
-  text-align: center;
-  border-bottom: 1px solid #3A3A3A;
-  margin-bottom: 10px;
-}
-
-.app-logo h2 {
-  color: #fff;
-  font-weight: 700;
-  margin: 0;
-}
-
-.app-logo span {
-  color: #9747FF;
-}
-
-@media (max-width: 992px) {
-  .sidebar {
-    width: 200px;
-  }
-}
-
-
-@media (max-width: 768px) {
-  .sidebar {
-      width: 60px;
-  }
-  
-  .sidebar-menu li a span {
-      display: none;
-  }
-  
-  .sidebar-menu li a {
-      justify-content: center;
-      padding: 15px 5px;
   }
   
   .sidebar-menu li a .fas,
   .sidebar-menu li a .far,
   .sidebar-menu li svg {
-      margin-right: 0;
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+  
+  .sidebar-menu .logout {
+    margin-top: 40px;
+  }
+  
+  .app-logo {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #3A3A3A;
+    margin-bottom: 10px;
   }
   
   .app-logo h2 {
-    font-size: 0;
-}
-
-.app-logo::after {
-    content: "MV";
-    font-size: 18px;
+    color: #fff;
     font-weight: 700;
-    color: #9747FF;
-}
-
+    margin: 0;
+  }
   
-  .app-logo::after {
+  .app-logo span {
+    color: #9747FF;
+  }
+  
+  /* 992px and below */
+  @media (max-width: 992px) {
+    .sidebar {
+      width: 200px;
+    }
+  }
+  
+  /* 768px and below */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 60px;
+    }
+  
+    .sidebar-menu li a span {
+      display: none;
+    }
+  
+    .sidebar-menu li a {
+      justify-content: center;
+      padding: 15px 5px;
+    }
+  
+    .sidebar-menu li a .fas,
+    .sidebar-menu li a .far,
+    .sidebar-menu li svg {
+      margin-right: 0;
+    }
+  
+    .app-logo h2 {
+      font-size: 0;
+    }
+  
+    .app-logo::after {
       content: "MV";
       font-size: 18px;
       font-weight: 700;
       color: #9747FF;
+    }
   }
-
-}
-
-@media (max-width: 480px) {
-  .sidebar {
+  
+  /* 480px and below */
+  @media (max-width: 480px) {
+    .sidebar {
       width: 0;
       transform: translateX(-60px);
-  }
+    }
   
-  .sidebar.open {
+    .sidebar.open {
       width: 200px;
       transform: translateX(0);
-  }
+    }
   
-  .sidebar.open .sidebar-menu li a span {
+    .sidebar.open .sidebar-menu li a span {
       display: inline;
-  }
+    }
   
-  .sidebar.open .app-logo h2 {
+    .sidebar.open .app-logo h2 {
       font-size: 20px;
+    }
+  
+    .sidebar.open .app-logo::after {
+      content: "";
+    }
   }
   
-  .sidebar.open .app-logo::after {
-      content: "";
-  }
-
-}

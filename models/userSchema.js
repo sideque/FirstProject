@@ -17,9 +17,9 @@ const userSchema = new Schema({
     },
     phone:{
         type:String,
-        required:false,  //google ellam singup cheyumbool email and password kandaal may userinte phone number wenda athkondaan false kodukunath
+        required:false,  
         unique:true,
-        sparse:true, //single sinup cheyumbool phone number wenda
+        sparse:true, 
         default:null
     },
     gender: { type: String, enum: ["Male", "Female", "Other"] },
@@ -29,7 +29,7 @@ const userSchema = new Schema({
     },
     password:{
         type:String,
-        require:false //single singup user password adikunnila bcs require is false
+        require:false 
     },
     isBlocked :{
         type:Boolean,

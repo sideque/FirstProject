@@ -28,12 +28,10 @@ const productController = async (req, res) => {
       })
       .lean();
 
-    // Reject if product, category, or brand is missing (meaning they didn’t match)
     if (!product || !product.category || !product.brand) {
       return res.status(404).render("404"); 
     }
 
-    // Fetch related products (with proper filters)
     const relatedProducts = await Product.find({
       category: product.category._id,
       _id: { $ne: productId },
@@ -48,11 +46,10 @@ const productController = async (req, res) => {
       })
       .lean();
 
-    // Fetch offers applicable to this product, its category, or its brand
     const allOffers = await Offer.find({
       isList: true,
-      validFrom: { $lte: new Date() }, // Offer has started
-      validUpto: { $gte: new Date() }, // Offer has not expired
+      validFrom: { $lte: new Date() }, 
+      validUpto: { $gte: new Date() }, 
       $or: [
         { offerType: 'Product', applicableTo: productId },
         { offerType: 'Category', applicableTo: product.category._id },
@@ -60,41 +57,35 @@ const productController = async (req, res) => {
       ],
     }).lean();
 
-    // Determine the best offer (highest percentage discount)
     let bestOffer = null;
     let discountAmount = 0;
     let discountedPrice = product.salePrice;
 
     if (allOffers.length > 0) {
-      // Calculate discount for each offer and find the best one
       bestOffer = allOffers.reduce((best, offer) => {
-        const currentDiscount = (product.salePrice * offer.offerAmount) / 100; // Percentage-based discount
+        const currentDiscount = (product.salePrice * offer.offerAmount) / 100; 
         if (!best || currentDiscount > best.discount) {
           return { ...offer, discount: currentDiscount };
         }
         return best;
       }, null);
 
-      // Set discountAmount and discountedPrice for the best offer
       if (bestOffer) {
         discountAmount = bestOffer.discount;
         discountedPrice = product.salePrice - discountAmount;
       }
 
-      // Map offers to match template expectations (ensure consistency)
       allOffers.forEach(offer => {
-        offer.discountType = offer.discountType || 'percentage'; // Ensure discountType is set
-        offer.discountAmount = offer.offerAmount; // Map offerAmount to discountAmount for template
+        offer.discountType = offer.discountType || 'percentage'; 
+        offer.discountAmount = offer.offerAmount; 
       });
 
-      // Update bestOffer to match template expectations
       if (bestOffer) {
         bestOffer.discountType = bestOffer.discountType || 'percentage';
         bestOffer.discountAmount = bestOffer.offerAmount;
       }
     }
 
-    // Prepare product data with discounted price and offer percentage
     const productWithOffer = {
       ...product,
       salePrice: discountedPrice,

@@ -1,9 +1,9 @@
 const User = require("../../models/userSchema");
+const Wallet = require("../../models/walletSchema"); 
 const adminController = require('./adminController');
 
 const customerInfo = async (req, res) => {
     try {
-
         const adminUser = await adminController.getAdminData(req);
         const search = req.query.search || '';
         const page = parseInt(req.query.page) || 1;
@@ -38,7 +38,8 @@ const customerInfo = async (req, res) => {
         const users = await User.find(query)
             .sort({ createdOn: -1 })
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .select('name email phone createdOn isBlocked _id');
 
         res.render("users", {
             users,
@@ -60,7 +61,7 @@ const customerBlocked = async (req, res) => {
     try {
         let id = req.query.id;
         await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
-        res.redirect("/admin/users");
+        res.redirect("/admin/users?status=blocked");
     } catch (error) {
         res.redirect("/admin/pageerror");
     }
@@ -70,14 +71,39 @@ const customerunBlocked = async (req, res) => {
     try {
         let id = req.query.id;
         await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
-        res.redirect("/admin/users");
+        res.redirect("/admin/users?status=unblocked");
     } catch (error) {
         res.redirect("/admin/pageerror");
+    }
+};
+
+const getWalletDetails = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).populate('wallet');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Ensure wallet data is included, even if not populated correctly
+        let walletData = user.wallet || await Wallet.findOne({ userId: user._id });
+        if (!walletData) {
+            walletData = { balance: 0, transactions: [] };
+        }
+        res.json({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            createdOn: user.createdOn,
+            wallet: walletData
+        });
+    } catch (error) {
+        console.error('Error fetching wallet details:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 module.exports = {
     customerInfo,
     customerBlocked,
-    customerunBlocked
-}
+    customerunBlocked,
+    getWalletDetails
+};

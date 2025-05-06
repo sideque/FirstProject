@@ -12,6 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/sideBar.css">
+
   <!-- Custom CSS -->
   <style>
     /* General styling */
@@ -33,83 +34,6 @@
       z-index: 90;
     }
 
-    /* Search Bar */
-    .search-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .search-input {
-      background-color: #2A2A2A;
-      border: 1px solid #333;
-      border-radius: 20px;
-      color: white;
-      padding: 8px 15px 8px 40px;
-      width: 250px;
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #9747FF;
-      width: 280px;
-      box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 30px;
-      color: #999;
-      pointer-events: none;
-    }
-
-    /* Admin Profile */
-    .admin-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 25px;
-      transition: background-color 0.3s;
-      background-color: #2A2A2A;
-      padding: 5px 15px;
-      border-radius: 30px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .admin-profile:hover {
-      background-color: #2A2A2A;
-    }
-
-    .admin-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      overflow: hidden;
-      background-color: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #4778FF;
-      margin-right: 10px;
-    }
-
-    .admin-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .admin-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: white;
-      white-space: nowrap;
-    }
-
-    
     .main-content {
         margin-left: 250px;
         margin-top: 50px;
@@ -181,6 +105,15 @@
     .unblock-btn:hover {
         background-color: #27ae60;
     }
+
+    .details-btn {
+        background-color: #00d4ff;
+        margin-right: 10px;
+    }
+    
+    .details-btn:hover {
+        background-color: #00b7e0;
+    }
     
     .action-btn a {
         color: white;
@@ -188,18 +121,26 @@
         display: block;
     }
 
-    /* Search container */
-    .search-container {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        margin-left: 250px;
-        padding: 10px 20px;
+    /* Modal styling */
+    .modal-content {
+        background-color: #2a2a2a;
+        color: #ffffff;
+        border-radius: 5px;
     }
-    
-    .search-icon {
-        margin-right: 10px;
-        color: #ccc;
+
+    .modal-header, .modal-footer {
+        border-color: #444;
+    }
+
+    .modal-body p {
+        margin: 10px 0;
+    }
+
+    .wallet-item {
+        background-color: #3a3a3a;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
     }
     
     /* Responsive Styles */
@@ -207,18 +148,9 @@
         .main-content {
             margin-left: 200px;
         }
-        .search-input {
-        width: 200px;
-      }
-      
-      .search-input:focus {
-        width: 220px;
-      }
-        
     }
     
     @media (max-width: 768px) {
-        
         .main-content {
             margin-left: 60px;
         }
@@ -238,22 +170,9 @@
         top: 10px;
         right: 15px;
       }
-      
-      .admin-name {
-        display: none;
-      }
-      
-      .search-input {
-        width: 160px;
-      }
-      
-      .search-input:focus {
-        width: 180px;
-      }
     }
     
     @media (max-width: 480px) {
-       
         .main-content {
             margin-left: 0;
             margin-top: 0;
@@ -264,35 +183,18 @@
         padding: 10px;
         width: 100%;
         box-sizing: border-box;
-      }
-      
-      .search-container {
-        width: 70%;
-      }
-      
-      .search-input {
-        width: 100%;
-      }
-      
-      .search-input:focus {
-        width: 100%;
-      }
-        
+      }    
     }
   </style>
-  
-  <!-- External JS -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
- 
   <!-- Main content -->
   <div class="main-content">
+    <!-- Include the admin sidebar -->
+    <%- include('../../views/partials/admin/admin-sidebar') %>
+
     <!-- Include the admin header with search and profile -->
-    <%-include("../../views/partials/admin/admin-header")%>
-    
-    <!-- Include the sidebar -->
-    <%-include("../../views/partials/admin/admin-sidebar")%>
+    <%- include('../../views/partials/admin/admin-header') %>
     
     <h1>User Management</h1>
     <table class="data-table">
@@ -300,32 +202,30 @@
             <tr>
                 <th>USER NAME</th>
                 <th>EMAIL</th>
-                <th>ADDRESS</th>
+                <th>PHONE</th>
                 <th>DATE OF CREATION</th>
+                <th>WALLET</th>
                 <th>ACTION</th>
             </tr>
         </thead>
-        <tbody>
-            <% if(users && users.length > 0) { %>
-                <% for(let i = 0; i < users.length; i++) { %>
-                <tr>
-                    <td><%= users[i].name %></td>
-                    <td><%= users[i].email %></td>
-                    <td><%= users[i].phone %></td>
-                    <td><%= users[i].createdOn ? users[i].createdOn.toDateString() : "N/A" %></td>
-                    <td>
-                        <% if(users[i].isBlocked === false) { %>
-                            <button class="action-btn block-btn">
-                                <a href="/admin/blockCustomer?id=<%= users[i]._id %>">BLOCK</a>
-                            </button>
-                        <% } else { %>
-                            <button class="action-btn unblock-btn">
-                                <a href="/admin/unblockCustomer?id=<%= users[i]._id %>">UNBLOCK</a>
-                            </button>
-                        <% } %>
-                    </td>
-                </tr>
-                <% } %>
+        <tbody id="userTableBody">
+            <% if (users && users.length > 0) { %>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.name %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.phone || 'N/A' %></td>
+                        <td><%= user.createdOn.toDateString() %></td>
+                        <td><button class="action-btn details-btn" onclick="showWallet('<%= user._id %>')">Details</button></td>
+                        <td>
+                            <% if (user.isBlocked) { %>
+                                <button class="action-btn unblock-btn"><a href="/admin/unblockCustomer?id=<%= user._id %>">UNBLOCK</a></button>
+                            <% } else { %>
+                                <button class="action-btn block-btn"><a href="/admin/blockCustomer?id=<%= user._id %>">BLOCK</a></button>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }); %>
             <% } else { %>
                 <tr>
                     <td colspan="5" style="text-align: center;">No users found</td>
@@ -334,10 +234,103 @@
         </tbody>
     </table>
     
-    <!-- Include the pagination component -->
-    <%-include("../../views/partials/admin/pagination")%>
+    <!-- Pagination -->
+    <div id="pagination" class="d-flex justify-content-center">
+        <% for(let i = startPage; i <= endPage; i++) { %>
+            <button class="btn <%= i === currentPage ? 'btn-primary' : 'btn-secondary' %> mx-1" onclick="window.location.href='/admin/users?page=<%= i %><%= search ? '&search=' + search : '' %>'"><%= i %></button>
+        <% } %>
+    </div>
+
+    <!-- Modal for Wallet Details -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailsModalLabel">User Details</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Name:</strong> <span id="modalName"></span></p>
+            <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+            <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+            <p><strong>Created On:</strong> <span id="modalCreated"></span></p>
+            <p><strong>Wallet Balance:</strong> <span id="modalBalance"></span></p>
+            <div class="wallet-section">
+              <h6>Wallet Transactions</h6>
+              <div id="walletDetails"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function showWallet(userId) {
+      try {
+        const response = await fetch(`/admin/user-wallet/${userId}`);
+        const user = await response.json();
+
+        if (user) {
+          document.getElementById('modalName').textContent = user.name;
+          document.getElementById('modalEmail').textContent = user.email;
+          document.getElementById('modalPhone').textContent = user.phone || 'N/A';
+          document.getElementById('modalCreated').textContent = new Date(user.createdOn).toDateString();
+          document.getElementById('modalBalance').textContent = `$${user.wallet.balance || 0}`;
+
+          const walletDetails = document.getElementById('walletDetails');
+          if (user.wallet && user.wallet.transactions && user.wallet.transactions.length) {
+            walletDetails.innerHTML = user.wallet.transactions.map(t => `
+              <div class="wallet-item">
+                <p><strong>Amount:</strong> $${t.amount}</p>
+                <p><strong>Type:</strong> ${t.type}</p>
+                <p><strong>Date:</strong> ${new Date(t.date).toLocaleDateString()}</p>
+              </div>
+            `).join('');
+          } else {
+            walletDetails.innerHTML = '<p>No transactions yet</p>';
+          }
+
+          const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+          modal.show();
+        }
+      } catch (error) {
+        console.error('Error fetching wallet details:', error);
+        Swal.fire('Error', 'Failed to load user details.', 'error');
+      }
+    }
+
+    // Check for status query parameter on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+
+        if (status === 'blocked') {
+            Swal.fire({
+                icon: 'success',
+                title: 'User Blocked',
+                text: 'The user has been successfully blocked.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Remove the status parameter from the URL to prevent repeated alerts
+                window.history.replaceState({}, document.title, '/admin/users');
+            });
+        } else if (status === 'unblocked') {
+            Swal.fire({
+                icon: 'success',
+                title: 'User Unblocked',
+                text: 'The user has been successfully unblocked.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Remove the status parameter from the URL to prevent repeated alerts
+                window.history.replaceState({}, document.title, '/admin/users');
+            });
+        }
+    });
+  </script>
 </body>
 </html>

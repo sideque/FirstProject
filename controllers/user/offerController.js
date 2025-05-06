@@ -33,6 +33,8 @@ const getProductOffers= async (productId, categoryId, brandId) => {
       console.error('Error fetching product offers:', error);
       return { bestOffer: null, allOffers: [] };
     }
-  };
+};
   
-  module.exports = { getProductOffers };
+  module.exports = {
+    getProductOffers
+  };
