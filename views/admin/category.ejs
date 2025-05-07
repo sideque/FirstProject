@@ -283,7 +283,6 @@ th.actions-column {
   <!-- Sidebar Navigation -->
   <%-include("../../views/partials/admin/admin-sidebar")%> 
 
-  <!-- Include the admin header with search and profile -->
   <%-include("../../views/partials/admin/admin-header")%>
 
   <!-- Main content area -->
@@ -301,7 +300,6 @@ th.actions-column {
                     <th>NO</th>
                     <th>CATEGORIES</th>
                     <th>CATEGORY DESCRIPTION</th>
-                    <th>OFFER PERCENTAGE</th>
                     <th class="actions-column">ACTIONS</th>
                 </tr>
             </thead>
@@ -311,23 +309,8 @@ th.actions-column {
                         <td><%= (currentPage - 1) * 4 + index + 1 %></td>
                         <td class="category-name"><%= category.name %></td>
                         <td class="category-description"><%= category.description %></td>
-                        <td>
-                            <%= category.categoryOffer ? `${category.categoryOffer}%` : '0%' %>
-                        </td>
 
                         <td class="actions-column">
-                            <!-- Consistent offer buttons -->
-                            <!-- <button class="action-btn <%= category.categoryOffer ? 'unblock-btn' : 'block-btn' %>">
-                                <a href="#" onclick="addOffer('<%= category._id %>')">
-                                    <%= category.categoryOffer ? 'Update Offer' : 'Add Offer' %>
-                                </a>
-                            </button>
-                            
-                            <% if(category.categoryOffer > 0) { %>
-                                <button class="action-btn unblock-btn">
-                                    <a href="#" onclick="removeOffer('<%= category._id %>')">Remove Offer</a>
-                                </button>
-                            <% } %> -->
                             
                             <!-- Clean up list/unlist - remove duplicate status indicator -->
                             <% if (category.isListed) { %>
@@ -363,129 +346,7 @@ th.actions-column {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-
-    async function addOffer(categoryId) {
-    try {
-        // Prompt for percentage
-        const {value: amount, dismiss} = await Swal.fire({
-            title: "Offer in percentage",
-            input: "number",
-            inputLabel: "Percentage",
-            inputPlaceholder: "%",
-            showCancelButton: true,
-            inputValidator: (value) => {
-                if (!value) {
-                    return 'Please enter a percentage value';
-                }
-                if (value < 0 || value > 100) {
-                    return 'Percentage must be between 0 and 100';
-                }
-            }
-        });
-        
-        // Check if user cancelled the dialog
-        if (dismiss === Swal.DismissReason.cancel || amount === undefined) {
-            return;
-        }
-        
-        // Show loading indicator
-        Swal.fire({
-            title: 'Processing...',
-            text: 'Adding category offer',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            willOpen: () => {
-                Swal.showLoading();
-            }
-        });
-        
-        // Make API request
-        // const response = await fetch("/admin/addCategoryOffer", {
-        //     method: "POST",
-        //     headers: {
-        //         'Content-Type': "application/json",
-        //     },
-        //     body: JSON.stringify({
-        //         percentage: amount,
-        //         categoryId: categoryId,
-        //     }),
-        // });
-        
-        // Check for non-JSON responses first
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new Error(`Server returned non-JSON response: ${await response.text()}`);
-        }
-        
-        const data = await response.json();
-        
-        if (response.ok && data.status === true) {
-            Swal.fire(
-                "Offer added",
-                "The offer has been added",
-                "success"
-            ).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire(
-                "Failed",
-                data.message || "Adding offer failed",
-                "error"
-            );
-        }
-    } catch (error) {
-        console.error("Error adding offer:", error);
-        
-        Swal.fire(
-            "Error",
-            "An error occurred while adding the offer. Please check console for details.",
-            "error"
-        );
-    }
-}
-
-
-    // async function removeOffer(categoryId) {
-    //     try {
-
-    //         const response = await fetch("/admin/removeCategoryOffer",{
-    //             method:"POST",
-    //             headers:{
-    //                 "content-type" : "application/json",
-    //             },
-    //             body:JSON.stringify({
-    //                 categoryId:categoryId,
-    //             })
-    //         })
-
-    //         const data = await response.json();
-
-    //         if(response.ok && data.status === true){
-    //             Swal.fire(
-    //                 "Offer removed",
-    //                 "The offer has been removed",
-    //                 "success"
-    //             ).then(()=>{
-    //                 location.reload();
-    //             });
-    //         }else{
-    //             Swal.fire("Failed",data.message || "Removing offer failed","error");
-    //         }
-
-    //     } catch (error) {
-
-    //         Swal.fire(
-    //             "Error",
-    //             "An error occured while removing the offer",
-    //             "error"
-    //         );
-
-    //         console.error("Error removing offer",error);
-
-    //     }
-    // }
-
+    
     async function deleteCategory(categorieId) {
     const confirmDelete = await Swal.fire({
         title: 'Are you sure?',

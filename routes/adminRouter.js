@@ -47,7 +47,7 @@ router.get("/brand", adminAuth, brandController.brandInfo);
 router.post("/addBrand", adminAuth, brandController.addBrand);
 router.get("/add-brand", adminAuth, brandController.loadAddBrand);
 router.post("/addBrandOffer", adminAuth, brandController.addBrandOffer);
-router.post("/removeBrandOffer", adminAuth, brandController.removeBrandOffer);
+// router.post("/removeBrandOffer", adminAuth, brandController.removeBrandOffer);
 router.get("/listBrand", adminAuth, brandController.getListBrand);
 router.get("/unlistBrand", adminAuth, brandController.getUnlistBrand);
 router.get("/brand-has-products/:id", adminAuth, brandController.brandHasProducts);

@@ -285,7 +285,7 @@
                                 <select id="brand" name="brand" onchange="document.getElementById('filterForm').submit()">
                                     <option value="">All Brands</option>
                                     <% brand.forEach(b => { %>
-                                        <option value="<%= b._id %>" <%= selectedBrand && selectedBrand === b.name ? 'selected' : '' %>>
+                                        <option value="<%= b._id %>" <%= selectedBrand && selectedBrand === b._id.toString() ? 'selected' : '' %>>
                                             <%= b.name %>
                                         </option>
                                     <% }) %>
@@ -308,10 +308,14 @@
                         <div class="filter-section">
                             <div class="filter-title">Price Range</div>
                             <div class="filter-content">
-                                <div class="price-range">
-                                    <input type="number" id="min-price" name="minPrice" value="<%= minPrice || '' %>" placeholder="Min">
-                                    <input type="number" id="max-price" name="maxPrice" value="<%= maxPrice || '' %>" placeholder="Max">
-                                </div>
+                                <select id="priceRange" name="priceRange" onchange="document.getElementById('filterForm').submit()">
+                                    <option value="">All Prices</option>
+                                    <option value="0-5000" <%= priceRange === '0-5000' ? 'selected' : '' %>>Low to 5000</option>
+                                    <option value="5000-10000" <%= priceRange === '5000-10000' ? 'selected' : '' %>>5000 to 10000</option>
+                                    <option value="10000-50000" <%= priceRange === '10000-50000' ? 'selected' : '' %>>10000 to 50000</option>
+                                    <option value="50000-150000" <%= priceRange === '50000-150000' ? 'selected' : '' %>>50000 to 150000</option>
+                                    <option value="150000-" <%= priceRange === '150000-' ? 'selected' : '' %>>Above 150000</option>
+                                </select>
                             </div>
                         </div>
                         <div class="button-container">
@@ -371,13 +375,13 @@
                     <div class="row mt-5">
                         <div class="pagination" style="width: 100%; text-align: center;">
                             <% if (currentPage > 1) { %>
-                                <a class="btn" href="/shop?page=<%= currentPage - 1 %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>&search=<%= search || '' %>&minPrice=<%= minPrice || '' %>&maxPrice=<%= maxPrice || '' %>">Previous</a>
+                                <a class="btn" href="/shop?page=<%= currentPage - 1 %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>&search=<%= search || '' %>&priceRange=<%= priceRange || '' %>">Previous</a>
                             <% } %>
                             <% for (let i = 1; i <= totalPages; i++) { %>
-                                <a class="btn <%= i === currentPage ? 'active' : '' %>" href="/shop?page=<%= i %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>&search=<%= search || '' %>&minPrice=<%= minPrice || '' %>&maxPrice=<%= maxPrice || '' %>"><%= i %></a>
+                                <a class="btn <%= i === currentPage ? 'active' : '' %>" href="/shop?page=<%= i %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>&search=<%= search || '' %>&priceRange=<%= priceRange || '' %>"><%= i %></a>
                             <% } %>
                             <% if (currentPage < totalPages) { %>
-                                <a class="btn" href="/shop?page=<%= currentPage + 1 %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>&search=<%= search || '' %>&minPrice=<%= minPrice || '' %>&maxPrice=<%= maxPrice || '' %>">Next</a>
+                                <a class="btn" href="/shop?page=<%= currentPage + 1 %>&category=<%= selectedCategory || '' %>&brand=<%= selectedBrand || '' %>&search=<%= search || '' %>&priceRange=<%= priceRange || '' %>">Next</a>
                             <% } %>
                         </div>
                     </div>
@@ -390,10 +394,9 @@
 <script>
     function clearSearch() {
         document.getElementById('search').value = '';
-        document.getElementById('min-price').value = '';
-        document.getElementById('max-price').value = '';
         document.getElementById('brand').value = '';
         document.getElementById('category').value = '';
+        document.getElementById('priceRange').value = '';
         document.getElementById('filterForm').submit();
     }
 </script>

@@ -330,7 +330,6 @@ th.actions-column {
                     <th>NO</th>
                     <th>BRANDS</th>
                     <th>BRAND DESCRIPTION</th>
-                    <th>OFFER PERCENTAGE</th>
                     <th class="actions-column">ACTIONS</th>
                 </tr>
             </thead>
@@ -341,9 +340,6 @@ th.actions-column {
                             <td><%= (currentPage - 1) * 5 + index + 1 %></td>
                             <td class="brand-name"><%= brand.name %></td>
                             <td class="brand-description"><%= brand.description %></td>
-                            <td>
-                                <%= brand.brandOffer ? `${brand.brandOffer}%` : '0%' %>
-                            </td>
                             <td class="actions-column">
                                 <% if (brand.isListed) { %>
                                     <button class="action-btn block-btn">
@@ -458,47 +454,6 @@ th.actions-column {
         );
     }
 }
-
-
-    // async function removeOffer(brandId) {
-    //     try {
-
-    //         const response = await fetch("/admin/removeBrandOffer",{
-    //             method:"POST",
-    //             headers:{
-    //                 "content-type" : "application/json",
-    //             },
-    //             body:JSON.stringify({
-    //                 brandId:brandId,
-    //             })
-    //         })
-
-    //         const data = await response.json();
-
-    //         if(response.ok && data.status === true){
-    //             Swal.fire(
-    //                 "Offer removed",
-    //                 "The offer has been removed",
-    //                 "success"
-    //             ).then(()=>{
-    //                 location.reload();
-    //             });
-    //         }else{
-    //             Swal.fire("Failed",data.message || "Removing offer failed","error");
-    //         }
-
-    //     } catch (error) {
-
-    //         Swal.fire(
-    //             "Error",
-    //             "An error occured while removing the offer",
-    //             "error"
-    //         );
-
-    //         console.error("Error removing offer",error);
-
-    //     }
-    // }
 
     async function deleteBrand(brandId) {
     const confirmDelete = await Swal.fire({

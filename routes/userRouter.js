@@ -100,14 +100,17 @@ router.post('/cart/remove', userAuth, cartController.removeCartItem);
 // Order
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
-router.get('/orders', userAuth, checkoutController.loadOrders);
+// router.get('/orders', userAuth, checkoutController.loadOrders);
 router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
 router.get('/order/success', userAuth, checkoutController.success);
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);
 router.post('/order/return', userAuth, checkoutController.returnOrder);
 router.post('/verify-razorpay-payment', userAuth, checkoutController.verifyRazorpayPayment);
 router.post('/retry-order', userAuth, checkoutController.retryOrder);
-router.get('/paymentfailedpage', userAuth, checkoutController.paymentFailed); 
+router.get('/paymentfailedpage', userAuth, checkoutController.paymentFailed);
+router.post('/cancelOrder',userAuth, checkoutController.cancelOrder);
+router.post('/cancelOrderItem',userAuth, checkoutController.cancelOrderItem);
+router.post('/order/returnItem',userAuth, checkoutController.returnOrderItem); 
 
 // Coupon Management
 router.get('/applyCoupon', userAuth, cartController.couponApply);

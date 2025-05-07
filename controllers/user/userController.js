@@ -302,7 +302,7 @@ const logout = async (req,res)=>{
 const loadShoppingPage = async (req, res) => {
     try {
         const user = req.session.user;
-        const { category, brand, search, minPrice, maxPrice, page: pageQuery } = req.query;
+        const { category, brand, search, priceRange, page: pageQuery } = req.query;
         const page = parseInt(pageQuery) || 1;
         const limit = 9;
         const skip = (page - 1) * limit;
@@ -369,7 +369,6 @@ const loadShoppingPage = async (req, res) => {
             }
             query.brand = brand;
         } else {
-            // Only include products from listed and non-deleted brands
             const brandIds = brands.map(brand => brand._id);
             query.brand = { $in: brandIds };
         }
@@ -380,20 +379,23 @@ const loadShoppingPage = async (req, res) => {
         }
 
         // Handle price range
-        if (minPrice || maxPrice) {
+        let minPrice = null;
+        let maxPrice = null;
+        if (priceRange) {
+            const [min, max] = priceRange.split('-').map(val => val ? parseFloat(val) : null);
+            if (min !== null) minPrice = min;
+            if (max !== null) maxPrice = max;
             query.salePrice = {};
-            if (minPrice) query.salePrice.$gte = parseFloat(minPrice);
-            if (maxPrice) query.salePrice.$lte = parseFloat(maxPrice);
+            if (minPrice !== null) query.salePrice.$gte = minPrice;
+            if (maxPrice !== null) query.salePrice.$lte = maxPrice;
         }
-
-        // console.log('Product query:', JSON.stringify(query, null, 2));
 
         // Fetch products
         const productsData = await Product.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('brand')
+            .populate('brand');
 
         // Format product images
         const products = productsData.map((product) => {
@@ -411,7 +413,7 @@ const loadShoppingPage = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / limit);
 
         // Save search history for logged-in user
-        if (userData && (category || brand || search || minPrice || maxPrice)) {
+        if (userData && (category || brand || search || priceRange)) {
             const searchEntry = {
                 category: category || null,
                 brand: brand || null,
@@ -436,8 +438,7 @@ const loadShoppingPage = async (req, res) => {
             selectedCategory: category || null,
             selectedBrand: brand || null,
             search: search || '',
-            minPrice: minPrice || '',
-            maxPrice: maxPrice || '',
+            priceRange: priceRange || '',
         });
     } catch (error) {
         console.error('Load Shopping Page Error:', error.message, error.stack);

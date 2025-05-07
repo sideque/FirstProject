@@ -7,10 +7,8 @@ const path = require("path");
 const sharp = require("sharp");
 const adminController = require('./adminController');
 
-
 const checkForDuplicateProducts = async () => {
     try {
-
         const allProducts = await Product.find({}, 'productName');
 
         // Track product names and potential duplicates
@@ -29,7 +27,6 @@ const checkForDuplicateProducts = async () => {
             }
         });
 
-
         if (duplicates.length > 0) {
             console.log('DUPLICATE PRODUCTS FOUND:');
             duplicates.forEach(dup => {
@@ -46,8 +43,8 @@ const checkForDuplicateProducts = async () => {
 
 const getProductPage = async (req, res) => {
     try {
-        const category = await Category.find({ isListed: true });
-        const brand = await Brand.find({ isListed: true }) || [];
+        const category = await Category.find({ isListed: true, isDeleted: false });
+        const brand = await Brand.find({ isListed: true, isDeleted: false }) || [];
         res.render("add-product", {
             cat: category,
             brand: brand
@@ -84,18 +81,20 @@ const getProductAddPage = async (req, res) => {
 
             const brandIds = matchingBrands.map(brand => brand._id);
 
-            // 2. Build query using those brandIds
+            // Build query using those brandIds
             query = {
                 $or: [
                     { productName: { $regex: new RegExp("^" + search, "i") } },
                     { description: { $regex: new RegExp("^" + search, "i") } },
                     { brand: { $in: brandIds } }
-                ]
+                ],
+                category: { $in: validCategoryIds },
+                brand: { $in: validBrandIds }
             };
         }
 
         // Get total count for pagination
-        const totalProducts = await Product.countDocuments();
+        const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
         // Get products with pagination
@@ -139,7 +138,7 @@ const getProductAddPage = async (req, res) => {
             return product;
         });
 
-        // pagination 
+        // Pagination 
         const maxPagesToShow = 5;
         let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
         let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
@@ -188,6 +187,7 @@ const addProducts = async (req, res) => {
             camera,
         } = req.body;
 
+        // Validate required fields
         if (!productName || !description || !brand || !category || !regularPrice || !salePrice || !quantity) {
             return res.status(400).json({
                 success: false,
@@ -195,14 +195,27 @@ const addProducts = async (req, res) => {
             });
         }
 
-        const existingProduct = await Product.findOne({ productName });
-        if (existingProduct) {
+        // Validate product name format (alphanumeric, spaces, and some special characters)
+        const productNameRegex = /^[a-zA-Z0-9\s\-_&()]+$/;
+        if (!productNameRegex.test(productName)) {
             return res.status(400).json({
                 success: false,
-                message: "Product with this name already exists",
+                message: "Product name contains invalid characters. Use letters, numbers, spaces, or -_&() only",
             });
         }
 
+        // Check for existing product with case-insensitive comparison
+        const existingProduct = await Product.findOne({ 
+            productName: { $regex: new RegExp(`^${productName}$`, 'i') }
+        });
+        if (existingProduct) {
+            return res.status(400).json({
+                success: false,
+                message: "A product with this name already exists (case-insensitive)",
+            });
+        }
+
+        // Validate images
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -230,19 +243,19 @@ const addProducts = async (req, res) => {
             images.push(file.filename);
         }
 
-        const brandObj = await Brand.findOne({ name: brand });
+        const brandObj = await Brand.findOne({ name: brand, isListed: true, isDeleted: false });
         if (!brandObj) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid brand name",
+                message: "Invalid or unlisted brand name",
             });
         }
 
-        const categoryObj = await Category.findOne({ name: category });
+        const categoryObj = await Category.findOne({ name: category, isListed: true, isDeleted: false });
         if (!categoryObj) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid category name",
+                message: "Invalid or unlisted category name",
             });
         }
 
@@ -295,14 +308,21 @@ const listProducts = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
 
-        let searchQuery = {};
+        const validCategories = await Category.find({ isListed: true, isDeleted: false }).select('_id');
+        const validBrands = await Brand.find({ isListed: true, isDeleted: false }).select('_id');
+        const validCategoryIds = validCategories.map(cat => cat._id);
+        const validBrandIds = validBrands.map(brand => brand._id);
+
+        let searchQuery = {
+            category: { $in: validCategoryIds },
+            brand: { $in: validBrandIds }
+        };
+
         if (search) {
-            searchQuery = {
-                $or: [
-                    { productName: { $regex: new RegExp(search, "i") } },
-                    { description: { $regex: new RegExp(search, "i") } }
-                ]
-            };
+            searchQuery.$or = [
+                { productName: { $regex: new RegExp(search, "i") } },
+                { description: { $regex: new RegExp(search, "i") } }
+            ];
         }
 
         const totalProducts = await Product.countDocuments(searchQuery);
@@ -316,29 +336,13 @@ const listProducts = async (req, res) => {
             startPage = Math.max(1, endPage - maxPagesToShow + 1);
         }
 
-        let products;
-        if (search) {
-            products = await Product.find({
-                $or: [
-                    { productName: { $regex: new RegExp(search, "i") } },
-                    { description: { $regex: new RegExp(search, "i") } },
-                ]
-            })
-                .populate('category', 'name')
-                .populate('brand', 'name')
-                .sort({ createdAt: -1 })
-                .skip((page - 1) * limit)
-                .limit(limit)
-                .exec();
-        } else {
-            products = await Product.find({})
-                .populate('category', 'name')
-                .populate('brand', 'name')
-                .sort({ createdAt: -1 })
-                .skip((page - 1) * limit)
-                .limit(limit)
-                .exec();
-        }
+        const products = await Product.find(searchQuery)
+            .populate('category', 'name')
+            .populate('brand', 'name')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec();
 
         const formattedProducts = products.map(product => {
             if (product.productImage && Array.isArray(product.productImage)) {
@@ -371,8 +375,8 @@ const listProducts = async (req, res) => {
             return product;
         });
 
-        const categories = await Category.find({ isListed: true });
-        const brands = await Brand.find({ isListed: true });
+        const categories = await Category.find({ isListed: true, isDeleted: false });
+        const brands = await Brand.find({ isListed: true, isDeleted: false });
 
         res.render("product", {
             data: formattedProducts,
@@ -426,13 +430,10 @@ const deleteProductImage = async (req, res) => {
             if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath);
                 console.log("File deleted successfully");
-            } else {
-
             }
 
             product.productImage.splice(imageIndex, 1);
             await product.save();
-
 
             return res.status(200).json({
                 success: true,
@@ -460,7 +461,6 @@ const deleteProductImage = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     try {
-
         const productId = req.body.productId;
         if (!productId) {
             return res.status(400).json({ success: false, message: "Product ID is required" });
@@ -486,7 +486,6 @@ const updateProduct = async (req, res) => {
         if (croppedImages.length > 0) {
             for (let i = 0; i < croppedImages.length; i++) {
                 try {
-
                     const base64Data = croppedImages[i].replace(/^data:image\/\w+;base64,/, "");
                     const buffer = Buffer.from(base64Data, "base64");
 
@@ -535,7 +534,6 @@ const updateProduct = async (req, res) => {
                 }
             }
         }
-
 
         // Prepare updated product data
         const updatedProduct = {
@@ -663,8 +661,8 @@ const getProductEditPage = async (req, res) => {
             });
         }
 
-        const categories = await Category.find({ isListed: true });
-        const brands = await Brand.find({ isListed: true });
+        const categories = await Category.find({ isListed: true, isDeleted: false });
+        const brands = await Brand.find({ isListed: true, isDeleted: false });
 
         res.render("edit-product", {
             product: product,
@@ -683,15 +681,22 @@ const getAllProducts = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
 
-        let searchQuery = {};
+        const validCategories = await Category.find({ isListed: true, isDeleted: false }).select('_id');
+        const validBrands = await Brand.find({ isListed: true, isDeleted: false }).select('_id');
+        const validCategoryIds = validCategories.map(cat => cat._id);
+        const validBrandIds = validBrands.map(brand => brand._id);
+
+        let searchQuery = {
+            category: { $in: validCategoryIds },
+            brand: { $in: validBrandIds }
+        };
+
         if (search) {
-            searchQuery = {
-                $or: [
-                    { productName: { $regex: new RegExp(search, "i") } },
-                    { brand: { $regex: new RegExp(search, "i") } },
-                    { description: { $regex: new RegExp(search, "i") } }
-                ]
-            };
+            searchQuery.$or = [
+                { productName: { $regex: new RegExp(search, "i") } },
+                { brand: { $regex: new RegExp(search, "i") } },
+                { description: { $regex: new RegExp(search, "i") } }
+            ];
         }
 
         const totalProducts = await Product.countDocuments(searchQuery);
@@ -732,23 +737,20 @@ const getAllProducts = async (req, res) => {
                 product.formattedImages = normalizedImages.map(image => {
                     let path = `/uploads/product-images/${image}`;
                     const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                    // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                     return { filename: image, path: path };
                 });
 
                 if (normalizedImages.length === 0) {
-
                 }
             } else {
                 product.productImage = [];
                 product.formattedImages = [];
-
             }
             return product;
         });
 
-        const category = await Category.find({ isListed: true });
-        const brand = await Brand.find({ isListed: true });
+        const category = await Category.find({ isListed: true, isDeleted: false });
+        const brand = await Brand.find({ isListed: true, isDeleted: false });
 
         res.render("product", {
             data: formattedProducts,
@@ -819,14 +821,12 @@ const getEditProduct = async (req, res) => {
             product.formattedImages = product.productImage.map(image => {
                 let path = `/uploads/product-images/${image}`;
                 const absolutePath = process.cwd() + path.replace(/\//g, '\\');
-                // console.log(`Image absolute path check: ${absolutePath}, exists: ${fs.existsSync(absolutePath)}`);
                 return { filename: image, path: path };
             });
         }
 
-        const category = await Category.find({ isListed: true });
-        const brand = await Brand.find({ isListed: true });
-
+        const category = await Category.find({ isListed: true, isDeleted: false });
+        const brand = await Brand.find({ isListed: true, isDeleted: false });
 
         res.render("edit-product", {
             product: product,
@@ -856,13 +856,11 @@ const getProductData = async (req, res) => {
             .populate("brand", "name");
 
         if (!product) {
-
             return res.status(404).json({
                 success: false,
                 message: "Product not found"
             });
         }
-
 
         if (product.productImage && product.productImage.length > 0) {
             const normalizedImages = product.productImage.map(img => {
@@ -979,7 +977,7 @@ const getProductByID = async (req, res) => {
             }));
         }
 
-        const categories = await Category.find();
+        const categories = await Category.find({ isListed: true, isDeleted: false });
 
         return res.render('admin/edit-product', {
             product,

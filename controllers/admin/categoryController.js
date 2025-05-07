@@ -1,5 +1,4 @@
 const Category = require("../../models/categorySchema");
-const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const adminController = require('./adminController');
 

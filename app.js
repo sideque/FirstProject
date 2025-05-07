@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
+const morgan = require("morgan");
 const fs = require('fs');
 const passport = require('./config/passport');
 const mongoURI = require('./config/db');
@@ -14,6 +15,7 @@ dotenv.config();
 
 
 const app = express();
+app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
     res.set('cache-control', 'no-store')
     next()
-})
+});
 app.use(session({
     secret: process.env.SESSION_SECRET || "mySecret",
     resave: false,
@@ -68,6 +70,7 @@ app.use((req, res, next) => {
 
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
+const { applyTimestamps } = require("./models/userSchema");
 
 app.use("/", userRouter);
 app.use("/admin", adminRouter);
