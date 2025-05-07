@@ -116,7 +116,7 @@ h1 {
     background-color: #2a2a2a;
     border-radius: 8px;
     padding: 20px;
-    margin-top: 20px;
+    margin-top: 55px;
 }
 
 .categories-header {
@@ -205,9 +205,9 @@ h1 {
 
 th.actions-column {
     /* Replace the fixed padding with text alignment */
-    padding-left: 0; 
+    padding-left: 50px; 
     text-align: center;
-    width: 25%; /* Set a reasonable width */
+    width: 100%; 
 }
 
 .actions-column {
@@ -300,6 +300,7 @@ th.actions-column {
                     <th>NO</th>
                     <th>CATEGORIES</th>
                     <th>CATEGORY DESCRIPTION</th>
+                    <th>LISTING</th>
                     <th class="actions-column">ACTIONS</th>
                 </tr>
             </thead>
@@ -310,10 +311,9 @@ th.actions-column {
                         <td class="category-name"><%= category.name %></td>
                         <td class="category-description"><%= category.description %></td>
 
-                        <td class="actions-column">
-                            
-                            <!-- Clean up list/unlist - remove duplicate status indicator -->
-                            <% if (category.isListed) { %>
+                        <td>
+                             <!-- Clean up list/unlist - remove duplicate status indicator -->
+                             <% if (category.isListed) { %>
                                 <button class="action-btn block-btn">
                                     <a href="/admin/listCategory?id=<%= category._id %>">Unlist</a>
                                 </button>
@@ -322,6 +322,9 @@ th.actions-column {
                                     <a href="/admin/unlistCategory?id=<%= category._id %>">List</a>
                                 </button>
                             <% } %>
+                        </td>
+
+                        <td class="actions-column">
                             
                             <!-- Keep edit and delete buttons consistent -->
                             <button class="action-btn" style="background-color: #4a6da7;">

@@ -241,9 +241,9 @@ h1 {
 
 th.actions-column {
     /* Replace the fixed padding with text alignment */
-    padding-left: 0; 
+    padding-left: 25px; 
     text-align: center;
-    width: 25%; /* Set a reasonable width */
+    width: 100%; /* Set a reasonable width */
 }
 
 .actions-column {
@@ -330,6 +330,7 @@ th.actions-column {
                     <th>NO</th>
                     <th>BRANDS</th>
                     <th>BRAND DESCRIPTION</th>
+                    <th>LISTING</th>
                     <th class="actions-column">ACTIONS</th>
                 </tr>
             </thead>
@@ -340,7 +341,7 @@ th.actions-column {
                             <td><%= (currentPage - 1) * 5 + index + 1 %></td>
                             <td class="brand-name"><%= brand.name %></td>
                             <td class="brand-description"><%= brand.description %></td>
-                            <td class="actions-column">
+                            <td>
                                 <% if (brand.isListed) { %>
                                     <button class="action-btn block-btn">
                                         <a href="/admin/listBrand?id=<%= brand._id %>">Unlist</a>
@@ -350,6 +351,8 @@ th.actions-column {
                                         <a href="/admin/unlistBrand?id=<%= brand._id %>">List</a>
                                     </button>
                                 <% } %>
+                            </td>
+                            <td class="actions-column">
                                 <button class="action-btn" style="background-color: #4a6da7;">
                                     <a href="/admin/edit-brand/<%= brand._id %>">Edit</a>
                                 </button>
