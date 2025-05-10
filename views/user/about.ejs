@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Dialogue Digital</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #82ae46;
+            --secondary-color: #343a40;
+            --accent-color: #f8f9fa;
+            --text-color: #212529;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #495057;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .hero-wrap {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+            background-size: cover;
+            background-position: center;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .breadcrumbs {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .breadcrumbs a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .breadcrumbs a:hover {
+            color: var(--primary-color);
+        }
+        
+        .hero-wrap h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Services Section */
+        .services-section {
+            padding: 3rem 0;
+            background-color: var(--light-gray);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .service-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+        
+        /* About Content */
+        .about-section {
+            padding: 5rem 0;
+            background-color: white;
+        }
+        
+        .about-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .about-section h2:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+        
+        .about-card {
+            padding: 2rem;
+            border-radius: 8px;
+            background-color: var(--light-gray);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .about-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .about-card h3:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+            bottom: 0;
+            left: 0;
+        }
+        
+        .about-card p {
+            color: var(--dark-gray);
+            line-height: 1.8;
+        }
+        
+        /* Stats Section */
+        .stats-section {
+            padding: 4rem 0;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .stat-item {
+            padding: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-title {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+        
+        /* Founder Section */
+        .team-section {
+            padding: 5rem 0;
+            background-color: var(--light-gray);
+        }
+        
+        .team-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .team-section h2:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            justify-items: center;
+        }
+        
+        .team-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 300px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .team-image {
+            height: 300px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .team-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .team-card:hover .team-image img {
+            transform: scale(1.1);
+        }
+        
+        .team-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .team-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+        
+        .team-info p {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            width: 35px;
+            height: 35px;
+            background-color: var(--medium-gray);
+            color: var(--dark-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Timeline Section */
+        .timeline-section {
+            padding: 5rem 0;
+            position: relative;
+        }
+        
+        .timeline-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .timeline-section h2:after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: var(--medium-gray);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -17px;
+            background-color: white;
+            border: 4px solid var(--primary-color);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        
+        .left {
+            left: 0;
+        }
+        
+        .right {
+            left: 50%;
+        }
+        
+        .right::after {
+            left: -16px;
+        }
+        
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timeline-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .timeline-year {
+            position: absolute;
+            top: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: white;
+            background-color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        .left .timeline-year {
+            right: -100px;
+        }
+        
+        .right .timeline-year {
+            left: -100px;
+        }
+        
+        /* CTA Section */
+
+        .cta-section {
+            padding: 5rem 0;
+            background-color: #82ae46;
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-section p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background-color: #dbcc8f;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .cta-btn:hover {
+            background-color: white;
+            color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero-wrap {
+                height: 250px;
+            }
+            
+            .hero-wrap h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item::after {
+                left: 15px;
+            }
+            
+            .right {
+                left: 0%;
+            }
+            
+            .left .timeline-year, .right .timeline-year {
+                left: -45px;
+                right: auto;
+                top: 15px;
+            }
+            
+            .about-grid, .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-wrap {
+                height: 200px;
+            }
+            
+            .hero-wrap h1 {
+                font-size: 2rem;
+            }
+            
+            .service-card, .about-card, .team-card {
+                padding: 1.5rem;
+            }
+            
+            .service-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2.5rem;
+            }
+            
+            .stat-title {
+                font-size: 1rem;
+            }
+            
+            .timeline-item {
+                padding-left: 60px;
+            }
+            
+            .timeline-year {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.8rem;
+                left: -40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+   <%- include("../../views/partials/user/header") %>
+
+   <div class="hero-wrap hero-bread" style="background-image: url('/images/ss4.jpg');">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 text-center">
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span><span>About</span></p>
+          <h1 class="mb-0 bread">About</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+    <!-- Services Section -->
+    <section class="services-section">
+        <div class="container">
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3>Free Shipping</h3>
+                    <p>We provide complimentary shipping on all orders, delivering the latest mobile technology right to your doorstep with care and efficiency.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Support Customer</h3>
+                    <p>Our dedicated customer service team is always ready to assist with any questions, concerns, or technical support you might need.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Secure Payments</h3>
+                    <p>Shop with confidence knowing your transactions are protected by advanced encryption and multiple secure payment options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Content -->
+    <section class="about-section">
+        <div class="container">
+            <h2>Who We Are</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3>Our Story</h3>
+                    <p>At MobiVault, everything began with a vision — to create a secure and smart space where mobile shopping meets trust and innovation. What started as a humble concept has grown into a reliable online destination for tech lovers everywhere.</p>
+                    <p>Driven by a team of digital dreamers and mobile enthusiasts, MobiVault was built to simplify how people discover and buy smartphones. We handpick the latest devices from trusted brands and bring them together in one seamless platform, ensuring that every click leads you closer to the perfect phone for your needs.</p>
+                    <p>But MobiVault isn’t just about products — it’s about people. It’s about giving you confidence in every purchase, clarity in every comparison, and comfort in every delivery. Whether you're upgrading your device or gifting a loved one, we’re here to make that journey smooth, secure, and satisfying.</p>
+                    <h4>MobiVault — Unlocking the future of mobile shopping.</h4>
+                </div>
+                
+                <div class="about-card">
+                    <h3>Our Mission</h3>
+                    <p>At MobiVault, our mission is simple — to bring you the best in mobile technology with ease, trust, and unbeatable value. Every device we offer is handpicked by our expert team to ensure it meets the highest standards of quality, performance, and durability.</p>
+                    <p>We believe that buying a phone should be exciting, not overwhelming. That’s why we focus on clarity, convenience, and care — making your shopping journey smooth from the moment you land on our site to the moment you unwrap your new phone.</p>
+                    <h4>With MobiVault, you’re not just buying a device — you’re unlocking a smarter, more connected lifestyle.</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-title">Happy Customers</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-title">Products</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-title">Brands</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-title">Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <h2>Our Leadership</h2>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="/images/sidhique.jpg" alt="Aboobakkar Sidhique">
+                    </div>
+                    <div class="team-info">
+                        <h3>Aboobakkar Sidhique</h3>
+                        <p>Founder & CEO</p>
+                        <div class="social-links">
+                            <a style="text-decoration: none;" href="https://www.linkedin.com/in/sidhiee/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                            <a style="text-decoration: none;" href="https://www.youtube.com/@sidhiQuee" target="_blank"><i class="fab fa-youtube"></i></a>
+                            <a style="text-decoration: none;" href="https://www.instagram.com/sidhiquee/" target="_blank"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="/images/akhila.jpg" alt="Team Member">
+                    </div>
+                    <div class="team-info">
+                        <h3>Akhila T</h3>
+                        <p>Chief Technology Officer</p>
+                        <div class="social-links">
+                            <a style="text-decoration: none;" href="https://www.linkedin.com/in/akhila-t-73670134b/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                            <a style="text-decoration: none;" href="https://www.youtube.com/@akhilatharol5993" target="_blank"><i class="fab fa-youtube"></i></a>
+                            <a style="text-decoration: none;" href="https://www.instagram.com/__akhila__t/" target="_blank"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="/images/unais.jpg" alt="Team Member">
+                    </div>
+                    <div class="team-info">
+                        <h3>Muhammed Unais</h3>
+                        <p>Head of Customer Experience</p>
+                        <div class="social-links">
+                            <a style="text-decoration: none;" href="https://www.linkedin.com/in/muhammed-unais-863a73325/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                            <a style="text-decoration: none;" href="http://www.youtube.com/@unaissse" target="_blank"><i class="fab fa-youtube"></i></a>
+                            <a style="text-decoration: none;" href="https://www.instagram.com/unnaiiss?igsh=MXU1YzRjcm1xdGt4Zw==" target="_blank"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Timeline Section -->
+    <section class="timeline-section">
+        <div class="container">
+            <h2>Our Journey</h2>
+            <div class="timeline">
+                <div class="timeline-item left">
+                    <div class="timeline-year">2018</div>
+                    <div class="timeline-content">
+                        <h3>The Beginning</h3>
+                        <p>MobiVault was founded with a vision to redefine the way people discover and purchase the latest in mobile technology.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item right">
+                    <div class="timeline-year">2019</div>
+                    <div class="timeline-content">
+                        <h3>Expanding Our Reach</h3>
+                        <p>We established partnerships with major mobile brands and expanded our product offerings.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item left">
+                    <div class="timeline-year">2021</div>
+                    <div class="timeline-content">
+                        <h3>Going Global</h3>
+                        <p>We expanded our operations to serve customers internationally, bringing our curated selection worldwide.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item right">
+                    <div class="timeline-year">2023</div>
+                    <div class="timeline-content">
+                        <h3>Innovation Focus</h3>
+                        <p>Launched our technology consulting division to help customers find the perfect mobile solutions for their needs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Stay Connected?</h2>
+                <p>Discover our carefully curated selection of mobile devices and accessories that perfectly match your lifestyle and needs.</p>
+                <a href="/shop" class="cta-btn">Shop Now</a>
+            </div>
+        </div>
+    </section>
+  
+</body>
+</html>
+  <%- include("../../views/partials/user/footer") %>

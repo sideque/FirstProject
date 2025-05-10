@@ -4,6 +4,7 @@ const Category = require('../../models/categorySchema');
 const Product = require('../../models/productSchema');
 const Brand = require('../../models/brandSchema');
 const env = require('dotenv').config();
+const csrf = require('csurf');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 
@@ -220,7 +221,6 @@ const verifyOtp = async (req, res) => {
             return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
         }
 
-        // check if OTP matches
         if (otp == userOtp) {
             const passwordHash = await securePassword(userData.password);
 
@@ -328,20 +328,17 @@ const loadShoppingPage = async (req, res) => {
             name: category.name,
         }));
 
-        // Fetch only listed and non-deleted brands
         const brands = await Brand.find({ isListed: true, isDeleted: false });
         const brandsWithIds = brands.map(brand => ({
             _id: brand._id,
             name: brand.name,
         }));
 
-        // Build product query
         const query = {
             isBlocked: false,
             quantity: { $gt: 0 },
         };
 
-        // Handle category filtering
         if (category) {
             const validCategory = await Category.findOne({ 
                 _id: category, 
@@ -357,7 +354,6 @@ const loadShoppingPage = async (req, res) => {
             query.category = { $in: categoryIds };
         }
 
-        // Handle brand filtering
         if (brand) {
             const validBrand = await Brand.findOne({ 
                 _id: brand, 
@@ -373,12 +369,10 @@ const loadShoppingPage = async (req, res) => {
             query.brand = { $in: brandIds };
         }
 
-        // Handle search
         if (search) {
             query.productName = { $regex: search, $options: 'i' };
         }
 
-        // Handle price range
         let minPrice = null;
         let maxPrice = null;
         if (priceRange) {
@@ -390,14 +384,12 @@ const loadShoppingPage = async (req, res) => {
             if (maxPrice !== null) query.salePrice.$lte = maxPrice;
         }
 
-        // Fetch products
         const productsData = await Product.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .populate('brand');
 
-        // Format product images
         const products = productsData.map((product) => {
             const formattedImages = (product.productImage || []).map((img) =>
                 img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
@@ -408,11 +400,9 @@ const loadShoppingPage = async (req, res) => {
             };
         });
 
-        // Count total products for pagination
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Save search history for logged-in user
         if (userData && (category || brand || search || priceRange)) {
             const searchEntry = {
                 category: category || null,
@@ -426,7 +416,6 @@ const loadShoppingPage = async (req, res) => {
             await userData.save();
         }
 
-        // Render shop page
         res.render('shop', {
             user: userData,
             products,
@@ -446,6 +435,39 @@ const loadShoppingPage = async (req, res) => {
     }
 };
 
+const loadAboutPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (user) {
+            const userData = await User.findOne({ _id: user._id });
+            res.render('about', { user: userData });
+        } else {
+            res.render('about');
+        }
+    } catch (error) {
+        console.error('Load About Page Error:', error.message, error.stack);
+        res.redirect('/pageNotFound');
+    }
+};
+
+const loadContactPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        let userData = null;
+        if (user) {
+            userData = await User.findOne({ _id: user._id }).select('name email');
+        }
+        res.render('contact', { user: userData, message: "" });
+    } catch (error) {
+        console.error('Load Contact Page Error:', error.message, error.stack);
+        res.status(500).render('page-404', {
+            message: 'Something went wrong. Please try again later.',
+            error: process.env.NODE_ENV === 'development' ? error : {}
+        });
+    }
+};
+
+
 module.exports = {
     loadHomePage,
     pageNotFound,
@@ -457,4 +479,6 @@ module.exports = {
     login,
     logout,
     loadShoppingPage,
+    loadAboutPage,
+    loadContactPage,
 };

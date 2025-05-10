@@ -67,7 +67,6 @@ const getProductAddPage = async (req, res) => {
         const validBrandIds = brand.map(brand => brand._id);
 
         let query = {
-            isBlocked: false,
             category: { $in: validCategoryIds },
             brand: { $in: validBrandIds }
         };

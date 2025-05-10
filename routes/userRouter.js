@@ -56,9 +56,19 @@ router.get(
     }
 );
 
+router.get('/config', (req, res) => {
+    res.json({
+        EMAILJS_PUBLIC_KEY: 'i1J2JkmCjVYU7yS5t',
+        EMAILJS_SERVICE_ID: 'service_bdn6rmi',
+        EMAILJS_TEMPLATE_ID: 'template_dls774f'
+    });
+});
+
 router.get('/login', userController.loadLogin);
 router.post('/login', userController.login);
 router.get('/logout', userController.logout);
+router.get('/about', userController.loadAboutPage);
+router.get('/contact', userController.loadContactPage);
 
 // Home page & Shopping page
 router.get('/', userController.loadHomePage);
@@ -100,7 +110,6 @@ router.post('/cart/remove', userAuth, cartController.removeCartItem);
 // Order
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
-// router.get('/orders', userAuth, checkoutController.loadOrders);
 router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
 router.get('/order/success', userAuth, checkoutController.success);
 router.get('/order/:id', userAuth, checkoutController.loadOrderDetails);

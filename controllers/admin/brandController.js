@@ -137,36 +137,6 @@ const addBrandOffer = async (req, res) => {
     }
 };
 
-// const removeBrandOffer = async (req, res) => {
-//     try {
-//         const brandId = req.body.brandId;
-//         const brand = await Brand.findById(brandId);
-
-//         if (!brand) {
-//             return res.status(404).json({status: false, message: "Brand not found"});
-//         }
-
-//         const percentage = Brand.brandOffer;
-//         const products = await Product.find({brand: brand._id});
-
-//         if (products.length > 0) {
-//             for (const product of products) {
-//                 // Reset sale price to regular price since no discount applies now
-//                 product.salePrice = product.regularPrice;
-//                 await product.save();
-//             }
-//         }
-
-//         // Reset brand offer
-//         brand.brandOffer = 0;
-//         await brand.save();
-//         res.json({status: true});
-//     } catch (error) {
-//         console.error("Error removing brand offer:", error);
-//         res.status(500).json({status: false, message: "Internal Server Error"});
-//     }
-// };
-
 const deleteBrand = async (req, res) => {
     try {
         const brandId = req.params.id;

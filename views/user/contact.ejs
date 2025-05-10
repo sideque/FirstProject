@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - MobiVault</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #82ae46;
+            --secondary-color: #343a40;
+            --accent-color: #f8f9fa;
+            --text-color: #212529;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #495057;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Hero Section */
+        .hero-wrap {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/ss4.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .breadcrumbs {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .breadcrumbs a {
+            color: #ffffff; /* Improved contrast */
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .breadcrumbs a:hover {
+            color: var(--primary-color);
+        }
+        
+        .breadcrumbs span[style] {
+            color: #ffffff !important; /* Override inline style for "Contact" */
+        }
+        
+        .hero-wrap h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Contact Info Cards */
+        .contact-info-section {
+            padding: 3rem 0;
+            background-color: var(--light-gray);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            position: relative;
+            padding-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .contact-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .contact-info-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        
+        .contact-info-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .contact-icon {
+            width: 70px;
+            height: 70px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .contact-info-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .contact-info-card p {
+            color: var(--dark-gray);
+        }
+        
+        /* Map & Form Section */
+        .map-form-section {
+            padding: 3rem 0 5rem;
+        }
+        
+        .map-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+        
+        .map-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            min-height: 450px;
+        }
+        
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .contact-form {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-form h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .contact-form h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(130, 174, 70, 0.2);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .error-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+        
+        .btn-submit:hover {
+            background-color: #6c9039;
+            transform: translateY(-3px);
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 0;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-section p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background-color: #dbcc8f;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .cta-btn:hover {
+            background-color: white;
+            color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Social Media Section */
+        .social-section {
+            padding: 4rem 0;
+            background-color: var(--light-gray);
+            text-align: center;
+        }
+        
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .social-icon {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .social-icon:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .map-form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .map-container {
+                min-height: 400px;
+            }
+            
+            .hero-wrap {
+                height: 250px;
+            }
+            
+            .hero-wrap h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .contact-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .contact-info-card h3 {
+                font-size: 1.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .contact-form h3 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-wrap {
+                height: 200px;
+            }
+            
+            .hero-wrap h1 {
+                font-size: 2rem;
+            }
+            
+            .contact-info-card {
+                padding: 1.5rem;
+            }
+            
+            .contact-form {
+                padding: 1.5rem;
+            }
+            
+            .btn-submit {
+                width: 100%;
+            }
+            
+            .social-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+            
+            .cta-section h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header includes -->
+    <%- include("../../views/partials/user/header") %>
+
+    <!-- Hero Section -->
+    <div class="hero-wrap">
+        <div class="container">
+            <div class="text-center">
+                <p style="color: black;" class="breadcrumbs"><span><a href="/" style="color: black;">Home</a></span> <span>/ Contact</span></p>
+                <h1>Get In Touch</h1>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact Info Section -->
+    <section class="contact-info-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact Information</h2>
+            </div>
+            
+            <div class="contact-info-grid">
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Our Location</h3>
+                    <p>Kinfra Industrial Park, Kakkanchery<br>Kozhikode, Kerala</p>
+                </div>
+                
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>Phone Number</h3>
+                    <p>+91 9207020851</p>
+                </div>
+                
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email Address</h3>
+                    <p>mobivxult@gmail.com</p>
+                </div>
+                
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Working Hours</h3>
+                    <p>Monday - Saturday<br>9:00 AM - 8:00 PM</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Map & Form Section -->
+    <section class="map-form-section">
+        <div class="container">
+            <div class="map-form-grid">
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3914.4726666763686!2d75.88980567355765!3d11.152596852145587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6502f41ef4e8b%3A0xf4c653a7548cccd!2sKinfra%20Techno%20Industrial%20Park!5e0!3m2!1sen!2sin!4v1745724302157!5m2!1sen!2sin" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                
+                <div class="contact-form">
+                    <h3>Send Us A Message</h3>
+                    <form id="contact-form" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Your Name" required>
+                                <div class="error-feedback" id="name-error">Please enter your name</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="email" class="form-control" id="user_email" name="user_email" placeholder="Your Email" required>
+                                <div class="error-feedback" id="email-error">Please enter a valid email address</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
+                            <div class="error-feedback" id="subject-error">Please enter a subject</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <textarea class="form-control" id="message" name="message" placeholder="Your Message" required></textarea>
+                            <div class="error-feedback" id="message-error">Please enter your message</div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="submit" class="btn-submit">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Social Media Section -->
+    <section class="social-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Connect With Us</h2>
+            </div>
+            
+            <div class="social-icons">
+                <a href="https://www.pinterest.com/xidhique/" target="_blank" class="social-icon">
+                    <i class="fab fa-pinterest-p"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/sidhiee/" target="_blank" class="social-icon">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="https://www.instagram.com/sidhiquee/" target="_blank" class="social-icon">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://www.youtube.com/@sidhiQuee" target="_blank" class="social-icon">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Stay Connected?</h2>
+                <p>Discover our carefully curated selection of mobile devices and accessories that perfectly match your lifestyle and needs.</p>
+                <a href="/shop" class="cta-btn">Shop Now</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- JavaScript for form validation and EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@latest/dist/email.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/config')
+            .then(response => response.json())
+            .then(config => {
+                const { EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID } = config;
+                console.log('Fetched EmailJS Config:', config); // Log the fetched credentials
+
+                // Initialize EmailJS with the fetched public key
+                emailjs.init(EMAILJS_PUBLIC_KEY);
+
+                // Form validation function
+                function validateForm() {
+                    let isValid = true;
+                    
+                    // Validate name
+                    const nameInput = document.getElementById('user_name');
+                    const nameError = document.getElementById('name-error');
+                    if (!nameInput.value.trim()) {
+                        nameInput.classList.add('is-invalid');
+                        nameError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        nameInput.classList.remove('is-invalid');
+                        nameError.style.display = 'none';
+                    }
+                    
+                    // Validate email
+                    const emailInput = document.getElementById('user_email');
+                    const emailError = document.getElementById('email-error');
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
+                        emailInput.classList.add('is-invalid');
+                        emailError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        emailInput.classList.remove('is-invalid');
+                        emailError.style.display = 'none';
+                    }
+                    
+                    // Validate subject
+                    const subjectInput = document.getElementById('subject');
+                    const subjectError = document.getElementById('subject-error');
+                    if (!subjectInput.value.trim()) {
+                        subjectInput.classList.add('is-invalid');
+                        subjectError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        subjectInput.classList.remove('is-invalid');
+                        subjectError.style.display = 'none';
+                    }
+                    
+                    // Validate message
+                    const messageInput = document.getElementById('message');
+                    const messageError = document.getElementById('message-error');
+                    if (!messageInput.value.trim()) {
+                        messageInput.classList.add('is-invalid');
+                        messageError.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        messageInput.classList.remove('is-invalid');
+                        messageError.style.display = 'none';
+                    }
+                    
+                    return isValid;
+                }
+
+                // Add input event listeners for real-time validation
+                const formInputs = document.querySelectorAll('#contact-form input, #contact-form textarea');
+                formInputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        const errorElement = document.getElementById(`${input.id}-error`);
+                        if (input.value.trim()) {
+                            // For email, do additional regex validation
+                            if (input.type === 'email') {
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (emailRegex.test(input.value.trim())) {
+                                    input.classList.remove('is-invalid');
+                                    errorElement.style.display = 'none';
+                                } else {
+                                    input.classList.add('is-invalid');
+                                    errorElement.style.display = 'block';
+                                }
+                            } else {
+                                input.classList.remove('is-invalid');
+                                errorElement.style.display = 'none';
+                            }
+                        } else {
+                            input.classList.add('is-invalid');
+                            errorElement.style.display = 'block';
+                        }
+                    });
+                });
+
+                // Handle form submission
+                document.getElementById('contact-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    // Validate form before submission
+                    if (!validateForm()) {
+                        return;
+                    }
+
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Sending...',
+                        text: 'Please wait while we send your message',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Try emailjs.sendForm first
+                    emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, this)
+                        .then(function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Message Sent!',
+                                text: 'Thank you for contacting us. We will get back to you shortly.',
+                                confirmButtonColor: '#82ae46',
+                            });
+                            document.getElementById('contact-form').reset();
+                        }, function(error) {
+                            console.error('EmailJS sendForm Error:', JSON.stringify(error, null, 2));
+                            // Fallback to emailjs.send if sendForm fails
+                            const formData = {
+                                user_name: document.getElementById('user_name').value,
+                                user_email: document.getElementById('user_email').value,
+                                subject: document.getElementById('subject').value,
+                                message: document.getElementById('message').value
+                            };
+                            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, formData)
+                                .then(function(response) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Message Sent!',
+                                        text: 'Thank you for contacting us. We will get back to you shortly.',
+                                        confirmButtonColor: '#82ae46',
+                                    });
+                                    document.getElementById('contact-form').reset();
+                                }, function(fallbackError) {
+                                    console.error('EmailJS send Error:', JSON.stringify(fallbackError, null, 2));
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: 'Something went wrong. Please try again!',
+                                        confirmButtonColor: '#dc3545',
+                                    });
+                                });
+                        });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching config:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Configuration Error',
+                    text: 'There was a problem loading the contact form. Please try again later.',
+                    confirmButtonColor: '#dc3545',
+                });
+            });
+    });
+    </script>
+    
+    <!-- Footer includes -->
+    <%- include("../../views/partials/user/footer") %>
+</body>
+</html>

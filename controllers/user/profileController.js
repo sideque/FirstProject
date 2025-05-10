@@ -11,7 +11,6 @@ const saltRounds = 10;
 const mongoose = require("mongoose");
 
 
-//Generate OTP
 function generateOtp() {
   const digits = "1234567890";
   let otp = "";
@@ -21,7 +20,6 @@ function generateOtp() {
   return otp;
 }
 
-// sendVerificationEmail 
 const sendVerificationEmail = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -52,7 +50,6 @@ const sendVerificationEmail = async (email, otp) => {
   }
 };
 
-// getForgotPassPage
 const getForgotPassPage = async (req, res) => {
   try {
     res.render("forgot-password");
@@ -88,7 +85,6 @@ const forgotEmailValid = async (req, res) => {
   }
 };
 
-// verifyForgotPassOtp
 const verifyForgotPassOtp = async (req, res) => {
   try {
     const enteredOtp = req.body.otp;
@@ -103,7 +99,6 @@ const verifyForgotPassOtp = async (req, res) => {
   }
 };
 
-//getResetPassPage
 const getResetPassPage = async (req, res) => {
   try {
     res.render("reset-password");
@@ -112,7 +107,6 @@ const getResetPassPage = async (req, res) => {
   }
 };
 
-// postNewPassword
 const postNewPassword = async (req, res) => {
   try {
     const { NewPassword, password } = req.body;
@@ -131,7 +125,6 @@ const postNewPassword = async (req, res) => {
   }
 };
 
-// userProfile
 const userProfile = async (req, res) => {
   try {
     // Check if user is logged in
