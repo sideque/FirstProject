@@ -12,16 +12,19 @@ const mongoURI = require('./config/db');
 
 dotenv.config();
 
-// Debug logging to confirm environment variables
-// console.log('EMAILJS_PUBLIC_KEY:', process.env.EMAILJS_PUBLIC_KEY);
-// console.log('EMAILJS_SERVICE_ID:', process.env.EMAILJS_SERVICE_ID);
-// console.log('EMAILJS_TEMPLATE_ID:', process.env.EMAILJS_TEMPLATE_ID);
 
 const app = express();
 // app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+app.use((req, res, next) => {
+  console.log(`${req.method} request received at ${req.url}`);
+  next();
+});
+
 
 app.use((req, res, next) => {
     res.set('cache-control', 'no-store')
