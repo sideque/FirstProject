@@ -98,7 +98,8 @@ const productController = async (req, res) => {
       relatedProducts: relatedProducts.filter(p => p.brand),
       bestOffer, 
       allOffers, 
-      discountAmount, 
+      discountAmount,
+      currentPage: 'product',
     });
 
   } catch (error) {

@@ -120,6 +120,7 @@ router.get('/paymentfailedpage', userAuth, checkoutController.paymentFailed);
 router.post('/cancelOrder',userAuth, checkoutController.cancelOrder);
 router.post('/cancelOrderItem',userAuth, checkoutController.cancelOrderItem);
 router.post('/order/returnItem',userAuth, checkoutController.returnOrderItem); 
+router.post('/updateOrderStatus',userAuth, checkoutController.updateOrderStatusToDelivered)
 
 // Coupon Management
 router.get('/applyCoupon', userAuth, cartController.couponApply);

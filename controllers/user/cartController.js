@@ -114,7 +114,8 @@ const loadCart = async (req, res) => {
       subtotal,
       offerDiscount,
       coupon,
-      total
+      total,
+      currentPage: "cart"
     });
   } catch (error) {
     console.error('Error loading cart:', error);
@@ -425,6 +426,7 @@ const loadWishlist = async (req, res) => {
       currentPage: page,
       totalItems,
       user: userData,
+      currentPage: "wishlist",
     });
   } catch (error) {
     console.error('Error loading wishlist:', error);

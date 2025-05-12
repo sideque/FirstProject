@@ -770,12 +770,12 @@
             </div>
 
             <div class="product-actions">
-              <form id="cartForm" action="/cart/add/<%= product._id %>" method="POST" style="width: 48%;">
-                <input type="hidden" name="quantity" id="cartQuantity" value="1">
-                <button type="submit" class="cart-btn" id="cartBtn" style="width: 100%;">
-                  <i class="ion-ios-cart"></i> Add to Cart
-                </button>
-              </form>
+              <input type="hidden" id="cartQuantity" value="1">
+
+              <button type="button" class="cart-btn" data-id="<%= product._id %>" style="width: 48%;">
+                <i class="ion-ios-cart"></i> Add to Cart
+              </button>
+
               <button class="wish-btn" style="width: 48%;" data-id="<%= product._id %>">
                 <i class="fa fa-heart"></i> Add to Wishlist
               </button>
@@ -1058,260 +1058,267 @@
       evt.currentTarget.classList.add("active");
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeZoom();
+  // Add to Cart Function
+  async function addToCart(productId, cartBtn) {
+    const quantity = parseInt(document.getElementById('cartQuantity').value);
+    const maxQuantity = parseInt(document.getElementById('quantity').max);
+    const originalText = cartBtn.textContent;
 
-      // Add to Cart functionality
-      const cartForm = document.getElementById('cartForm');
-      const cartBtn = document.getElementById('cartBtn');
-      if (cartForm && cartBtn) {
-        cartForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          const quantity = parseInt(document.getElementById('cartQuantity').value);
-          const maxQuantity = parseInt(document.getElementById('quantity').max);
-          const productId = '<%= product._id %>';
+    // Validate quantity
+    if (quantity > maxQuantity) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Out of Stock',
+        text: `Only ${maxQuantity} items available in stock.`,
+        confirmButtonColor: '#82ae46',
+      });
+      return;
+    }
 
-          if (quantity > maxQuantity) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Out of Stock',
-              text: `Only ${maxQuantity} items available in stock.`,
-              confirmButtonColor: '#82ae46',
-            });
-            return;
-          }
+    // Set loading state
+    cartBtn.classList.add('loading');
+    cartBtn.disabled = true;
+    cartBtn.textContent = 'Adding...';
 
-          // Set loading state
-          cartBtn.classList.add('loading');
-          cartBtn.disabled = true;
-          const originalText = cartBtn.textContent;
-          cartBtn.textContent = 'Adding...';
-
-          fetch('/cart/add', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId, quantity, fromWishlist: false }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            // Reset button state
-            cartBtn.classList.remove('loading');
-            cartBtn.disabled = false;
-            cartBtn.textContent = originalText;
-
-            if (data.success) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Added to Cart',
-                text: 'Item has been added to your cart successfully!',
-                confirmButtonColor: '#82ae46',
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                window.location.reload();
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'Failed to add item to cart',
-                confirmButtonColor: '#82ae46',
-              });
-            }
-          })
-          .catch(error => {
-            // Reset button state
-            cartBtn.classList.remove('loading');
-            cartBtn.disabled = false;
-            cartBtn.textContent = originalText;
-
-            console.error('Error adding to cart:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong. Please try again later.',
-              confirmButtonColor: '#82ae46',
-            });
-          });
-        });
-      }
-
-      // Add to Wishlist button event listener
-      const wishBtn = document.querySelector('.wish-btn');
-      if (wishBtn) {
-        wishBtn.addEventListener('click', function() {
-          const productId = this.dataset.id;
-
-          fetch('/addtowish', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Added to Wishlist',
-                text: data.message,
-                confirmButtonColor: '#82ae46',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'Failed to add to wishlist',
-                confirmButtonColor: '#82ae46',
-              });
-            }
-          })
-          .catch(error => {
-            console.error('Error adding to wishlist:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong. Please try again later.',
-              confirmButtonColor: '#82ae46',
-            });
-          });
-        });
-      }
-
-      // Add to Wishlist for related products
-      const wishlistBtns = document.querySelectorAll('.wishlist');
-      wishlistBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          const productId = this.dataset.id;
-
-          fetch('/addtowish', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Added to Wishlist',
-                text: data.message,
-                confirmButtonColor: '#82ae46',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'Failed to add to wishlist',
-                confirmButtonColor: '#82ae46',
-              });
-            }
-          })
-          .catch(error => {
-            console.error('Error adding to wishlist:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong. Please try again later.',
-              confirmButtonColor: '#82ae46',
-            });
-          });
-        });
+    try {
+      const response = await fetch('/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity, fromWishlist: false }),
       });
 
-      // Add to Cart for related products
-      const addToCartBtns = document.querySelectorAll('.add-to-cart');
-      addToCartBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          const productId = this.dataset.id;
-          const availableStock = parseInt(this.dataset.quantity);
+      const data = await response.json();
 
-          if (availableStock <= 0) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Out of Stock',
-              text: 'This item is out of stock and cannot be added to the cart.',
-              confirmButtonColor: '#82ae46',
-            });
-            return;
-          }
+      // Reset button state
+      cartBtn.classList.remove('loading');
+      cartBtn.disabled = false;
+      cartBtn.textContent = originalText;
 
-          btn.classList.add('loading');
-          btn.disabled = true;
-          const originalText = btn.textContent;
-          btn.textContent = 'Adding...';
-
-          fetch('/cart/add', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId, quantity: 1, fromWishlist: false }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            btn.classList.remove('loading');
-            btn.disabled = false;
-            btn.textContent = originalText;
-
-            if (data.success) {
-              Swal.fire({
-                icon: 'success',
-                title: 'Added to Cart',
-                text: 'Item has been added to your cart successfully!',
-                confirmButtonColor: '#82ae46',
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                window.location.reload();
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: data.message || 'Failed to add item to cart',
-                confirmButtonColor: '#82ae46',
-              });
-            }
-          })
-          .catch(error => {
-            btn.classList.remove('loading');
-            btn.disabled = false;
-            btn.textContent = originalText;
-            console.error('Error adding to cart:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Something went wrong. Please try again later.',
-              confirmButtonColor: '#82ae46',
-            });
-          });
-        });
-      });
-
-      // Check for error in URL params (e.g., insufficient stock)
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('error') === 'insufficient_stock') {
+      if (response.ok && data.success) {
         Swal.fire({
+          title: 'Success!',
+          text: 'Item has been added to your cart successfully!',
+          icon: 'success',
+          confirmButtonText: 'Go to Cart',
+          showCancelButton: true,
+          cancelButtonText: 'Continue Shopping',
+          confirmButtonColor: '#82ae46',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/cart';
+          }
+        });
+      } else {
+        Swal.fire({
+          title: 'Error!',
+          text: data.message || 'Failed to add item to cart',
           icon: 'error',
-          title: 'Out of Stock',
-          text: `Only <%= product.quantity %> items available in stock.`,
+          confirmButtonText: 'OK',
           confirmButtonColor: '#82ae46',
         });
-        window.history.replaceState({}, document.title, '/product?id=<%= product._id %>');
       }
+    } catch (error) {
+      cartBtn.classList.remove('loading');
+      cartBtn.disabled = false;
+      cartBtn.textContent = originalText;
+
+      console.error('Error adding to cart:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Error adding to cart. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#82ae46',
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeZoom();
+
+    // Add to Cart button event listener
+    const cartButtons = document.querySelectorAll('.cart-btn');
+    cartButtons.forEach(cartBtn => {
+      cartBtn.addEventListener('click', () => {
+        const productId = cartBtn.dataset.id;
+        addToCart(productId, cartBtn);
+      });
     });
-  </script>
+
+    // Add to Wishlist button event listener
+    const wishBtn = document.querySelector('.wish-btn');
+    if (wishBtn) {
+      wishBtn.addEventListener('click', function() {
+        const productId = this.dataset.id;
+
+        fetch('/addtowish', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to Wishlist',
+              text: data.message,
+              confirmButtonColor: '#82ae46',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to add to wishlist',
+              confirmButtonColor: '#82ae46',
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error adding to wishlist:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again later.',
+            confirmButtonColor: '#82ae46',
+          });
+        });
+      });
+    }
+
+    // Add to Wishlist for related products
+    const wishlistBtns = document.querySelectorAll('.wishlist');
+    wishlistBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const productId = this.dataset.id;
+
+        fetch('/addtowish', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to Wishlist',
+              text: data.message,
+              confirmButtonColor: '#82ae46',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to add to wishlist',
+              confirmButtonColor: '#82ae46',
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error adding to wishlist:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again later.',
+            confirmButtonColor: '#82ae46',
+          });
+        });
+      });
+    });
+
+    // Add to Cart for related products
+    const addToCartBtns = document.querySelectorAll('.add-to-cart');
+    addToCartBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const productId = this.dataset.id;
+        const availableStock = parseInt(this.dataset.quantity);
+
+        if (availableStock <= 0) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Out of Stock',
+            text: 'This item is out of stock and cannot be added to the cart.',
+            confirmButtonColor: '#82ae46',
+          });
+          return;
+        }
+
+        btn.classList.add('loading');
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Adding...';
+
+        fetch('/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId, quantity: 1, fromWishlist: false }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          btn.textContent = originalText;
+
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to Cart',
+              text: 'Item has been added to your cart successfully!',
+              confirmButtonColor: '#82ae46',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Failed to add item to cart',
+              confirmButtonColor: '#82ae46',
+            });
+          }
+        })
+        .catch(error => {
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          btn.textContent = originalText;
+          console.error('Error adding to cart:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again later.',
+            confirmButtonColor: '#82ae46',
+          });
+        });
+      });
+    });
+
+    // Check for error in URL params (e.g., insufficient stock)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'insufficient_stock') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Out of Stock',
+        text: `Only <%= product.quantity %> items available in stock.`,
+        confirmButtonColor: '#82ae46',
+      });
+      window.history.replaceState({}, document.title, '/product?id=<%= product._id %>');
+    }
+  });
+</script>
 </body>
 </html>

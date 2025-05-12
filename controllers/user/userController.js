@@ -61,9 +61,16 @@ const loadHomePage = async (req, res) => {
 
         if (user) {
             const userData = await User.findOne({ _id: user._id });
-            res.render("home", { user: userData, products: formattedProducts });
+            res.render("home",{ 
+                user: userData, 
+                products: formattedProducts,
+                currentPage: "home",
+            });
         } else {
-            res.render("home", { products: formattedProducts });
+            res.render("home", { 
+                products: formattedProducts,
+                currentPage: "home",
+            });
         }
     } catch (error) {
         console.log("Home page not loading:", error);
@@ -428,6 +435,7 @@ const loadShoppingPage = async (req, res) => {
             selectedBrand: brand || null,
             search: search || '',
             priceRange: priceRange || '',
+            currentPage: "shop",
         });
     } catch (error) {
         console.error('Load Shopping Page Error:', error.message, error.stack);
@@ -440,7 +448,11 @@ const loadAboutPage = async (req, res) => {
         const user = req.session.user;
         if (user) {
             const userData = await User.findOne({ _id: user._id });
-            res.render('about', { user: userData });
+            res.render('about', { 
+                user: userData,
+                currentPage: "about",
+                message: "",
+            });
         } else {
             res.render('about');
         }
@@ -457,7 +469,11 @@ const loadContactPage = async (req, res) => {
         if (user) {
             userData = await User.findOne({ _id: user._id }).select('name email');
         }
-        res.render('contact', { user: userData, message: "" });
+        res.render('contact', { 
+            user: userData, 
+            message: "",
+            currentPage: "contact" 
+        });
     } catch (error) {
         console.error('Load Contact Page Error:', error.message, error.stack);
         res.status(500).render('page-404', {

@@ -119,6 +119,7 @@ const loadCheckout = async (req, res) => {
       coupon: couponDiscount,
       total,
       wallet,
+      currentPage: 'cart',
       csrfToken: req.csrfToken ? req.csrfToken() : '',
     });
   } catch (error) {
@@ -490,6 +491,7 @@ const loadOrderDetails = async (req, res) => {
     res.render('order-details', {
       user: userData,
       order,
+      currentPage: 'cart',
       address: selectedAddress,
     });
   } catch (error) {
@@ -548,7 +550,7 @@ const returnOrderItem = async (req, res) => {
     const { orderId, itemId, reason } = req.body;
     const userId = req.session.user;
 
-    const order = await Order.findOne({ _id: orderId, userId }).populate('orderItems.product');
+    const order = await Order.findOne({ orderId });
     if (!order) {
       return res.json({ success: false, message: 'Order not found' });
     }
@@ -830,6 +832,7 @@ const success = async (req, res) => {
         user: userData,
         order: null,
         address: null,
+        currentPage: "cart",
         message: 'No order found. Please contact support.',
       });
     }
@@ -857,7 +860,11 @@ const paymentFailed = async (req, res) => {
 
     const error = req.query.error || 'Payment failed or was cancelled';
 
-    res.render('paymentfailed', { user, error });
+    res.render('paymentfailed', { 
+      user, 
+      error,
+      currentPage: 'cart', 
+    });
   } catch (error) {
     console.error('Error in paymentFailed:', error);
     res.redirect('/pageNotFound');
@@ -979,6 +986,34 @@ const retryOrder = async (req, res) => {
   }
 };
 
+// Temporary function to update order status to "Delivered" for testing
+const updateOrderStatusToDelivered = async (req, res) => {
+  try {
+    const { orderId } = req.body; // Pass the orderId via the request body
+    const userId = req.session.user;
+
+    const order = await Order.findOne({ orderId, userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Update the order and item statuses to "Delivered"
+    order.status = 'Delivered';
+    order.deliveredDate = new Date();
+    order.orderItems.forEach((item) => {
+      if (item.status !== 'Cancelled') {
+        item.status = 'Delivered';
+      }
+    });
+
+    await order.save();
+    res.status(200).json({ success: true, message: 'Order status updated to Delivered' });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ success: false, message: 'An error occurred' });
+  }
+};
+
 module.exports = {
   loadCheckout,
   placeOrder,
@@ -992,4 +1027,5 @@ module.exports = {
   loadProductDetails,
   paymentFailed,
   retryOrder,
+  updateOrderStatusToDelivered, // Export the temporary function for testing
 };

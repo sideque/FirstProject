@@ -6,11 +6,9 @@ const Wallet = require("../../models/walletSchema");
 
 const loadOrder = async (req, res) => {
   try {
-    // Get query parameters
     const { status, date, page = 1, search = '', sort = 'asc' } = req.query; 
     const limit = 10;
 
-    // Build query for filtering
     let query = {};
     if (status) {
       query.status = status;
@@ -41,7 +39,6 @@ const loadOrder = async (req, res) => {
     const totalPages = Math.ceil(totalOrders / limit);
     const skip = (page - 1) * limit;
 
-    // Pagination
     const maxPagesToShow = 5;
     let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
@@ -49,10 +46,8 @@ const loadOrder = async (req, res) => {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
 
-    
-    const sortOrder = sort === 'desc' ? 1 : -1; // asc for oldest first, desc for newest first
+    const sortOrder = sort === 'desc' ? 1 : -1;
 
-    // Fetch orders with dynamic sorting
     const orders = await Order.find(query)
       .populate({
         path: "orderItems.product",
@@ -67,7 +62,6 @@ const loadOrder = async (req, res) => {
       .sort({ createdAt: sortOrder }) 
       .lean();
 
-    // Log order dates to verify sorting
     orders.forEach((order, index) => {
       console.log(`Order ${index + 1}:`, {
         orderId: order.orderId,
@@ -75,7 +69,6 @@ const loadOrder = async (req, res) => {
       });
     });
 
-    // Format orders for template
     const formattedOrders = orders.map((order) => {
       return {
         ...order,
@@ -89,7 +82,6 @@ const loadOrder = async (req, res) => {
       };
     });
 
-    // Render template
     res.render("order", {
       orders: formattedOrders,
       currentPage: parseInt(page),
@@ -148,17 +140,21 @@ const viewOrder = async (req, res) => {
           image: item.product.productImage?.[0] || '/images/placeholder.png',
           quantity: item.stock,
           price: item.price,
-          total: item.stock * item.price
+          total: item.stock * item.price,
+          status: item.status // Ensure item status is passed
         })),
       returnItems: order.orderItems
-        .filter(item => item.product && (item.status === 'Returned' || item.status === 'Return Request'))
+        .filter(item => item.product && (item.status === 'Returned' || item.status === 'Return Request' || item.status === 'Return Requested'))
         .map(item => ({
           name: item.product.name || item.product.productName || 'N/A', 
           image: item.product.productImage?.[0] || '/images/placeholder.png',
           quantity: item.stock,
           price: item.price,
           reason: order.returnReason || 'N/A'
-        }))
+        })),
+      isReturnRequested: order.orderItems.some(item => 
+        item.status === 'Return Request' || item.status === 'Return Requested'
+      ) // Update to handle both 
     };
 
     if (formattedOrder.products.length === 0) {
@@ -177,7 +173,7 @@ const updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ["Pending", "Processing", "Shipped", "Delivered"];
+    const validStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
@@ -191,20 +187,38 @@ const updateOrderStatus = async (req, res) => {
     if (status === "Cancelled" && order.status !== "Cancelled") {
       for (const item of order.orderItems) {
         await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: item.stock }
+          // $inc: { stock: item.stock }
+          $inc: { quantity: item.stock } // Use 'quantity' to match Product schema
         });
       }
     }
 
+    // Update the overall order status
     order.status = status;
-    if (status === "Shipped") order.shippedDate = new Date();
-    if (status === "Delivered") order.deliveredDate = new Date();
+
+    // Update timestamps
+    if (status === "Shipped") {
+      order.shippedDate = new Date();
+      // Update non-cancelled items to "Shipped"
+      order.orderItems.forEach(item => {
+        if (item.status !== "Cancelled") {
+          item.status = "Shipped";
+        }
+      });
+    }
+    if (status === "Delivered") {
+      order.deliveredDate = new Date();
+      order.orderItems.forEach(item => {
+        if (item.status !== "Cancelled") {
+          item.status = "Delivered";
+        }
+      });
+    }
 
     await order.save();
 
     res.json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
-    console.log(error);
     console.error("Error in updateOrderStatus:", error);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -220,11 +234,16 @@ const verifyReturnRequest = async (req, res) => {
     }
 
     if (action === "accept") {
-      order.orderItems.map(items => {
-        items.status = 'Cancelled'
-      })
+      // Update items to "Returned" instead of "Cancelled"
+      order.orderItems.forEach(item => {
+        if (item.status === "Return Request" || item.status === "Return Requested") {
+          item.status = "Returned";
+          item.isReturned = true;
+          item.isReturnRequested = false;
+        }
+      });
 
-      order.status = 'Returned';
+      order.status = "Returned";
       order.isReturnRequested = false;
       order.cancelOrReturn = order.finalAmount;
       order.revokedCoupon = order.couponDiscount;
@@ -236,21 +255,19 @@ const verifyReturnRequest = async (req, res) => {
       let wallet = await Wallet.findOne({ userId: order.userId });
       if (!wallet) {
         wallet = new Wallet({
-          transactionId,
-          orderId:order.orderId,
           userId: order.userId,
           balance: 0,
           transactions: [],
-         });
+        });
       }
 
       wallet.balance += refundAmount;
       wallet.transactions.push({
         type: "credit",
         amount: refundAmount,
-        orderId:order.orderId,  
-        paymentMethod:order.paymentMethod,
-        transactionId:`TXN${Date.now()}`,
+        orderId: order.orderId,  
+        paymentMethod: order.paymentMethod,
+        transactionId: `TXN${Date.now()}`,
         description: `Refund for order ${orderId}`,
         date: new Date()
       });
@@ -258,6 +275,14 @@ const verifyReturnRequest = async (req, res) => {
       await wallet.save();
 
     } else if (action === "reject") {
+      // Revert items to "Delivered"
+      order.orderItems.forEach(item => {
+        if (item.status === "Return Request" || item.status === "Return Requested") {
+          item.status = "Delivered";
+          item.isReturnRequested = false;
+        }
+      });
+
       order.status = "Delivered";
       order.isReturnRequested = false;
     }

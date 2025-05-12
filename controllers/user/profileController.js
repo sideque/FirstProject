@@ -70,7 +70,9 @@ const forgotEmailValid = async (req, res) => {
       if (emailSent) {
         req.session.userOtp = otp;
         req.session.email = email;
-        res.render("forgotPass-otp");
+        res.render("forgotPass-otp", {
+          currentPage: "profile",
+        });
         console.log("OTP:", otp);
       } else {
         res.json({ success: false, message: "Failed to send OTP. Please try again" });
@@ -145,12 +147,7 @@ const userProfile = async (req, res) => {
     const orders = await Order.find({ userId: new mongoose.Types.ObjectId(user._id) })
       .populate('orderItems.product')
       .sort({ createdOn: -1 });
-
-    // Debug each order individually
-    // orders.forEach(order => {
-    //   console.log('Individual order details:', order);
-    // });
-
+      
     // Fetch addresses for the logged-in user
     const addressDoc = await Address.findOne({ userId: user._id });
     const addresses = addressDoc ? addressDoc.address : [];
@@ -160,6 +157,7 @@ const userProfile = async (req, res) => {
       user: userData,
       orders,
       addresses,
+      currentPage: 'profile',
     });
   } catch (error) {
     console.error('Error loading user profile:', error.message, error.stack);
@@ -567,7 +565,7 @@ const loadWallet = async (req, res) => {
       transactions: paginatedTransactions,
       totalTransactions,
       perPage,
-      currentPage,
+      currentPage: 'profile',
       paymentMethods, 
       message: req.session.userMessage || '',
     });

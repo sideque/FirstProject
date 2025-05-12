@@ -260,6 +260,17 @@
             border-color: #3565d8;
         }
 
+        .btn-item-return {
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
         .status-selector {
             width: 100%;
             padding: 10px;
@@ -406,7 +417,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                      <div class="col-md-4">
                             <% if (order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped') { %>
                                 <!-- Normal status update -->
                                 <select class="form-select status-selector" id="status-<%= order.orderId %>">
@@ -420,9 +431,15 @@
                                     <option value="Return Rejected" <%= order.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
                                 </select>
                                 <button class="btn btn-primary w-100 mt-2" onclick="updateStatus('<%= order.orderId %>')">Update Status</button>
-                        
-                            <% } else if (order.status === 'Returned' || order.status === 'Return Requested') { %>
-                                <!-- Admin action for returned orders -->
+                            <% } else if (order.status === 'Returned' || order.status === 'Return Request' || order.status === 'Return Requested') { %>
+                                <!-- Admin action for return requests -->
+                                <% if (order.isReturnRequested) { %>
+                                    <div>
+                                        <strong><p style="color: white;">Return reason: <span style="color: red;"><%= order.returnReason %></span></p></strong>
+                                        <button onclick="orderReturn('<%= order.orderId %>', 'accept')" class="btn-accept">Accept</button>
+                                        <button onclick="orderReturn('<%= order.orderId %>', 'reject')" class="btn-reject">Reject</button>
+                                    </div>
+                                <% } %>
                                 <select class="form-select status-selector" id="status-<%= order.orderId %>">
                                     <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
                                     <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
@@ -433,7 +450,6 @@
                                     <option value="Return Accepted" <%= order.status === 'Return Accepted' ? 'selected' : '' %>>Return Accepted</option>
                                     <option value="Return Rejected" <%= order.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
                                 </select>
-                        
                             <% } else { %>
                                 <!-- Final status display -->
                                 <p class="text-success fw-bold">Status: <%= order.status %></p>
@@ -444,76 +460,49 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Order Items</h2>
-                </div>
-
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
+                 <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% (order.products || []).forEach(item => { %>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Product Name</th>
-                                    <th>Quantity</th>
-                                    <th>Unit Price</th>
-                                    <th>Total Price</th>
-                                    <th>Status</th>
+                                    <td>
+                                        <div class="product-image">
+                                            <img src="/Uploads/product-images/<%= item.image || 'default.jpg' %>" 
+                                                 alt="<%= item.name || 'Product Image' %>"
+                                                 onerror="this.src='/Uploads/product-images/default.jpg'">
+                                        </div>
+                                    </td>
+                                    <td><%= item.name || 'N/A' %></td>
+                                    <td><%= item.quantity || 1 %></td>
+                                    <td>₹<%= (item.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                                    <td>₹<%= (item.total || (item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                                    <td>
+                                        <span class="status-badge status-<%= (item.status || order.status || 'Pending').toLowerCase().replace(' ', '-') %>">
+                                            <%= item.status || order.status || 'Pending' %>
+                                        </span>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <% order.products.forEach(item=> { %>
-                                    <tr>
-                                        <td>
-                                            <div class="product-image">
-                                                <img src="/Uploads/product-images/<%= item.image %>"
-                                                    alt="<%= item.name %>">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <%= item.name || "NA" %>
-                                        </td>
-                                        <td>
-                                            <%= item.quantity %>
-                                        </td>
-                                        <td>₹<%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2 }) %>
-                                        </td>
-                                        <td>₹<%= item.total.toLocaleString('en-IN', { minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2 }) %>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="status-badge status-<%= item.status ? item.status.toLowerCase().replace(' ', '-') : 'pending' %>">
-                                                <%= item.status || 'Pending' %>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
-                                        <tr class="total-row">
-                                            <td colspan="4" class="text-end">Total</td>
-                                            <td>₹<%= order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits:
-                                                    2, maximumFractionDigits: 2 }) %>
-                                            </td>
-                                            <td></td>
-                                        </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                            <% }) %>
+                            <tr class="total-row">
+                                <td colspan="4" class="text-end">Total</td>
+                                <td>₹<%= (order.finalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            
-            <% if (order.isReturnRequested) { %>
-                <div>
-                    <p>Return reason: <%= order.returnReason %>
-                    </p>
-                    <button onclick="orderReturn('<%= order.orderId %>', 'accept')" class="btn-accept">Accept</button>
-                    <button onclick="orderReturn('<%= order.orderId %>', 'reject')" class="btn-reject">Reject</button>
-                </div>
-                <% } %>
-
-        </div>
 
         <script>
             // Status update function
@@ -556,6 +545,10 @@
                                         background: '#333',
                                         color: '#fff'
                                     });
+                                    // Reload page to reflect changes
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 3000);
                                 } else {
                                     Swal.fire({
                                         title: 'Error!',
@@ -601,6 +594,10 @@
                                 background: '#333',
                                 color: '#fff'
                             });
+                            // Reload page to reflect changes
+                            setTimeout(() => {
+                                location.reload();
+                            }, 3000);
                         } else {
                             Swal.fire({
                                 title: 'Error!',
@@ -621,6 +618,77 @@
                             color: '#fff'
                         });
                     });
+            }
+
+            // Function to handle individual item returns
+            function returnItem(orderId, itemId) {
+                // Show a dialog to get the return reason
+                Swal.fire({
+                    title: 'Return Item',
+                    input: 'textarea',
+                    inputLabel: 'Return Reason',
+                    inputPlaceholder: 'Please provide a reason for returning this item...',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit Return Request',
+                    background: '#333',
+                    color: '#fff',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to provide a reason!';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const returnReason = result.value;
+                        
+                        // Submit the return request via AJAX
+                        fetch(`/admin/returnItem`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                orderId: orderId,
+                                itemId: itemId,
+                                returnReason: returnReason
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Return Requested!',
+                                    text: 'Item return request has been submitted successfully.',
+                                    icon: 'success',
+                                    background: '#333',
+                                    color: '#fff'
+                                });
+                                // Reload page to reflect changes
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 2000);
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message || 'Failed to submit return request.',
+                                    icon: 'error',
+                                    background: '#333',
+                                    color: '#fff'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error submitting return request:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong.',
+                                icon: 'error',
+                                background: '#333',
+                                color: '#fff'
+                            });
+                        });
+                    }
+                });
             }
         </script>
 </body>
