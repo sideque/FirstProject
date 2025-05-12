@@ -32,7 +32,14 @@ const orderSchema = new Schema({
       required: true,
       enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Request", "Returned"],
       default: "Processing"
-    }
+    },
+    returnReason: String,
+    isReturnRequested: Boolean,
+    isReturned: Boolean,
+    refunded: { 
+      type: Boolean, 
+      default: false 
+    },
   }],
   totalPrice: { 
     type: Number, 

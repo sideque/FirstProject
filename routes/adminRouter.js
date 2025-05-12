@@ -70,10 +70,12 @@ router.get("/remove-duplicate-products", adminAuth, productController.removeDupl
 
 // Order Management
 router.get('/orders', adminAuth, orderController.loadOrder);
-router.get('/vieworder/:orderId', adminAuth, orderController.viewOrder);
-router.patch('/updateStatus/:orderId', adminAuth, orderController.updateOrderStatus);
+router.get('/vieworder/:id', adminAuth, orderController.viewOrder); // Using :id for orderId
+router.patch('/updateStatus/:id', adminAuth, orderController.updateOrderStatus);
 router.get('/returnOrder', adminAuth, orderController.verifyReturnRequest);
 router.get('/orders/clear', adminAuth, orderController.clearFilters);
+router.get('/returnItem', adminAuth, orderController.handleItemReturn);
+router.post('/returnItem', adminAuth, orderController.returnOrderItem);
 
 // Coupons Management
 router.get("/coupons", adminAuth, couponController.loadCoupon);

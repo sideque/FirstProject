@@ -550,29 +550,37 @@ const returnOrderItem = async (req, res) => {
     const { orderId, itemId, reason } = req.body;
     const userId = req.session.user;
 
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.json({ success: false, message: 'Order not found' });
+    // Validate inputs
+    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+      return res.status(400).json({ success: false, message: 'Invalid order or item ID' });
     }
 
+    // Find the order by _id and ensure it belongs to the user
+    const order = await Order.findOne({ _id: orderId, userId }).populate('orderItems.product');
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Find the item in the order
     const item = order.orderItems.find((i) => i._id.toString() === itemId);
     if (!item) {
-      return res.json({ success: false, message: 'Item not found in order' });
+      return res.status(404).json({ success: false, message: 'Item not found in order' });
     }
 
+    // Check if the item can be returned
     if (item.status !== 'Delivered' || item.isReturned || item.isReturnRequested) {
-      return res.json({ success: false, message: 'Item cannot be returned' });
+      return res.status(400).json({ success: false, message: 'Item cannot be returned' });
     }
-
-    // Update item status
-    item.status = 'Return Request';
-    item.isReturnRequested = true;
-    item.returnReason = reason;
 
     // Calculate refund amount for this item
     const itemTotal = item.price * item.stock;
     const itemOfferDiscount = item.offerAmount || 0;
     const itemRefund = Math.round((itemTotal - itemOfferDiscount) * 100) / 100;
+
+    // Update item status
+    item.status = 'Return Request';
+    item.isReturnRequested = true;
+    item.returnReason = reason;
 
     // Update order totals
     order.finalAmount = Math.max(0, Math.round((order.finalAmount - itemRefund) * 100) / 100);
@@ -583,17 +591,17 @@ const returnOrderItem = async (req, res) => {
       Math.round((order.offerDiscount - itemOfferDiscount) * 100) / 100
     );
 
-    // Check if all non-cancelled items are returned or return requested
-    const allReturnedOrRequested = order.orderItems.every(
-      (i) =>
-        i.status === 'Cancelled' ||
-        i.status === 'Returned' ||
-        i.status === 'Return Request'
+    // Check if any item has a return request
+    const hasReturnRequest = order.orderItems.some(
+      (i) => i.isReturnRequested || i.status === 'Return Request'
     );
-    if (allReturnedOrRequested) {
-      order.status = 'Return Request';
+    if (hasReturnRequest) {
       order.isReturnRequested = true;
-      order.returnReason = reason || 'All items return requested';
+      order.returnReason = order.returnReason || reason || 'Item return requested';
+      // Optionally update order status to 'Return Request' if not already set
+      if (!['Return Request', 'Returned', 'Return Accepted', 'Return Rejected'].includes(order.status)) {
+        order.status = 'Return Request';
+      }
     }
 
     // Restore product stock
@@ -603,12 +611,12 @@ const returnOrderItem = async (req, res) => {
       await product.save();
     }
 
-    await order.save();
+     await order.save();
 
     res.json({ success: true, message: 'Item return request submitted successfully' });
   } catch (error) {
     console.error('Error requesting item return:', error);
-    res.json({ success: false, message: 'An error occurred' });
+    res.status(500).json({ success: false, message: 'An error occurred' });
   }
 };
 
@@ -832,12 +840,18 @@ const success = async (req, res) => {
         user: userData,
         order: null,
         address: null,
-        currentPage: "cart",
+        currentPage: "profile",
         message: 'No order found. Please contact support.',
       });
     }
 
-    res.render('success', { order, address: order.address || null, message: null, user: userData });
+    res.render('success', { 
+      order, 
+      address: order.address || null, 
+      message: null, 
+      user: userData,
+      currentPage: 'profile' 
+    });
   } catch (error) {
     console.error('Error in success route:', error);
     res.status(500).render('error', { message: 'Error loading order details. Try again later.' });
