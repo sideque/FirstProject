@@ -83,7 +83,7 @@ const loadOrder = async (req, res) => {
         products: order.orderItems.map((item) => ({
           ...item,
           productImage:
-            item.product?.productImage?.[0] || "/images/placeholder.png",
+            item.product?.productImage?.[0] || "/images/placeholder.webp",
         })),
       };
     });
@@ -145,7 +145,7 @@ const viewOrder = async (req, res) => {
         .map((item) => ({
           _id: item._id,
           name: item.product.name || item.product.productName || "N/A",
-          image: item.product.productImage?.[0] || "/images/placeholder.png",
+          image: item.product.productImage?.[0] || "/images/placeholder.webp",
           quantity: item.stock,
           price: item.price,
           total: item.stock * item.price,
@@ -159,7 +159,7 @@ const viewOrder = async (req, res) => {
            item.status === "Return Requested"))
         .map((item) => ({
           name: item.product.name || item.product.productName || "N/A",
-          image: item.product.productImage?.[0] || "/images/placeholder.png",
+          image: item.product.productImage?.[0] || "/images/placeholder.webp",
           quantity: item.stock,
           price: item.price,
           reason: item.returnReason || "N/A",

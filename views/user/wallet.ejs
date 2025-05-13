@@ -475,196 +475,196 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // Add Money Button
-      const addMoneyBtn = document.getElementById('addMoneyBtn');
-      if (addMoneyBtn) {
-        addMoneyBtn.addEventListener('click', function () {
-          Swal.fire({
-            title: 'Add Money to Wallet',
-            html: `
-              <div class="form-group">
-                <label for="amount" class="text-left">Amount (₹)</label>
-                <input type="number" id="amount" class="form-control" min="100" placeholder="Enter amount" required>
-              </div>
-              <div class="form-group mt-3">
-                <label for="paymentMethod" class="text-left">Payment Method</label>
-                <select id="paymentMethod" class="form-control">
-                  <option value="credit-card">Credit Card</option>
-                  <option value="debit-card">Debit Card</option>
-                  <option value="upi">UPI</option>
-                  <option value="net-banking">Net Banking</option>
-                </select>
-              </div>
-            `,
-            showCancelButton: true,
-            confirmButtonColor: '#82ae46',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Add Money',
-            preConfirm: () => {
-              const amount = document.getElementById('amount').value;
-              const paymentMethod = document.getElementById('paymentMethod').value;
-              if (!amount || amount < 100) {
-                Swal.showValidationMessage('Please enter an amount of at least ₹100');
-                return false;
-              }
-              return { amount, paymentMethod };
-            },
-          }).then((result) => {
-            if (result.isConfirmed) {
-              Swal.fire({
-                icon: 'info',
-                title: 'Processing Payment',
-                text: 'Please wait while we process your payment...',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                willOpen: () => {
-                  Swal.showLoading();
-                },
-              });
+      // // Add Money Button
+      // const addMoneyBtn = document.getElementById('addMoneyBtn');
+      // if (addMoneyBtn) {
+      //   addMoneyBtn.addEventListener('click', function () {
+      //     Swal.fire({
+      //       title: 'Add Money to Wallet',
+      //       html: `
+      //         <div class="form-group">
+      //           <label for="amount" class="text-left">Amount (₹)</label>
+      //           <input type="number" id="amount" class="form-control" min="100" placeholder="Enter amount" required>
+      //         </div>
+      //         <div class="form-group mt-3">
+      //           <label for="paymentMethod" class="text-left">Payment Method</label>
+      //           <select id="paymentMethod" class="form-control">
+      //             <option value="credit-card">Credit Card</option>
+      //             <option value="debit-card">Debit Card</option>
+      //             <option value="upi">UPI</option>
+      //             <option value="net-banking">Net Banking</option>
+      //           </select>
+      //         </div>
+      //       `,
+      //       showCancelButton: true,
+      //       confirmButtonColor: '#82ae46',
+      //       cancelButtonColor: '#d33',
+      //       confirmButtonText: 'Add Money',
+      //       preConfirm: () => {
+      //         const amount = document.getElementById('amount').value;
+      //         const paymentMethod = document.getElementById('paymentMethod').value;
+      //         if (!amount || amount < 100) {
+      //           Swal.showValidationMessage('Please enter an amount of at least ₹100');
+      //           return false;
+      //         }
+      //         return { amount, paymentMethod };
+      //       },
+      //     }).then((result) => {
+      //       if (result.isConfirmed) {
+      //         Swal.fire({
+      //           icon: 'info',
+      //           title: 'Processing Payment',
+      //           text: 'Please wait while we process your payment...',
+      //           allowOutsideClick: false,
+      //           showConfirmButton: false,
+      //           willOpen: () => {
+      //             Swal.showLoading();
+      //           },
+      //         });
   
-              setTimeout(() => {
-                fetch('/wallet/add-money', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    amount: result.value.amount,
-                    paymentMethod: result.value.paymentMethod,
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then((data) => {
-                    if (data.success) {
-                      Swal.fire({
-                        icon: 'success',
-                        title: 'Money Added!',
-                        text: `₹${result.value.amount} has been added to your wallet successfully!`,
-                        confirmButtonColor: '#82ae46',
-                      }).then(() => {
-                        window.location.reload();
-                      });
-                    } else {
-                      Swal.fire({
-                        icon: 'error',
-                        title: 'Transaction Failed',
-                        text: data.message || 'Something went wrong. Please try again.',
-                        confirmButtonColor: '#82ae46',
-                      });
-                    }
-                  })
-                  .catch((error) => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Transaction Failed',
-                      text: 'Something went wrong. Please try again.',
-                      confirmButtonColor: '#82ae46',
-                    });
-                  });
-              }, 2000);
-            }
-          });
-        });
-      }
+      //         setTimeout(() => {
+      //           fetch('/wallet/add-money', {
+      //             method: 'POST',
+      //             headers: {
+      //               'Content-Type': 'application/json',
+      //             },
+      //             body: JSON.stringify({
+      //               amount: result.value.amount,
+      //               paymentMethod: result.value.paymentMethod,
+      //             }),
+      //           })
+      //             .then((response) => response.json())
+      //             .then((data) => {
+      //               if (data.success) {
+      //                 Swal.fire({
+      //                   icon: 'success',
+      //                   title: 'Money Added!',
+      //                   text: `₹${result.value.amount} has been added to your wallet successfully!`,
+      //                   confirmButtonColor: '#82ae46',
+      //                 }).then(() => {
+      //                   window.location.reload();
+      //                 });
+      //               } else {
+      //                 Swal.fire({
+      //                   icon: 'error',
+      //                   title: 'Transaction Failed',
+      //                   text: data.message || 'Something went wrong. Please try again.',
+      //                   confirmButtonColor: '#82ae46',
+      //                 });
+      //               }
+      //             })
+      //             .catch((error) => {
+      //               console.error('Error:', error);
+      //               Swal.fire({
+      //                 icon: 'error',
+      //                 title: 'Transaction Failed',
+      //                 text: 'Something went wrong. Please try again.',
+      //                 confirmButtonColor: '#82ae46',
+      //               });
+      //             });
+      //         }, 2000);
+      //       }
+      //     });
+      //   });
+      // }
   
-      // Transfer Button
-      const transferBtn = document.getElementById('transferBtn');
-      if (transferBtn) {
-        transferBtn.addEventListener('click', function () {
-          Swal.fire({
-            title: 'Transfer Money',
-            html: `
-              <div class="form-group">
-                <label for="recipientId" class="text-left">Recipient ID or Email</label>
-                <input type="text" id="recipientId" class="form-control" placeholder="Enter recipient ID or email" required>
-              </div>
-              <div class="form-group mt-3">
-                <label for="transferAmount" class="text-left">Amount (₹)</label>
-                <input type="number" id="transferAmount" class="form-control" min="10" placeholder="Enter amount" required>
-              </div>
-              <div class="form-group mt-3">
-                <label for="transferNote" class="text-left">Note (Optional)</label>
-                <textarea id="transferNote" class="form-control" placeholder="Add a note"></textarea>
-              </div>
-            `,
-            showCancelButton: true,
-            confirmButtonColor: '#82ae46',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Transfer',
-            preConfirm: () => {
-              const recipientId = document.getElementById('recipientId').value;
-              const amount = document.getElementById('transferAmount').value;
-              const note = document.getElementById('transferNote').value;
-              if (!recipientId) {
-                Swal.showValidationMessage('Please enter recipient ID or email');
-                return false;
-              }
-              if (!amount || amount < 10) {
-                Swal.showValidationMessage('Please enter an amount of at least ₹10');
-                return false;
-              }
-              return { recipientId, amount, note };
-            },
-          }).then((result) => {
-            if (result.isConfirmed) {
-              Swal.fire({
-                icon: 'info',
-                title: 'Processing Transfer',
-                text: 'Please wait while we process your transfer...',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                willOpen: () => {
-                  Swal.showLoading();
-                },
-              });
+      // // Transfer Button
+      // const transferBtn = document.getElementById('transferBtn');
+      // if (transferBtn) {
+      //   transferBtn.addEventListener('click', function () {
+      //     Swal.fire({
+      //       title: 'Transfer Money',
+      //       html: `
+      //         <div class="form-group">
+      //           <label for="recipientId" class="text-left">Recipient ID or Email</label>
+      //           <input type="text" id="recipientId" class="form-control" placeholder="Enter recipient ID or email" required>
+      //         </div>
+      //         <div class="form-group mt-3">
+      //           <label for="transferAmount" class="text-left">Amount (₹)</label>
+      //           <input type="number" id="transferAmount" class="form-control" min="10" placeholder="Enter amount" required>
+      //         </div>
+      //         <div class="form-group mt-3">
+      //           <label for="transferNote" class="text-left">Note (Optional)</label>
+      //           <textarea id="transferNote" class="form-control" placeholder="Add a note"></textarea>
+      //         </div>
+      //       `,
+      //       showCancelButton: true,
+      //       confirmButtonColor: '#82ae46',
+      //       cancelButtonColor: '#d33',
+      //       confirmButtonText: 'Transfer',
+      //       preConfirm: () => {
+      //         const recipientId = document.getElementById('recipientId').value;
+      //         const amount = document.getElementById('transferAmount').value;
+      //         const note = document.getElementById('transferNote').value;
+      //         if (!recipientId) {
+      //           Swal.showValidationMessage('Please enter recipient ID or email');
+      //           return false;
+      //         }
+      //         if (!amount || amount < 10) {
+      //           Swal.showValidationMessage('Please enter an amount of at least ₹10');
+      //           return false;
+      //         }
+      //         return { recipientId, amount, note };
+      //       },
+      //     }).then((result) => {
+      //       if (result.isConfirmed) {
+      //         Swal.fire({
+      //           icon: 'info',
+      //           title: 'Processing Transfer',
+      //           text: 'Please wait while we process your transfer...',
+      //           allowOutsideClick: false,
+      //           showConfirmButton: false,
+      //           willOpen: () => {
+      //             Swal.showLoading();
+      //           },
+      //         });
   
-              setTimeout(() => {
-                fetch('/wallet/transfer', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    recipient: result.value.recipientId,
-                    amount: result.value.amount,
-                    note: result.value.note,
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then((data) => {
-                    if (data.success) {
-                      Swal.fire({
-                        icon: 'success',
-                        title: 'Transfer Successful!',
-                        text: `₹${result.value.amount} has been transferred successfully!`,
-                        confirmButtonColor: '#82ae46',
-                      }).then(() => {
-                        window.location.reload();
-                      });
-                    } else {
-                      Swal.fire({
-                        icon: 'error',
-                        title: 'Transfer Failed',
-                        text: data.message || 'Something went wrong. Please try again.',
-                        confirmButtonColor: '#82ae46',
-                      });
-                    }
-                  })
-                  .catch((error) => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Transfer Failed',
-                      text: 'Something went wrong. Please try again.',
-                      confirmButtonColor: '#82ae46',
-                    });
-                  });
-              }, 2000);
-            }
-          });
-        });
-      }
+      //         setTimeout(() => {
+      //           fetch('/wallet/transfer', {
+      //             method: 'POST',
+      //             headers: {
+      //               'Content-Type': 'application/json',
+      //             },
+      //             body: JSON.stringify({
+      //               recipient: result.value.recipientId,
+      //               amount: result.value.amount,
+      //               note: result.value.note,
+      //             }),
+      //           })
+      //             .then((response) => response.json())
+      //             .then((data) => {
+      //               if (data.success) {
+      //                 Swal.fire({
+      //                   icon: 'success',
+      //                   title: 'Transfer Successful!',
+      //                   text: `₹${result.value.amount} has been transferred successfully!`,
+      //                   confirmButtonColor: '#82ae46',
+      //                 }).then(() => {
+      //                   window.location.reload();
+      //                 });
+      //               } else {
+      //                 Swal.fire({
+      //                   icon: 'error',
+      //                   title: 'Transfer Failed',
+      //                   text: data.message || 'Something went wrong. Please try again.',
+      //                   confirmButtonColor: '#82ae46',
+      //                 });
+      //               }
+      //             })
+      //             .catch((error) => {
+      //               console.error('Error:', error);
+      //               Swal.fire({
+      //                 icon: 'error',
+      //                 title: 'Transfer Failed',
+      //                 text: 'Something went wrong. Please try again.',
+      //                 confirmButtonColor: '#82ae46',
+      //               });
+      //             });
+      //         }, 2000);
+      //       }
+      //     });
+      //   });
+      // }
   
       // View Transaction Details
       const viewBtns = document.querySelectorAll('.view-btn');

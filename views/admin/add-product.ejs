@@ -48,11 +48,11 @@
                             </div>
                             
                             <input type="file" class="hidden-file-input" id="productImage0" name="images" 
-                                accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event, 0)">
+                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 0)">
                             <input type="file" class="hidden-file-input" id="productImage1" name="images" 
-                                accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event, 1)">
+                                accept="image/png, image/jpeg, image/jpg image/webp" onchange="handleFileSelect(event, 1)">
                             <input type="file" class="hidden-file-input" id="productImage2" name="images" 
-                                accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event, 2)">
+                                accept="image/png, image/jpeg, image/jpg image/webp" onchange="handleFileSelect(event, 2)">
                             
                             <input type="hidden" id="croppedImage0" name="croppedImages">
                             <input type="hidden" id="croppedImage1" name="croppedImages">
@@ -310,10 +310,10 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];            
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];            
             // if (!file.type.match('image.*')) {
                 if (!validTypes.includes(file.type)) {
-                showError('images-error', 'Please select an image file (JPEG, JPG, or PNG)');
+                showError('images-error', 'Please select an image file (JPEG, JPG, PNG or webp)');
                 event.target.value = '';
                 return;
             }
@@ -339,10 +339,11 @@
                 
                 cropper = new Cropper(document.getElementById('cropImage'), {
                     aspectRatio: 1,
-                    viewMode: 1,
+                    viewMode: 0,
                     background: false,
                     zoomable: true,
-                    cropBoxResizable: true
+                    cropBoxResizable: true,
+                    autoCropArea:1
                 });
                 
                 currentImageIndex = index;
@@ -515,7 +516,7 @@
         hideError('category-error');
     }
 
-   // ✅ Validate regular price (Allow commas)
+   
     const regularPriceInput = document.getElementById('regularPrice').value;
     const regularPrice = regularPriceInput; // no replace
     if (!regularPrice.trim() || isNaN(Number(regularPrice.replace(/,/g, '')))) {
@@ -525,7 +526,7 @@
         hideError('regularPrice-error');
     }
 
-    // ✅ Validate sale price (Allow commas)
+    
     const salePriceInput = document.getElementById('salePrice').value;
     const salePrice = salePriceInput; // no replace
     if (salePrice.trim() && isNaN(Number(salePrice.replace(/,/g, '')))) {

@@ -489,7 +489,7 @@ const updateProduct = async (req, res) => {
                     const buffer = Buffer.from(base64Data, "base64");
 
                     // Generate unique filename
-                    const filename = `cropped-${Date.now()}-${i}.jpg`;
+                    const filename = `cropped-${Date.now()}-${i}.webp`;
                     const filePath = path.join("uploads", "product-images", filename);
 
                     // Ensure directory exists

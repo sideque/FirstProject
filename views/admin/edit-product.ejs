@@ -48,11 +48,11 @@
                             </div>
                             
                             <input type="file" class="hidden-file-input" id="productImage0" name="images" 
-                                accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event, 0)">
+                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 0)">
                             <input type="file" class="hidden-file-input" id="productImage1" name="images" 
-                                accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event, 1)">
+                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 1)">
                             <input type="file" class="hidden-file-input" id="productImage2" name="images" 
-                                accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event, 2)">
+                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 2)">
                             
                             <input type="hidden" id="croppedImage0" name="croppedImages">
                             <input type="hidden" id="croppedImage1" name="croppedImages">
@@ -328,7 +328,7 @@
         // Function to validate Base64 image data
         function isValidBase64Image(base64String) {
             // Check if the string starts with a valid data URI prefix
-            const base64Regex = /^data:image\/(jpeg|png|jpg);base64,/;
+            const base64Regex = /^data:image\/(jpeg|png|jpg|webp);base64,/;
             if (!base64Regex.test(base64String)) {
                 return false;
             }
@@ -398,9 +398,9 @@
             const file = event.target.files[0];
             if (!file) return;
     
-            const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+            const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
             if (!validTypes.includes(file.type)) {
-                showError("images-error", "Please select an image file (JPEG, JPG, or PNG)");
+                showError("images-error", "Please select an image file (JPEG, JPG, PNG or webp)");
                 event.target.value = "";
                 return;
             }

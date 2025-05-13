@@ -17,11 +17,11 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/webp'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG, JPG and PNG are allowed.'), false);
+    cb(new Error('Invalid file type. Only JPEG, JPG and PNG are allowed. and i convert to webp'), false);
   }
 };
 

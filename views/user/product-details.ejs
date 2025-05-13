@@ -677,11 +677,11 @@
             <img 
                 src="<%= product.productImage && product.productImage.length > 0 
                         ? '/uploads/product-images/' + product.productImage[0] 
-                        : '/images/placeholder.jpg' %>" 
+                        : '/images/placeholder.webp' %>" 
                 alt="<%= product.productName || 'Product Image' %>" 
                 class="main-image zoom-image" 
                 id="mainImage"
-                onerror="this.src='/images/placeholder.jpg'; console.log('Main image load failed for <%= product.productName %>');">
+                onerror="this.src='/images/placeholder.webp'; console.log('Main image load failed for <%= product.productName %>');">
             <div class="zoom-lens"></div>
            <div class="thumbnails">
               <% if (product.productImage && Array.isArray(product.productImage) && product.productImage.length > 0) { %>
