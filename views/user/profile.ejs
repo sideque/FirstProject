@@ -333,8 +333,14 @@
                           <% order.orderItems.slice(0, 1).forEach(function(item) { %>
                             <% if (item.product) { %>
                               <div class="order-product">
-                                <img src="/Uploads/product-images/<%= item.product.productImage[0] || 'default.jpg' %>"
-                                  alt="<%= item.product.productName || 'Product' %>" class="product-img">
+                               <img 
+                                  src="<%= item.product.productImage && item.product.productImage.length > 0 
+                                        ? '/uploads/product-images/' + item.product.productImage[0] 
+                                        : '/images/default.jpg' %>" 
+                                  alt="<%= item.product.productName || 'Product' %>" 
+                                  class="product-img"
+                                  style="width: 60px; height: 60px; object-fit: contain;"
+                                  onerror="this.src='/images/default.jpg'; console.log('Image failed for <%= item.product.productName %>');">
                                 <div class="product-details">
                                   <div class="product-name">
                                     <%= item.product.productName || 'Unknown' %>

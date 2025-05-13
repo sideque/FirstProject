@@ -331,9 +331,10 @@
                             <% if (item.productId) { %>
                                 <div class="wishlist-item" data-id="<%= item.productId._id %>">
                                     <div class="item-image">
-                                        <img src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
-                                             alt="<%= item.productId.productName || 'Product' %>"
-                                             style="height: 200px; width: 100%; object-fit: contain;">
+                                        <img 
+                                            src="/uploads/product-images/<%= item.productId.productImage[0] %>" 
+                                            alt="<%= item.productId.productName || 'Product' %>" 
+                                            style="height: 200px; width: 100%; object-fit: contain;">
                                     </div>
                                     <div class="item-details">
                                         <div>
@@ -368,8 +369,8 @@
                                 <% if (item.productId) { %>
                                     <div class="product-card" data-id="<%= item.productId._id %>">
                                         <div class="product-card-image">
-                                            <img src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
-                                                 alt="<%= item.productId.productName || 'Product' %>">
+                                            <img src="/uploads/product-images/<%= item.productId.productImage[0] %>"
+                                                alt="<%= item.productId.productName || 'Product' %>">
                                         </div>
                                         <div class="product-card-details">
                                             <h3 class="product-card-title"><%= item.productId.productName || 'Unnamed Product' %></h3>

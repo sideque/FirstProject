@@ -674,21 +674,32 @@
       <div class="product-detail-row">
         <div class="product-images-col">
           <div class="product-gallery zoom-container">
-            <img src="/Uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : '/images/placeholder.jpg' %>" 
-                 alt="<%= product.productName || 'Product Image' %>" 
-                 class="main-image zoom-image" id="mainImage">
+            <img 
+  src="<%= product.productImage && product.productImage.length > 0 
+          ? '/uploads/product-images/' + product.productImage[0] 
+          : '/images/placeholder.jpg' %>" 
+  alt="<%= product.productName || 'Product Image' %>" 
+  class="main-image zoom-image" 
+  id="mainImage"
+  onerror="this.src='/images/placeholder.jpg'; console.log('Main image load failed for <%= product.productName %>');">
+
+
             <div class="zoom-lens"></div>
-            <div class="thumbnails">
+           <div class="thumbnails">
               <% if (product.productImage && Array.isArray(product.productImage) && product.productImage.length > 0) { %>
                 <% product.productImage.forEach((image, index) => { %>
-                  <img src="/Uploads/product-images/<%= image %>" 
-                       alt="<%= product.productName %> thumbnail <%= index+1 %>" 
-                       class="thumbnail <%= index === 0 ? 'active' : '' %>">
+                  <img 
+                    src="/Uploads/product-images/<%= image %>" 
+                    alt="<%= product.productName || 'Product' %> thumbnail <%= index + 1 %>" 
+                    class="thumbnail <%= index === 0 ? 'active' : '' %>" 
+                    style="width: 60px; height: 60px; object-fit: cover; margin: 5px;"
+                    onerror="this.src='/images/default-thumbnail.jpg'; console.log('Thumbnail load failed for <%= product.productName %> - image <%= index + 1 %>');">
                 <% }) %>
               <% } else { %>
                 <p>No additional images available.</p>
               <% } %>
             </div>
+
           </div>
         </div>
 
@@ -886,10 +897,16 @@
               <div class="product-item">
                 <div class="product">
                   <a href="/product?id=<%= relatedProduct._id %>" class="img-prod">
-                    <img src="/Uploads/product-images/<%= relatedProduct.productImage && relatedProduct.productImage.length > 0 ? relatedProduct.productImage[0] : '/images/placeholder.jpg' %>" alt="Related Products">
+                    <img src="<%= relatedProduct.productImage && relatedProduct.productImage.length > 0 
+                                ? '/Uploads/product-images/' + relatedProduct.productImage[0] 
+                                : 'https://via.placeholder.com/300x300?text=No+Image' %>" 
+                        alt="<%= relatedProduct.productName %> mobile phone"
+                        style="height: 320px; width: 100%; object-fit: contain; padding: 10px;"
+                        onerror="this.src='https://via.placeholder.com/300x300?text=Error'; console.log('Image load failed for <%= relatedProduct.productName %>');">
+                    
                     <% if (relatedProduct.productOffer && relatedProduct.productOffer > 0) { %>
                       <span class="status"><%= relatedProduct.productOffer %>% Off</span>
-                    <% } %>
+                    <% } %>  
                     <div class="overlay"></div>
                   </a>
                   <div class="text">

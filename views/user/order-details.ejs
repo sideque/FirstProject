@@ -395,9 +395,12 @@
             <tbody>
               <% order.orderItems.forEach(function(item) { %>
                 <tr>
-                  <td data-label="Image" class="image-col">
-                    <img src="/Uploads/product-images/<%= item.product.productImage[0] || 'default.jpg' %>" alt="<%= item.product.productName || 'Product' %>" class="product-img">
-                  </td>
+                 <td data-label="Image" class="image-col">
+                  <img 
+                      src="/uploads/product-images/<%= item.product.productImage[0] || 'default.jpg' %>" 
+                      alt="<%= item.product.productName || 'Product' %>" 
+                      class="product-img">
+              </td>
                   <td data-label="Product">
                     <div class="product-info">
                       <div class="product-name"><%= item.product.productName || 'Unknown product' %></div>

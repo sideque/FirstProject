@@ -347,11 +347,11 @@
           <% if (cart && cart.length > 0) { %>
             <% cart.forEach(item => { %>
               <div class="summary-product">
-                <img
-                  src="/Uploads/product-images/<%= item.image %>"
-                  alt="<%= item.name %>"
-                  class="product-image"
-                >
+                <img 
+                    src="<%= item.image ? '/uploads/product-images/' + item.image : '/images/placeholder.jpg' %>" 
+                    alt="<%= item.name || 'Product Name' %>" 
+                    class="product-image">
+
                 <div class="product-details">
                   <h3 class="product-name"><%= item.name %></h3>
                   <div class="product-meta">Quantity: <%= item.quantity %></div>

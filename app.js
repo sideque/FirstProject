@@ -64,12 +64,12 @@ app.set("views", [
 ]);
 
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use((req, res, next) => {
     if (req.url.includes('/uploads/')) {
         const relativePath = req.url.replace('/uploads/', '');
-        const absolutePath = path.join(__dirname, 'Uploads', relativePath);
+        const absolutePath = path.join(__dirname, 'uploads', relativePath);
     }
     next();
 });

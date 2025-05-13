@@ -422,13 +422,14 @@
                             <% (order.products || []).forEach(item => { %>
                                 <tr>
                                     <td>
-                                        <div class="product-image">
+                                       <div class="product-image">
                                             <img
-                                                src="/Uploads/product-images/<%= item.image || 'default.jpg' %>"
+                                                src="/uploads/product-images/<%= item.image || 'default.jpg' %>"
                                                 alt="<%= item.name || 'Product Image' %>"
-                                                onerror="this.src='/Uploads/product-images/default.jpg'"
+                                                onerror="this.src='/uploads/product-images/default.jpg';"
                                             />
                                         </div>
+
                                     </td>
                                     <td><%= item.name || 'N/A' %></td>
                                     <td><%= item.quantity || 1 %></td>

@@ -529,9 +529,9 @@
                             <% subtotal += itemTotal; %>
                             <div class="cart-item" data-id="<%= item.productId._id %>" data-max="<%= item.productId.quantity || 0 %>">
                                 <img class="img-fluid"
-                                     src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
-                                     alt="<%= item.productId.productName || 'mobile phone' %>"
-                                     style="height: 320px; width: 100%; object-fit: contain; padding: 10px;">
+                                    src="/uploads/product-images/<%= item.productId.productImage[0] %>"
+                                    alt="<%= item.productId.productName || 'mobile phone' %>"
+                                    style="height: 320px; width: 100%; object-fit: contain; padding: 10px;">
                                 <div class="item-details">
                                     <div>
                                         <h3 class="item-title"><%= item.productId.productName || 'Unnamed Product' %></h3>
@@ -569,11 +569,14 @@
                     <% if (cartItems && cartItems.length > 0) { %>
                         <% cartItems.forEach(item => { %>
                             <div class="summary-product" style="display: flex; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
-                                <img
-                                    src="/Uploads/product-images/<%= item.productId.productImage[0] %>"
+                               <img
+                                    src="<%= item.productId.productImage && item.productId.productImage.length > 0 
+                                        ? '/uploads/product-images/' + item.productId.productImage[0] 
+                                        : '/images/default-placeholder.jpg' %>"
                                     alt="<%= item.productId.productName %>"
                                     style="width: 60px; height: 60px; object-fit: contain; margin-right: 15px;"
-                                >
+>
+
                                 <div style="flex: 1;">
                                     <h3 style="font-size: 14px; margin: 0 0 5px 0;"><%= item.productId.productName %></h3>
                                     <div style="font-size: 12px; color: #666;">Qty: <%= item.stock %></div>
