@@ -401,7 +401,7 @@
     <div class="invoice-customer">
       <p class="invoice-label">BILLED TO</p>
       <% if (address) { %>
-        <p class="invoice-value"><%= order?.userId?.name || 'Customer Name' %></p>
+        <p class="invoice-value"><%= order?.address .name || 'Customer Name' %></p>
         <p class="invoice-value"><%= address.addressLine1 || 'Address Line 1' %></p>
         <% if (address.addressLine2) { %>
           <p class="invoice-value"><%= address.addressLine2 %></p>
