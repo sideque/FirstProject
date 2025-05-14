@@ -46,7 +46,12 @@ const login = async (req, res) => {
 
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if (passwordMatch) {
-            req.session.admin = { _id: admin._id, email: admin.email, name: admin.name, isAdmin: admin.isAdmin };
+            req.session.admin = { 
+                _id: admin._id, 
+                email: admin.email, 
+                name: admin.name, 
+                isAdmin: admin.isAdmin 
+            };
             return res.redirect('/admin/dashboard');
         } else {
             req.session.admMsg = 'Invalid email or password.';

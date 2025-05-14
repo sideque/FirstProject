@@ -83,7 +83,7 @@ const getWalletDetails = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        // Ensure wallet data is included, even if not populated correctly
+        
         let walletData = user.wallet || await Wallet.findOne({ userId: user._id });
         if (!walletData) {
             walletData = { balance: 0, transactions: [] };

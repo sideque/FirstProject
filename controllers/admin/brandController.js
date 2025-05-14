@@ -265,7 +265,6 @@ module.exports = {
     addBrand,
     loadAddBrand,
     addBrandOffer,
-    // removeBrandOffer
     deleteBrand,
     brandHasProducts,
     getBrands,

@@ -1041,5 +1041,5 @@ module.exports = {
   loadProductDetails,
   paymentFailed,
   retryOrder,
-  updateOrderStatusToDelivered, // Export the temporary function for testing
+  updateOrderStatusToDelivered, 
 };
