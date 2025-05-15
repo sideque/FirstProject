@@ -129,30 +129,25 @@ const postNewPassword = async (req, res) => {
 
 const userProfile = async (req, res) => {
   try {
-    // Check if user is logged in
     const user = req.session.user;
     if (!user || !user._id) {
       console.log('No user session found, redirecting to login');
       return res.redirect('/login');
     }
 
-    // Fetch user data from the database
     const userData = await User.findOne({ _id: user._id });
     if (!userData) {
       console.log('User not found in database for ID:', user._id);
       return res.redirect('/login');
     }
 
-    // Fetch orders for the logged-in user using userId
     const orders = await Order.find({ userId: new mongoose.Types.ObjectId(user._id) })
       .populate('orderItems.product')
       .sort({ createdOn: -1 });
       
-    // Fetch addresses for the logged-in user
     const addressDoc = await Address.findOne({ userId: user._id });
     const addresses = addressDoc ? addressDoc.address : [];
 
-    // Render the profile page with user, orders, and addresses data
     res.render('profile', {
       user: userData,
       orders,
@@ -597,7 +592,7 @@ const getTransactionDetails = async (req, res) => {
     return res.json({ success: true, transaction });
   } catch (error) {
     console.error('Error fetching transaction:', error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).redirect("/pageNotFound");
   }
 };
 

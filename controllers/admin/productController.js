@@ -914,7 +914,7 @@ const deleteProduct = async (req, res) => {
         return res.status(200).json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ success: false, message: "Internal server error" });
+        return res.status(500).redirect('/admin/pageerror');
     }
 };
 

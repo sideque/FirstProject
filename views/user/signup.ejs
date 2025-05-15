@@ -63,15 +63,17 @@
               <div style="position: relative;">
                 <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" placeholder="Enter your password"
                   style="padding-right: 40px;"> 
-            
                 <i class="fa-solid fa-eye" id="togglePassword"
                   style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
               </div>
-            
               <div id="error4" class="error-message"></div>
             </div>
 
-
+           <div class="form-group">
+            <label for="referral">Referral Code (Optional)</label>
+            <input type="text" class="form-control" id="referral" name="referral" placeholder="Enter referral code">
+            <div id="error5" class="error-message"></div>
+          </div>
             
             
             <% if (message && message.length > 0) { %>
@@ -106,156 +108,161 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
-  <script>
-    const nameid = document.getElementById("name");
-    const emailid = document.getElementById("email");
-    const phoneid = document.getElementById("phone");
-    const passid = document.getElementById("password");
-    const cpassid = document.getElementById("confirmPassword");
-    const error1 = document.getElementById("error1");
-    const error2 = document.getElementById("error2");
-    const error3 = document.getElementById("error3");
-    const error4 = document.getElementById("error4");
-    const error5 = document.getElementById("error5");
-    const signform = document.getElementById("signform");
+<script>
+  const nameid = document.getElementById("name");
+  const emailid = document.getElementById("email");
+  const phoneid = document.getElementById("phone");
+  const passid = document.getElementById("password");
+  const cpassid = document.getElementById("confirmPassword");
+  const referralid = document.getElementById("referral");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+  const error3 = document.getElementById("error3");
+  const error4 = document.getElementById("error4");
+  const error5 = document.getElementById("error5");
+  const signform = document.getElementById("signform");
 
-    function nameValidateChecking() {
-        const nameval = nameid.value.trim();
-        const namepattern = /^[A-Za-z\s]+$/;
+  function nameValidateChecking() {
+    const nameval = nameid.value.trim();
+    const namepattern = /^[A-Za-z\s]+$/;
 
-        if (nameval === "") {
-            error1.style.display = "block";
-            error1.innerHTML = "Please enter a valid name";
-            return false;
-        } else if (!namepattern.test(nameval)) {
-            error1.style.display = "block";
-            error1.innerHTML = "Name can only contain alphabets and spaces";
-            return false;
-        } else {
-            error1.style.display = "none";
-            error1.innerHTML = "";
-            return true;
-        }
+    if (nameval === "") {
+      error1.style.display = "block";
+      error1.innerHTML = "Please enter a valid name";
+      return false;
+    } else if (!namepattern.test(nameval)) {
+      error1.style.display = "block";
+      error1.innerHTML = "Name can only contain alphabets and spaces";
+      return false;
+    } else {
+      error1.style.display = "none";
+      error1.innerHTML = "";
+      return true;
     }
+  }
 
-    function emailValidateChecking() {
-        const emailval = emailid.value.trim();
-        const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  function emailValidateChecking() {
+    const emailval = emailid.value.trim();
+    const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if (!emailpattern.test(emailval)) {
-            error2.style.display = "block";
-            error2.innerHTML = "Invalid email format";
-            return false;
-        } else {
-            error2.style.display = "none";
-            error2.innerHTML = "";
-            return true;
-        }
+    if (!emailpattern.test(emailval)) {
+      error2.style.display = "block";
+      error2.innerHTML = "Invalid email format";
+      return false;
+    } else {
+      error2.style.display = "none";
+      error2.innerHTML = "";
+      return true;
     }
+  }
 
-    function phoneValidateChecking() {
-        const phoneval = phoneid.value.trim();
-        if (phoneval === "") {
-            error3.style.display = "block";
-            error3.innerHTML = "Enter a valid phone number";
-            return false;
-        } else if (phoneval.length !== 10 || !/^\d+$/.test(phoneval)) {
-            error3.style.display = "block";
-            error3.innerHTML = "Phone number must be 10 digits and contain only numbers";
-            return false;
-        } else {
-            error3.style.display = "none";
-            error3.innerHTML = "";
-            return true;
-        }
+  function phoneValidateChecking() {
+    const phoneval = phoneid.value.trim();
+    if (phoneval === "") {
+      error3.style.display = "block";
+      error3.innerHTML = "Enter a valid phone number";
+      return false;
+    } else if (phoneval.length !== 10 || !/^\d+$/.test(phoneval)) {
+      error3.style.display = "block";
+      error3.innerHTML = "Phone number must be 10 digits and contain only numbers";
+      return false;
+    } else {
+      error3.style.display = "none";
+      error3.innerHTML = "";
+      return true;
     }
+  }
 
-    function passValidateChecking() {
-        const passval = passid.value.trim();
-        const cpassval = cpassid.value.trim();
-        const alpha = /[a-zA-Z]/;
-        const digit = /\d/;
+  function passValidateChecking() {
+    const passval = passid.value.trim();
+    const cpassval = cpassid.value.trim();
+    const alpha = /[a-zA-Z]/;
+    const digit = /\d/;
 
-        if (passval.length < 8) {
-            error4.style.display = "block";
-            error4.innerHTML = "Password must contain at least 8 characters";
-            return false;
-        } else if (!alpha.test(passval) || !digit.test(passval)) {
-            error4.style.display = "block";
-            error4.innerHTML = "Password must contain both letters and numbers";
-            return false;
-        } else {
-            error4.style.display = "none";
-            error4.innerHTML = "";
-        }
-
-        if (passval !== cpassval) {
-            error5.style.display = "block";
-            error5.innerHTML = "Passwords do not match";
-            return false;
-        } else {
-            error5.style.display = "none";
-            error5.innerHTML = "";
-            return true;
-        }
+    if (passval.length < 8) {
+      error4.style.display = "block";
+      error4.innerHTML = "Password must contain at least 8 characters";
+      return false;
+    } else if (!alpha.test(passval) || !digit.test(passval)) {
+      error4.style.display = "block";
+      error4.innerHTML = "Password must contain both letters and numbers";
+      return false;
+    } else if (passval !== cpassval) {
+      error4.style.display = "block";
+      error4.innerHTML = "Passwords do not match";
+      return false;
+    } else {
+      error4.style.display = "none";
+      error4.innerHTML = "";
+      return true;
     }
+  }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        signform.addEventListener("submit", function (e) {
-            const isNameValid = nameValidateChecking();
-            const isEmailValid = emailValidateChecking();
-            const isPhoneValid = phoneValidateChecking();
-            const isPasswordValid = passValidateChecking();
+  function referralValidateChecking() {
+    const referralval = referralid.value.trim();
+    const referralPattern = /^WLT[A-Z0-9]{9}$/;
 
-            if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordValid) {
-                e.preventDefault(); // Prevent form submission if validation fails
-            }
-        });
+    if (referralval && !referralPattern.test(referralval)) {
+      error5.style.display = "block";
+      error5.innerHTML = "Invalid referral code. Must start with 'WLT' followed by 9 alphanumeric characters.";
+      return false;
+    } else {
+      error5.style.display = "none";
+      error5.innerHTML = "";
+      return true;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    signform.addEventListener("submit", function (e) {
+      const isNameValid = nameValidateChecking();
+      const isEmailValid = emailValidateChecking();
+      const isPhoneValid = phoneValidateChecking();
+      const isPasswordValid = passValidateChecking();
+      const isReferralValid = referralValidateChecking();
+
+      if (!isNameValid || !isEmailValid || !isPhoneValid || !isPasswordValid || !isReferralValid) {
+        e.preventDefault();
+      }
     });
-    const password = document.getElementById('password');
-    const confirmpassword = document.getElementById('confirmPassword')
+  });
 
-    const togglePassword = document.getElementById('togglePassword');
+  const password = document.getElementById('password');
+  const confirmpassword = document.getElementById('confirmPassword');
+  const togglePassword = document.getElementById('togglePassword');
 
-    // Show the eye icon when hovering over input
+  if (password && togglePassword) {
     password.addEventListener('mouseover', function () {
       togglePassword.style.display = 'block';
     });
-
-    confirmpassword.addEventListener('mouseover', function () {
-      togglePassword.style.display = 'block';
-    });
-
     password.addEventListener('mouseout', function () {
       togglePassword.style.display = 'none';
     });
-
-    confirmpassword.addEventListener('mouseout', function () {
-      togglePassword.style.display = 'none';
-    });
-
     togglePassword.addEventListener('mouseover', function () {
       togglePassword.style.display = 'block';
     });
-
-    // Toggle password visibility
     togglePassword.addEventListener('click', function () {
       const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
       password.setAttribute('type', type);
-
-      // Change the icon too
       this.classList.toggle('fa-eye');
       this.classList.toggle('fa-eye-slash');
     });
+  }
 
+  if (confirmpassword && togglePassword) {
+    confirmpassword.addEventListener('mouseover', function () {
+      togglePassword.style.display = 'block';
+    });
+    confirmpassword.addEventListener('mouseout', function () {
+      togglePassword.style.display = 'none';
+    });
     togglePassword.addEventListener('click', function () {
       const type = confirmpassword.getAttribute('type') === 'password' ? 'text' : 'password';
       confirmpassword.setAttribute('type', type);
-
-      // Change the icon too
       this.classList.toggle('fa-eye');
       this.classList.toggle('fa-eye-slash');
     });
+  }
 </script>
 </body>
 </html>

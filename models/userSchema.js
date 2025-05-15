@@ -51,16 +51,14 @@ const userSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:"Order"
     }],
-    orderHistory:[{
-        type:Schema.Types.ObjectId,
-        ref:"Order"
-    }],
     createdOn : {
         type:Date,
         default:Date.now
     },
     referalCode:{
-        type:String
+        type:String,
+        unique: true,
+        sparse: true
     },
     redeemed:{
         type:Boolean
@@ -82,8 +80,7 @@ const userSchema = new Schema({
             default:Date.now
         }
     }],
-
-    profileImage: { // Add this field
+    profileImage: { 
         type: String,
         required: false,
         default: null
@@ -95,7 +92,6 @@ const userSchema = new Schema({
 },{
     timestamps: true
 });
-
 
 const User = mongoose.model("User",userSchema);
 

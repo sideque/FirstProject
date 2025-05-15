@@ -29,7 +29,7 @@ const productController = async (req, res) => {
       .lean();
 
     if (!product || !product.category || !product.brand) {
-      return res.status(404).render("404"); 
+      return res.status(404).render("page-404"); 
     }
 
     const relatedProducts = await Product.find({
@@ -104,7 +104,7 @@ const productController = async (req, res) => {
 
   } catch (error) {
     console.error("Error in productController:", error);
-    res.status(500).send("Server Error");
+    res.status(500).render("page-404");
   }
 };
 

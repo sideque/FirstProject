@@ -338,7 +338,7 @@ const getOrderDetails = async (req, res) => {
         res.json({ success: true, order });
     } catch (error) {
         console.error('Error fetching order details:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(500).redirect("admin/pageerror");
     }
 };
 

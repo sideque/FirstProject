@@ -177,7 +177,7 @@ const addToCart = async (req, res) => {
     res.json({ success: true, message: 'Product added to cart' });
   } catch (error) {
     console.error('Error adding to cart:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).redirect("/pageNotFound");
   }
 };
 
@@ -238,7 +238,7 @@ const updateCartItem = async (req, res) => {
       res.json({ success: true, subtotal, offerDiscount, coupon, total });
   } catch (error) {
       console.error('Error in updateCartItem:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
+      res.status(500).redirect("/pageNotFound");
   }
 };
 
@@ -262,7 +262,7 @@ const removeCartItem = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Error in removeCartItem:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).redirect("/pageNotFound");
   }
 };
 
@@ -467,7 +467,7 @@ const addToWishList = async (req, res) => {
     res.json({ success: true, message: 'Product added to wishlist' });
   } catch (error) {
     console.error('Error adding to wishlist:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).redirect("/pageNotFound")
   }
 };
 

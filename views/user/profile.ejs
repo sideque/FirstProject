@@ -231,10 +231,15 @@
                     </div>
                   </div>
                   <div class="detail-item">
+                    <div class="detail-label">Referral Code</div>
+                    <div class="detail-value">
+                      <%= user.referalCode || 'Not available' %>
+                    </div>
+                  </div>
+                  <div class="detail-item">
                     <div class="detail-label">Account Created</div>
                     <div class="detail-value">
-                      <%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric' , month: 'long' ,
-                        day: 'numeric' }) %>
+                      <%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
                     </div>
                   </div>
                 </div>
@@ -935,7 +940,25 @@
           });
         }
       }
-    }
+    };
+
+    function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Copied!',
+      text: 'Referral code copied to clipboard.',
+      confirmButtonColor: '#3085d6'
+    });
+  }).catch(err => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to copy referral code.',
+      confirmButtonColor: '#3085d6'
+    });
+  });
+}
 
       </script>
 </body>
