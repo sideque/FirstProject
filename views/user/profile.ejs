@@ -5,485 +5,740 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Profile</title>
-  <!-- Ensure your CSS file includes styles for modal, address-grid, profile-sidebar, etc. -->
-  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- SweetAlert2 for alerts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      font-size: 24px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .form-group {
+      flex: 1;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group.valid .form-control {
+      border-color: #28a745;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right calc(0.375em + 0.1875rem) center;
+      background-size: 0.75em 0.75em;
+    }
+
+    .form-group.invalid .form-control {
+      border-color: #dc3545;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3E%3Ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right calc(0.375em + 0.1875rem) center;
+      background-size: 0.75em 0.75em;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.9em;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #545b62;
+    }
+
+    .address-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .address-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      position: relative;
+      background-color: white;
+    }
+
+    .address-type {
+      background-color: #28a745;
+      color: white;
+      padding: 5px;
+      border-radius: 4px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .address-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .profile-container {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .profile-sidebar {
+      width: 250px;
+      padding: 20px;
+      border-right: 1px solid #ddd;
+      background-color: #f8f9fa;
+    }
+
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
+    .profile-name {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+
+    .profile-nav {
+      list-style: none;
+      padding: 0;
+    }
+
+    .profile-nav li {
+      margin-bottom: 10px;
+    }
+
+    .profile-nav a {
+      text-decoration: none;
+      color: #333;
+      display: block;
+      padding: 10px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .profile-nav a:hover,
+    .profile-nav a.active {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .profile-content {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .profile-tab {
+      display: none;
+    }
+
+    .profile-tab.active {
+      display: block;
+    }
+
+    .content-card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .content-title {
+      font-size: 1.5em;
+      margin: 0;
+    }
+
+    .user-details {
+      display: grid;
+      gap: 15px;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail-label {
+      font-weight: 500;
+      color: #555;
+    }
+
+    .detail-value {
+      color: #333;
+    }
+
+    .referral-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .referral-code {
+      font-family: monospace;
+      background-color: #f1f1f1;
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: #333;
+    }
+
+    .copy-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .copy-btn:hover {
+      background-color: #218838;
+    }
+
+    .order-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background-color: white;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .order-status {
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .status-pending {
+      background-color: #ffc107;
+    }
+
+    .status-processing {
+      background-color: #17a2b8;
+    }
+
+    .status-shipped {
+      background-color: #28a745;
+    }
+
+    .status-delivered {
+      background-color: #007bff;
+    }
+
+    .status-cancelled {
+      background-color: #dc3545;
+    }
+
+    .order-product {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+
+    .product-details {
+      flex: 1;
+    }
+
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .profile-pic-upload {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #profile-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .edit-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .forgot-password {
+      margin-top: 20px;
+    }
+
+    .hero-wrap {
+      background-size: cover;
+      background-position: center;
+      padding: 100px 0;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .breadcrumbs {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .breadcrumbs a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .ftco-section {
+      padding: 60px 0;
+    }
+
+    .bg-light {
+      background-color: #f8f9fa;
+    }
+
+    .no-orders {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .add-address {
+      text-align: center;
+      padding: 20px;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .add-address:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
 </head>
 
-<style>
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-  }
-
-  .modal-content {
-    background-color: white;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 600px;
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-close {
-    cursor: pointer;
-    font-size: 24px;
-  }
-
-  .form-row {
-    display: flex;
-    gap: 20px;
-  }
-
-  .form-group {
-    flex: 1;
-    margin-bottom: 15px;
-  }
-
-  .form-label {
-    display: block;
-    margin-bottom: 5px;
-  }
-
-  .form-control {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .btn-primary {
-    background-color: #007bff;
-    color: white;
-  }
-
-  .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-  }
-
-  .address-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-  }
-
-  .address-card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    position: relative;
-  }
-
-  .address-type {
-    background-color: #28a745;
-    color: white;
-    padding: 5px;
-    border-radius: 4px;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-
-  .address-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-  }
-
-  .profile-sidebar {
-    width: 250px;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-  }
-
-  .profile-content {
-    flex: 1;
-    padding: 20px;
-  }
-
-  .profile-tab {
-    display: none;
-  }
-
-  .profile-tab.active {
-    display: block;
-  }
-</style>
-
 <body>
-  <%- include("../../views/partials/user/header") %>
+  <!-- Header (Placeholder for EJS include) -->
+  <!-- <%- include("../../views/partials/user/header") %> -->
 
-    <div class="hero-wrap hero-bread" style="background-image: url('/images/p41.jpg');">
-      <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center">
-            <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Profile</span></p>
-            <h1 class="mb-0 bread">Profile</h1>
+  <div class="hero-wrap hero-bread" style="background-image: url('/images/p41.jpg');">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 ftco-animate text-center">
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Profile</span></p>
+          <h1 class="mb-0 bread">Profile</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ftco-section bg-light">
+    <!-- Email Change Modal -->
+    <div id="emailModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Change Email</h3>
+          <span class="modal-close" onclick="closeEmailModal()">×</span>
+        </div>
+        <form id="email-form" action="/editemail" method="POST">
+          <div class="form-group">
+            <label class="form-label" for="current-email">Current Email</label>
+            <input type="email" class="form-control" id="current-email" name="currentEmail" value="<%= user.email %>" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-email">New Email</label>
+            <input type="email" class="form-control" id="new-email" name="email" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Send OTP</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+          <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" class="profile-pic">
+          <h3 class="profile-name"><%= user.name %></h3>
+          <ul class="profile-nav">
+            <li><a href="#" class="active" onclick="showTab('profile-details')"><i class="fa fa-user"></i> My Details</a></li>
+            <li><a href="#" onclick="showTab('profile-addresses')"><i class="fa fa-map-marker"></i> My Addresses</a></li>
+            <li><a href="#" onclick="showTab('profile-orders')"><i class="fa fa-shopping-bag"></i> Order History</a></li>
+            <li><a href="#" onclick="showTab('profile-edit')"><i class="fa fa-pencil"></i> Edit Profile</a></li>
+            <li><a href="#" onclick="showTab('profile-security')"><i class="fa fa-lock"></i> Change Password</a></li>
+            <li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Profile Content Area -->
+        <div class="profile-content">
+          <!-- Profile Details Tab -->
+          <div id="profile-details" class="profile-tab active">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Personal Information</h3>
+              </div>
+              <div class="user-details">
+                <div class="detail-item">
+                  <div class="detail-label">Full Name</div>
+                  <div class="detail-value"><%= user.name %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Email Address</div>
+                  <div class="detail-value"><%= user.email %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Phone Number</div>
+                  <div class="detail-value"><%= user.phone || 'Not added yet' %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Username</div>
+                  <div class="detail-value"><%= user.username || 'Not set' %></div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Referral Code</div>
+                  <div class="detail-value">
+                    <div class="referral-container">
+                      <span class="referral-code" id="referralCode"><%= user.referalCode || 'Not available' %></span>
+                      <% if (user.referalCode) { %>
+                        <button class="copy-btn" onclick="copyToClipboard('<%= user.referalCode %>')">
+                          <i class="fa fa-copy"></i> Copy
+                        </button>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <div class="detail-label">Account Created</div>
+                  <div class="detail-value">
+                    <%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Addresses Tab -->
+          <div id="profile-addresses" class="profile-tab">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">My Addresses</h3>
+                <button class="btn btn-primary" onclick="openAddressModal()">Add New Address</button>
+              </div>
+              <div class="address-grid">
+                <% if (addresses && addresses.length > 0) { %>
+                  <% addresses.forEach(function(address, index) { %>
+                    <div class="address-card">
+                      <% if (address.isDefault) { %>
+                        <span class="address-type">Default</span>
+                      <% } %>
+                      <h4><%= address.name %> (<%= address.addressType %>)</h4>
+                      <p><%= address.addressLine1 %></p>
+                      <% if (address.addressLine2) { %>
+                        <p><%= address.addressLine2 %></p>
+                      <% } %>
+                      <% if (address.landMark) { %>
+                        <p>Landmark: <%= address.landMark %></p>
+                      <% } %>
+                      <p><%= address.city %>, <%= address.state %> <%= address.pincode %></p>
+                      <p>Phone: <%= address.phone %></p>
+                      <% if (address.altPhone) { %>
+                        <p>Alt Phone: <%= address.altPhone %></p>
+                      <% } %>
+                      <div class="address-actions">
+                        <button class="btn btn-primary" onclick="editAddress('<%= index %>')">Edit</button>
+                        <% if (!address.isDefault) { %>
+                          <form action="/profile/address/default" method="POST" style="display:inline;">
+                            <input type="hidden" name="addressIndex" value="<%= index %>">
+                            <button type="submit" class="btn btn-secondary">Set as Default</button>
+                          </form>
+                        <% } %>
+                        <form action="/profile/address/delete" method="POST" style="display:inline;">
+                          <input type="hidden" name="addressIndex" value="<%= index %>">
+                          <button type="submit" class="btn btn-secondary">Delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="add-address" onclick="openAddressModal()">
+                    <span><i class="fa fa-plus"></i> Add New Address</span>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Orders Tab -->
+          <div id="profile-orders" class="profile-tab">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Order History</h3>
+              </div>
+              <div class="order-list">
+                <% if (orders && orders.length > 0) { %>
+                  <% orders.forEach(function(order) { %>
+                    <div class="order-card">
+                      <div class="order-header">
+                        <div class="order-id">Order #<%= order.orderId %></div>
+                        <div class="order-date">
+                          <%= new Date(order.createdOn).toLocaleDateString('en-US') %>
+                        </div>
+                        <div class="order-status status-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                          <%= order.status %>
+                        </div>
+                      </div>
+                      <div class="order-body">
+                        <% order.orderItems.slice(0, 1).forEach(function(item) { %>
+                          <% if (item.product) { %>
+                            <div class="order-product">
+                              <img 
+                                src="<%= item.product.productImage && item.product.productImage.length > 0 
+                                      ? '/uploads/product-images/' + item.product.productImage[0] 
+                                      : '/images/default.webp' %>" 
+                                alt="<%= item.product.productName || 'Product' %>" 
+                                class="product-img"
+                                style="width: 60px; height: 60px; object-fit: contain;"
+                                onerror="this.src='/images/default.webp';">
+                              <div class="product-details">
+                                <div class="product-name">
+                                  <%= item.product.productName || 'Unknown' %>
+                                </div>
+                                <div class="product-meta">Qty: <%= item.stock %></div>
+                                <div class="product-price">₹<%= (item.price * item.stock).toLocaleString('en-IN') %></div>
+                              </div>
+                            </div>
+                          <% } %>
+                        <% }); %>
+                        <% if (order.orderItems.length > 1) { %>
+                          <div class="more-products">+<%= order.orderItems.length - 1 %> more products</div>
+                        <% } %>
+                      </div>
+                      <div class="order-footer">
+                        <div class="order-total">Total: ₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+                        <div class="order-actions">
+                          <a href="/order/<%= order._id %>" class="btn btn-primary">View Details</a>
+                          <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                            <button class="btn btn-secondary" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="no-orders">
+                    <p>You haven't placed any orders yet.</p>
+                    <a href="/shop" class="btn btn-primary">Start Shopping</a>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Profile Tab -->
+          <div id="profile-edit" class="profile-tab">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Edit Profile</h3>
+              </div>
+              <form id="edit-profile-form" action="/profileUpdate" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                  <label class="form-label">Profile Picture</label>
+                  <div class="profile-pic-upload">
+                    <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" id="profile-preview">
+                    <input type="file" id="profile-image" name="profileImage" accept="image/*" style="display: none;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile-image').click()">Change Picture</button>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="<%= user.username || '' %>">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Email Address</label>
+                  <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
+                  <small class="form-text text-muted">
+                    To change your email, <a href="#" onclick="document.getElementById('emailModal').style.display='block'">click here</a>.
+                  </small>
+                </div>
+                <div class="edit-buttons">
+                  <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Change Password Tab -->
+          <div id="profile-security" class="profile-tab">
+            <div class="content-card">
+              <div class="content-header">
+                <h3 class="content-title">Change Password</h3>
+              </div>
+              <form id="change-password-form" action="/profile/change-password" method="POST">
+                <div class="form-group">
+                  <label class="form-label" for="current-password">Current Password</label>
+                  <div style="position: relative;">
+                    <input type="password" class="form-control" id="current-password" name="currentPassword" style="padding-right: 40px;" required>
+                    <i class="fa-solid fa-eye" id="toggleCurrentPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="new-password">New Password</label>
+                  <div style="position: relative;">
+                    <input type="password" class="form-control" id="new-password" name="newPassword" style="padding-right: 40px;" required>
+                    <i class="fa-solid fa-eye" id="toggleNewPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="confirm-password">Confirm New Password</label>
+                  <div style="position: relative;">
+                    <input type="password" class="form-control" id="confirm-password" name="confirmPassword" style="padding-right: 40px;" required>
+                    <i class="fa-solid fa-eye" id="toggleConfirmPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
+                  </div>
+                </div>
+                <div class="edit-buttons">
+                  <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+              </form>
+              <div class="forgot-password">
+                <p>Forgot your password?</p>
+                <a href="/forgot-password" class="btn btn-secondary">Reset Password</a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <section class="ftco-section bg-light">
-      <!-- Email Change Modal -->
-      <div id="emailModal" class="modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Change Email</h3>
-            <span class="modal-close" onclick="closeEmailModal()">×</span>
-          </div>
-          <form id="email-form" action="/editemail" method="POST">
-            <div class="form-group">
-              <label class="form-label" for="current-email">Current Email</label>
-              <input type="email" class="form-control" id="current-email" name="currentEmail" value="<%= user.email %>"
-                readonly>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="new-email">New Email</label>
-              <input type="email" class="form-control" id="new-email" name="email" required>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary">Send OTP</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-
-      <div class="container">
-        <div class="profile-container">
-          <!-- Profile Sidebar -->
-          <div class="profile-sidebar">
-            <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" class="profile-pic">
-            <h3 class="profile-name">
-              <%= user.name %>
-            </h3>
-            <ul class="profile-nav">
-              <li><a href="#" class="active" onclick="showTab('profile-details')"><i class="fa fa-user"></i> My
-                  Details</a></li>
-              <li><a href="#" onclick="showTab('profile-addresses')"><i class="fa fa-map-marker"></i> My Addresses</a>
-              </li>
-              <li><a href="#" onclick="showTab('profile-orders')"><i class="fa fa-shopping-bag"></i> Order History</a>
-              </li>
-              <li><a href="#" onclick="showTab('profile-edit')"><i class="fa fa-pencil"></i> Edit Profile</a></li>
-              <li><a href="#" onclick="showTab('profile-security')"><i class="fa fa-lock"></i> Change Password</a></li>
-              <li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
-            </ul>
-          </div>
-
-          <!-- Profile Content Area -->
-          <div class="profile-content">
-            <!-- Profile Details Tab -->
-            <div id="profile-details" class="profile-tab" style="display: block;">
-              <div class="content-card">
-                <div class="content-header">
-                  <h3 class="content-title">Personal Information</h3>
-                </div>
-                <div class="user-details">
-                  <div class="detail-item">
-                    <div class="detail-label">Full Name</div>
-                    <div class="detail-value">
-                      <%= user.name %>
-                    </div>
-                  </div>
-                  <div class="detail-item">
-                    <div class="detail-label">Email Address</div>
-                    <div class="detail-value">
-                      <%= user.email %>
-                    </div>
-                  </div>
-                  <div class="detail-item">
-                    <div class="detail-label">Phone Number</div>
-                    <div class="detail-value">
-                      <%= user.phone || 'Not added yet' %>
-                    </div>
-                  </div>
-                  <div class="detail-item">
-                    <div class="detail-label">Username</div>
-                    <div class="detail-value">
-                      <%= user.username || 'Not set' %>
-                    </div>
-                  </div>
-                  <div class="detail-item">
-                    <div class="detail-label">Referral Code</div>
-                    <div class="detail-value">
-                      <%= user.referalCode || 'Not available' %>
-                    </div>
-                  </div>
-                  <div class="detail-item">
-                    <div class="detail-label">Account Created</div>
-                    <div class="detail-value">
-                      <%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Addresses Tab -->
-            <div id="profile-addresses" class="profile-tab" style="display: none;">
-              <div class="content-card">
-                <div class="content-header">
-                  <h3 class="content-title">My Addresses</h3>
-                  <button class="btn btn-primary" onclick="openAddressModal()">Add New Address</button>
-                </div>
-
-
-                <div class="address-grid">
-                  <% if (addresses && addresses.length> 0) { %>
-                    <% addresses.forEach(function(address, index) { %>
-                      <div class="address-card">
-                        <% if (address.isDefault) { %>
-                          <span class="address-type">Default</span>
-                          <% } %>
-                            <h4>
-                              <%= address.name %> (<%= address.addressType %>)
-                            </h4>
-                            <p>
-                              <%= address.addressLine1 %>
-                            </p>
-                            <% if (address.addressLine2) { %>
-                              <p>
-                                <%= address.addressLine2 %>
-                              </p>
-                              <% } %>
-                                <% if (address.landMark) { %>
-                                  <p>Landmark: <%= address.landMark %>
-                                  </p>
-                                  <% } %>
-                                    <p>
-                                      <%= address.city %>, <%= address.state %>
-                                          <%= address.pincode %>
-                                    </p>
-                                    <p>Phone: <%= address.phone %>
-                                    </p>
-                                    <% if (address.altPhone) { %>
-                                      <p>Alt Phone: <%= address.altPhone %>
-                                      </p>
-                                      <% } %>
-                                        <div class="address-actions">
-                                          <button onclick="editAddress('<%= index %>')">Edit</button>
-                                          <% if (!address.isDefault) { %>
-                                            <form action="/profile/address/default" method="POST"
-                                              style="display:inline;">
-                                              <input type="hidden" name="addressIndex" value="<%= index %>">
-                                              <button type="submit">Set as Default</button>
-                                            </form>
-                                            <% } %>
-                                              <form action="/profile/address/delete" method="POST"
-                                                style="display:inline;">
-                                                <input type="hidden" name="addressIndex" value="<%= index %>">
-                                                <button type="submit" class="delete">Delete</button>
-                                              </form>
-                                        </div>
-                      </div>
-                      <% }); %>
-                        <% } else { %>
-                          <div class="add-address" onclick="openAddressModal()">
-                            <span><i class="fa fa-plus"></i> Add New Address</span>
-                          </div>
-                          <% } %>
-                </div>
-
-
-              </div>
-            </div>
-
-            <!-- Orders Tab -->
-            <div id="profile-orders" class="profile-tab" style="display: none;">
-              <div class="content-card">
-                <div class="content-header">
-                  <h3 class="content-title">Order History</h3>
-                </div>
-                <div class="order-list">
-                  <% if (orders && orders.length > 0) { %>
-                    <% orders.forEach(function(order) { %>
-                      <div class="order-card">
-                        <div class="order-header">
-                          <div class="order-id">Order #<%= order.orderId %></div>
-                          <div class="order-date">
-                            <%= new Date(order.createdOn).toLocaleDateString('en-US') %>
-                          </div>
-                          <div class="order-status status-<%= order.status.toLowerCase().replace(' ', '-') %>">
-                            <%= order.status %>
-                          </div>
-                        </div>
-                        <div class="order-body">
-                          <% order.orderItems.slice(0, 1).forEach(function(item) { %>
-                            <% if (item.product) { %>
-                              <div class="order-product">
-                               <img 
-                                  src="<%= item.product.productImage && item.product.productImage.length > 0 
-                                        ? '/uploads/product-images/' + item.product.productImage[0] 
-                                        : '/images/default.webp' %>" 
-                                  alt="<%= item.product.productName || 'Product' %>" 
-                                  class="product-img"
-                                  style="width: 60px; height: 60px; object-fit: contain;"
-                                  onerror="this.src='/images/default.webp'; console.log('Image failed for <%= item.product.productName %>');">
-                                <div class="product-details">
-                                  <div class="product-name">
-                                    <%= item.product.productName || 'Unknown' %>
-                                  </div>
-                                  <div class="product-meta">Qty: <%= item.stock %></div>
-                                  <div class="product-price">₹<%= (item.price * item.stock).toLocaleString('en-IN') %></div>
-                                </div>
-                              </div>
-                            <% } %>
-                          <% }); %>
-                          <% if (order.orderItems.length > 1) { %>
-                            <div class="more-products">+<%= order.orderItems.length - 1 %> more products</div>
-                          <% } %>
-                        </div>
-                        <div class="order-footer">
-                          <div class="order-total">Total: ₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
-                          <div class="order-actions">
-                            <a href="/order/<%= order._id %>" class="btn-details">View Details</a>
-                            <% if (order.status === 'Shipped') { %>
-                              <!-- <a href="/order/<%= order._id %>/track" class="btn-track">Track Order</a> -->
-                            <% } %>
-                            <% if (order.status === 'Pending' || order.status === 'Processing') { %>
-                              <a onclick="cancelOrder('<%= order._id %>')" class="btn-cancel">Cancel Order</a>
-                            <% } %>
-                          </div>
-                        </div>
-                      </div>
-                    <% }); %>
-                  <% } else { %>
-                    <div class="no-orders">
-                      <p>You haven't placed any orders yet.</p>
-                      <a href="/shop" class="btn btn-primary">Start Shopping</a>
-                    </div>
-                  <% } %>
-                </div>
-              </div>
-            </div>
-
-            <!-- Edit Profile Tab -->
-            <div id="profile-edit" class="profile-tab" style="display: none;">
-              <div class="content-card">
-                <div class="content-header">
-                  <h3 class="content-title">Edit Profile</h3>
-                </div>
-                <form id="edit-profile-form" action="/profileUpdate" method="POST" enctype="multipart/form-data">
-                  <div class="form-group">
-                    <label class="form-label">Profile Picture</label>
-                    <div class="profile-pic-upload">
-                      <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture"
-                        id="profile-preview">
-                      <input type="file" id="profile-image" name="profileImage" accept="image/*" style="display: none;">
-                      <button type="button" class="btn btn-secondary"
-                        onclick="document.getElementById('profile-image').click()">Change Picture</button>
-                    </div>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label class="form-label" for="name">Full Name</label>
-                      <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
-                    </div>
-                    <div class="form-group">
-                      <label class="form-label" for="phone">Phone Number</label>
-                      <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>">
-                    </div>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label class="form-label" for="username">Username</label>
-                      <input type="text" class="form-control" id="username" name="username"
-                        value="<%= user.username || '' %>">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="email">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
-                    <!-- Email change modal disabled until /editemail route is implemented -->
-                    <small class="form-text text-muted">
-                      To change your email, <a href="#" data-bs-toggle="modal" data-bs-target="#emailModal">click
-                        here</a>.
-                    </small>
-                  </div>
-                  <div class="edit-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <!-- Change Password Tab -->
-            <div id="profile-security" class="profile-tab" style="display: none;">
-              <div class="content-card">
-                <div class="content-header">
-                  <h3 class="content-title">Change Password</h3>
-                </div>
-                <form id="change-password-form" action="/profile/change-password" method="POST">
-                  <div class="form-group">
-                    <label class="form-label" for="current-password">Current Password</label>
-                    <div style="position: relative;">
-                      <input type="password" class="form-control" id="current-password" name="currentPassword"
-                        style="padding-right: 40px;" required>
-                      <i class="fa-solid fa-eye" id="toggleCurrentPassword"
-                        style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="new-password">New Password</label>
-                    <div style="position: relative;">
-                      <input type="password" class="form-control" id="new-password" name="newPassword"
-                        style="padding-right: 40px;" required>
-                      <i class="fa-solid fa-eye" id="toggleNewPassword"
-                        style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="confirm-password">Confirm New Password</label>
-                    <div style="position: relative;">
-                      <input type="password" class="form-control" id="confirm-password" name="confirmPassword"
-                        style="padding-right: 40px;" required>
-                      <i class="fa-solid fa-eye" id="toggleConfirmPassword"
-                        style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; display: none; color: gray;"></i>
-                    </div>
-                  </div>
-                  <div class="edit-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="showTab('profile-details')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Password</button>
-                  </div>
-                </form>
-                <div class="forgot-password">
-                  <p>Forgot your password?</p>
-                  <a href="/forgot-password" class="btn btn-secondary">Reset Password</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Address Modal -->
     <div id="addressModal" class="modal">
@@ -502,47 +757,57 @@
                 <option value="Work">Work</option>
                 <option value="Other">Other</option>
               </select>
+              <div id="address-type-error" class="error-message"></div>
             </div>
             <div class="form-group">
               <label class="form-label" for="address-name">Full Name</label>
               <input type="text" class="form-control" id="address-name" name="name" required>
+              <div id="address-name-error" class="error-message"></div>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="address-phone">Phone Number</label>
               <input type="tel" class="form-control" id="address-phone" name="phone" required>
+              <div id="address-phone-error" class="error-message"></div>
             </div>
             <div class="form-group">
               <label class="form-label" for="address-altPhone">Alternate Phone (Optional)</label>
               <input type="tel" class="form-control" id="address-altPhone" name="altPhone">
+              <div id="address-altPhone-error" class="error-message"></div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="address-line1">Address Line 1</label>
             <input type="text" class="form-control" id="address-line1" name="addressLine1" required>
+            <div id="address-line1-error" class="error-message"></div>
           </div>
           <div class="form-group">
             <label class="form-label" for="address-line2">Address Line 2 (Optional)</label>
             <input type="text" class="form-control" id="address-line2" name="addressLine2">
+            <div id="address-line2-error" class="error-message"></div>
           </div>
           <div class="form-group">
             <label class="form-label" for="address-landMark">Landmark (Optional)</label>
             <input type="text" class="form-control" id="address-landMark" name="landMark">
+            <div id="address-landMark-error" class="error-message"></div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="address-city">City</label>
               <input type="text" class="form-control" id="address-city" name="city" required>
+              <div id="address-city-error" class="error-message"></div>
             </div>
             <div class="form-group">
               <label class="form-label" for="address-state">State</label>
               <input type="text" class="form-control" id="address-state" name="state" required>
+              <div id="address-state-error" class="error-message"></div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="address-pincode">Pincode</label>
             <input type="text" class="form-control" id="address-pincode" name="pincode" required>
+            <div id="address-pincode-error" class="error-message"></div>
           </div>
           <div class="form-group">
             <label class="form-checkbox">
@@ -557,337 +822,340 @@
         </form>
       </div>
     </div>
+  </section>
 
+  <!-- Footer (Placeholder for EJS include) -->
+  <!-- <%- include("../../views/partials/user/footer") %> -->
 
-    <%- include("../../views/partials/user/footer") %>
+  <script>
+    // Tab switching
+    function showTab(tabId) {
+      document.querySelectorAll('.profile-tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelectorAll('.profile-nav a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick').includes(tabId)) link.classList.add('active');
+      });
+    }
 
+    // Profile image preview
+    document.getElementById('profile-image')?.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('profile-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
-      <script>
-        // Tab switching
-        function showTab(tabId) {
-          document.querySelectorAll('.profile-tab').forEach(tab => tab.style.display = 'none');
-          document.getElementById(tabId).style.display = 'block';
-          document.querySelectorAll('.profile-nav a').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('onclick').includes(tabId)) link.classList.add('active');
-          });
+    // Address modal functions
+    function openAddressModal() {
+      document.getElementById('addressModal').style.display = 'block';
+      document.getElementById('addressModalTitle').textContent = 'Add New Address';
+      document.getElementById('address-form').reset();
+      document.getElementById('address-index').value = '';
+      document.getElementById('address-form').action = '/addAddress';
+      resetFormValidation();
+    }
+
+    function closeAddressModal() {
+      document.getElementById('addressModal').style.display = 'none';
+      document.getElementById('address-form').reset();
+      document.getElementById('address-index').value = '';
+      document.getElementById('address-form').action = '/addAddress';
+      document.getElementById('addressModalTitle').textContent = 'Add New Address';
+      resetFormValidation();
+    }
+
+    async function editAddress(index) {
+      try {
+        const response = await fetch(`/profile/address/${index}`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Address not found');
+        const address = await response.json();
+        document.getElementById('addressModal').style.display = 'block';
+        document.getElementById('addressModalTitle').textContent = 'Edit Address';
+        document.getElementById('address-index').value = index;
+        document.getElementById('address-type').value = address.addressType || 'Home';
+        document.getElementById('address-name').value = address.name;
+        document.getElementById('address-phone').value = address.phone;
+        document.getElementById('address-altPhone').value = address.altPhone || '';
+        document.getElementById('address-line1').value = address.addressLine1;
+        document.getElementById('address-line2').value = address.addressLine2 || '';
+        document.getElementById('address-landMark').value = address.landMark || '';
+        document.getElementById('address-city').value = address.city;
+        document.getElementById('address-state').value = address.state;
+        document.getElementById('address-pincode').value = address.pincode;
+        document.getElementById('address-default').checked = address.isDefault;
+        document.getElementById('address-form').action = '/profile/address/edit';
+        validateFormOnLoad();
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to load address: ' + error.message,
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+
+    // Address form validation
+    const addressForm = document.getElementById('address-form');
+    if (addressForm) {
+      const fields = [
+        {
+          id: 'address-type',
+          regex: /^(Home|Work|Other)$/,
+          required: true,
+          errorMessage: 'Please select a valid address type.'
+        },
+        {
+          id: 'address-name',
+          regex: /^[a-zA-Z\s]{2,30}$/,
+          required: true,
+          errorMessage: 'Full Name must be 2-30 characters long and contain only letters and spaces.'
+        },
+        {
+          id: 'address-phone',
+          regex: /^[6-9]\d{9}$/,
+          required: true,
+          errorMessage: 'Phone Number must be a valid 10-digit Indian number starting with 6-9.'
+        },
+        {
+          id: 'address-altPhone',
+          regex: /^[6-9]\d{9}$/,
+          required: false,
+          errorMessage: 'Alternate Phone must be a valid 10-digit Indian number starting with 6-9.'
+        },
+        {
+          id: 'address-line1',
+          regex: /^[\w\s,.-]{5,100}$/,
+          required: true,
+          errorMessage: 'Address Line 1 must be 5-100 characters and contain valid address characters.'
+        },
+        {
+          id: 'address-line2',
+          regex: /^[\w\s,.-]{0,100}$/,
+          required: false,
+          errorMessage: 'Address Line 2 must contain valid address characters.'
+        },
+        {
+          id: 'address-landMark',
+          regex: /^[\w\s,.-]{0,50}$/,
+          required: false,
+          errorMessage: 'Landmark must contain valid characters.'
+        },
+  {
+          id: 'address-city',
+          regex: /^[a-zA-Z\s]{2,30}$/,
+          required: true,
+          errorMessage: 'City must be 2-30 characters and contain only letters and spaces.'
+        },
+        {
+          id: 'address-state',
+          regex: /^[a-zA-Z\s]{2,30}$/,
+          required: true,
+          errorMessage: 'State must be 2-30 characters and contain only letters and spaces.'
+        },
+        {
+          id: 'address-pincode',
+          regex: /^\d{6}$/,
+          required: true,
+          errorMessage: 'Pincode must be a valid 6-digit number.'
+        }
+      ];
+
+      fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input) {
+          const formGroup = input.closest('.form-group') || input.parentElement;
+          let errorElement = document.getElementById(`${field.id}-error`);
+          if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.id = `${field.id}-error`;
+            errorElement.className = 'error-message';
+            formGroup.appendChild(errorElement);
+          }
+        }
+      });
+
+      function validateField(field, input) {
+        const formGroup = input.closest('.form-group') || input.parentElement;
+        const errorElement = document.getElementById(`${field.id}-error`);
+        let isValid = true;
+
+        formGroup.classList.remove('invalid', 'valid');
+        errorElement.style.display = 'none';
+        errorElement.textContent = '';
+
+        const value = input.value.trim();
+
+        if (field.required && !value) {
+          isValid = false;
+          formGroup.classList.add('invalid');
+          errorElement.textContent = field.errorMessage;
+          errorElement.style.display = 'block';
+        } else if (value && field.regex && !field.regex.test(value)) {
+          isValid = false;
+          formGroup.classList.add('invalid');
+          errorElement.textContent = field.errorMessage;
+          errorElement.style.display = 'block';
+        } else if (value || (!field.required && !value)) {
+          formGroup.classList.add('valid');
         }
 
-        // Profile image preview
-        document.getElementById('profile-image').addEventListener('change', function (e) {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              document.getElementById('profile-preview').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        return isValid;
+      }
+
+      function validateForm() {
+        let isFormValid = true;
+        fields.forEach(field => {
+          const input = document.getElementById(field.id);
+          if (input && !validateField(field, input)) {
+            isFormValid = false;
           }
         });
+        return isFormValid;
+      }
 
-        // Address modal functions
-        function openAddressModal() {
-          document.getElementById('addressModal').style.display = 'block';
-          document.getElementById('addressModalTitle').textContent = 'Add New Address';
-          document.getElementById('address-form').reset();
-          document.getElementById('address-index').value = '';
-          document.getElementById('address-form').action = '/addAddress';
+      function validateFormOnLoad() {
+        fields.forEach(field => {
+          const input = document.getElementById(field.id);
+          if (input && input.value.trim()) {
+            validateField(field, input);
+          }
+        });
+      }
+
+      function resetFormValidation() {
+        fields.forEach(field => {
+          const input = document.getElementById(field.id);
+          if (input) {
+            const formGroup = input.closest('.form-group') || input.parentElement;
+            const errorElement = document.getElementById(`${field.id}-error`);
+            formGroup.classList.remove('invalid', 'valid');
+            errorElement.style.display = 'none';
+            errorElement.textContent = '';
+          }
+        });
+      }
+
+      fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input) {
+          input.addEventListener('input', () => validateField(field, input));
+          input.addEventListener('blur', () => validateField(field, input));
         }
+      });
 
-        function closeAddressModal() {
-          document.getElementById('addressModal').style.display = 'none';
-          document.getElementById('address-form').reset();
-          document.getElementById('address-index').value = '';
-          document.getElementById('address-form').action = '/addAddress';
-          document.getElementById('addressModalTitle').textContent = 'Add New Address';
+      addressForm.addEventListener('submit', async (event) => {
+        if (!validateForm()) {
+          event.preventDefault();
+          await Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: 'Please correct the errors in the form before submitting.',
+            confirmButtonColor: '#3085d6'
+          });
         }
+      });
+    }
 
-        async function editAddress(index) {
+    // Password toggle logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('change-password-form');
+
+      function setupPasswordToggle(inputId, toggleId) {
+        const input = document.getElementById(inputId);
+        const toggle = document.getElementById(toggleId);
+        if (input && toggle) {
+          input.addEventListener('input', () => {
+            toggle.style.display = input.value ? 'block' : 'none';
+          });
+          toggle.addEventListener('click', () => {
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            toggle.className = `fa-solid fa-${isPassword ? 'eye-slash' : 'eye'}`;
+          });
+        }
+      }
+
+      setupPasswordToggle('current-password', 'toggleCurrentPassword');
+      setupPasswordToggle('new-password', 'toggleNewPassword');
+      setupPasswordToggle('confirm-password', 'toggleConfirmPassword');
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const data = {
+            currentPassword: formData.get('currentPassword'),
+            newPassword: formData.get('newPassword'),
+            confirmPassword: formData.get('confirmPassword')
+          };
+
           try {
-            const response = await fetch(`/profile/address/${index}`, {
-              headers: { 'Accept': 'application/json' }
+            const response = await fetch('/profile/change-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
             });
-            if (!response.ok) throw new Error('Address not found');
-            const address = await response.json();
-            document.getElementById('addressModal').style.display = 'block';
-            document.getElementById('addressModalTitle').textContent = 'Edit Address';
-            document.getElementById('address-index').value = index;
-            document.getElementById('address-type').value = address.addressType || 'Home';
-            document.getElementById('address-name').value = address.name;
-            document.getElementById('address-phone').value = address.phone;
-            document.getElementById('address-altPhone').value = address.altPhone || '';
-            document.getElementById('address-line1').value = address.addressLine1;
-            document.getElementById('address-line2').value = address.addressLine2 || '';
-            document.getElementById('address-landMark').value = address.landMark || '';
-            document.getElementById('address-city').value = address.city;
-            document.getElementById('address-state').value = address.state;
-            document.getElementById('address-pincode').value = address.pincode;
-            document.getElementById('address-default').checked = address.isDefault;
-            document.getElementById('address-form').action = '/profile/address/edit';
+            const result = await response.json();
+
+            if (result.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: result.message,
+                confirmButtonColor: '#3085d6'
+              }).then(() => {
+                showTab('profile-details');
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: result.message,
+                confirmButtonColor: '#3085d6'
+              });
+            }
           } catch (error) {
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: 'Failed to load address: ' + error.message,
-              confirmButtonColor: '#3085d6'
-            });
-          }
-        }
-
-        function setDefaultAddress(index) {
-          Swal.fire({
-            title: 'Set as default address?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#82ae46',
-            cancelButtonColor: '#e63946',
-            confirmButtonText: 'Yes'
-          }).then(result => {
-            if (result.isConfirmed) {
-              const form = document.createElement('form');
-              form.method = 'POST';
-              form.action = '/profile/address/default';
-              const hiddenField = document.createElement('input');
-              hiddenField.type = 'hidden';
-              hiddenField.name = 'addressIndex';
-              hiddenField.value = index;
-              form.appendChild(hiddenField);
-              document.body.appendChild(form);
-              form.submit();
-            }
-          });
-        }
-
-        function deleteAddress(index) {
-          Swal.fire({
-            title: 'Delete this address?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#82ae46',
-            cancelButtonColor: '#e63946',
-            confirmButtonText: 'Yes, delete it'
-          }).then(result => {
-            if (result.isConfirmed) {
-              const form = document.createElement('form');
-              form.method = 'POST';
-              form.action = '/profile/address/delete';
-              const hiddenField = document.createElement('input');
-              hiddenField.type = 'hidden';
-              hiddenField.name = 'addressIndex';
-              hiddenField.value = index;
-              form.appendChild(hiddenField);
-              document.body.appendChild(form);
-              form.submit();
-            }
-          });
-        }
-
-        // Order cancellation
-        function cancelOrder(orderId) {
-          Swal.fire({
-            title: 'Cancel this order?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#82ae46',
-            cancelButtonColor: '#e63946',
-            confirmButtonText: 'Yes, cancel it'
-          }).then(result => {
-            if (result.isConfirmed) {
-              const form = document.createElement('form');
-              form.method = 'POST';
-              form.action = '/order/cancel';
-              const hiddenField = document.createElement('input');
-              hiddenField.type = 'hidden';
-              hiddenField.name = 'orderId';
-              hiddenField.value = orderId;
-              form.appendChild(hiddenField);
-              document.body.appendChild(form);
-              form.submit();
-            }
-          });
-        }
-
-        // Close Email Modal
-        function closeEmailModal() {
-          document.getElementById('emailModal').style.display = 'none';
-          document.getElementById('email-form').reset();
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function (event) {
-          if (event.target.className === 'modal') {
-            event.target.style.display = 'none';
-          }
-        };
-
-        // Password toggle logic
-        document.addEventListener('DOMContentLoaded', () => {
-          const form = document.getElementById('change-password-form');
-
-          function setupPasswordToggle(inputId, toggleId) {
-            const input = document.getElementById(inputId);
-            const toggle = document.getElementById(toggleId);
-            if (input && toggle) {
-              input.addEventListener('input', () => {
-                toggle.style.display = input.value ? 'block' : 'none';
-              });
-              toggle.addEventListener('click', () => {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                toggle.className = `fa-solid fa-${isPassword ? 'eye-slash' : 'eye'}`;
-              });
-            }
-          }
-
-          setupPasswordToggle('current-password', 'toggleCurrentPassword');
-          setupPasswordToggle('new-password', 'toggleNewPassword');
-          setupPasswordToggle('confirm-password', 'toggleConfirmPassword');
-
-          if (form) {
-            form.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const formData = new FormData(form);
-              const data = {
-                currentPassword: formData.get('currentPassword'),
-                newPassword: formData.get('newPassword'),
-                confirmPassword: formData.get('confirmPassword')
-              };
-
-              try {
-                const response = await fetch('/profile/change-password', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(data)
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                  Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: result.message,
-                    confirmButtonColor: '#3085d6'
-                  }).then(() => {
-                    showTab('profile-details');
-                  });
-                } else {
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: result.message,
-                    confirmButtonColor: '#3085d6'
-                  });
-                }
-              } catch (error) {
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'An unexpected error occurred',
-                  confirmButtonColor: '#3085d6'
-                });
-              }
-            });
-          }
-        });
-
-        // Client-side validation for address form
-        document.getElementById('address-form').addEventListener('submit', function (event) {
-          const requiredFields = [
-            { id: 'address-type', label: 'Address Type' },
-            { id: 'address-name', label: 'Full Name' },
-            { id: 'address-phone', label: 'Phone Number' },
-            { id: 'address-line1', label: 'Address Line 1' },
-            { id: 'address-city', label: 'City' },
-            { id: 'address-state', label: 'State' },
-            { id: 'address-pincode', label: 'Pincode' }
-          ];
-          const phoneRegex = /^[6-9]\d{9}$/; // Indian phone number: 10 digits, starts with 6-9
-          const pincodeRegex = /^\d{6}$/; // Indian pincode: 6 digits
-          const nameRegex = /^[a-zA-Z\s]{2,50}$/; // Name: letters and spaces, 2-50 chars
-          const cityStateRegex = /^[a-zA-Z\s]{2,50}$/; // City/State: letters and spaces, 2-50 chars
-          let isValid = true;
-          let errorMessage = '';
-
-          // Reset border colors for all inputs
-          requiredFields.forEach(field => {
-            document.getElementById(field.id).style.borderColor = '';
-          });
-          document.getElementById('address-altPhone').style.borderColor = '';
-          document.getElementById('address-line2').style.borderColor = '';
-          document.getElementById('address-landMark').style.borderColor = '';
-
-          // Validate required fields
-          requiredFields.forEach(field => {
-            const input = document.getElementById(field.id);
-            if (!input.value.trim()) {
-              isValid = false;
-              input.style.borderColor = 'red';
-              errorMessage += `${field.label} is required.\n`;
-            }
-          });
-
-          // Validate Full Name format
-          const nameInput = document.getElementById('address-name');
-          if (nameInput.value.trim() && !nameRegex.test(nameInput.value.trim())) {
-            isValid = false;
-            nameInput.style.borderColor = 'red';
-            errorMessage += 'Full Name must be 2-50 characters long and contain only letters and spaces.\n';
-          }
-
-          // Validate Phone Number format
-          const phoneInput = document.getElementById('address-phone');
-          if (phoneInput.value.trim() && !phoneRegex.test(phoneInput.value.trim())) {
-            isValid = false;
-            phoneInput.style.borderColor = 'red';
-            errorMessage += 'Phone Number must be a valid 10-digit Indian number starting with 6-9.\n';
-          }
-
-          // Validate Alternate Phone Number (if provided)
-          const altPhoneInput = document.getElementById('address-altPhone');
-          if (altPhoneInput.value.trim() && !phoneRegex.test(altPhoneInput.value.trim())) {
-            isValid = false;
-            altPhoneInput.style.borderColor = 'red';
-            errorMessage += 'Alternate Phone Number must be a valid 10-digit Indian number starting with 6-9.\n';
-          }
-
-          // Validate City format
-          const cityInput = document.getElementById('address-city');
-          if (cityInput.value.trim() && !cityStateRegex.test(cityInput.value.trim())) {
-            isValid = false;
-            cityInput.style.borderColor = 'red';
-            errorMessage += 'City must be 2-50 characters long and contain only letters and spaces.\n';
-          }
-
-          // Validate State format
-          const stateInput = document.getElementById('address-state');
-          if (stateInput.value.trim() && !cityStateRegex.test(stateInput.value.trim())) {
-            isValid = false;
-            stateInput.style.borderColor = 'red';
-            errorMessage += 'State must be 2-50 characters long and contain only letters and spaces.\n';
-          }
-
-          // Validate Pincode format
-          const pincodeInput = document.getElementById('address-pincode');
-          if (pincodeInput.value.trim() && !pincodeRegex.test(pincodeInput.value.trim())) {
-            isValid = false;
-            pincodeInput.style.borderColor = 'red';
-            errorMessage += 'Pincode must be a valid 6-digit number.\n';
-          }
-
-          // Prevent form submission if validation fails
-          if (!isValid) {
-            event.preventDefault();
-            Swal.fire({
-              icon: 'error',
-              title: 'Validation Error',
-              text: errorMessage.trim(),
+              text: 'An unexpected error occurred',
               confirmButtonColor: '#3085d6'
             });
           }
         });
+      }
+    });
 
+    // Referral code copy
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Copied!',
+          text: 'Referral code copied to clipboard.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }).catch(err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to copy referral code.',
+          confirmButtonColor: '#3085d6'
+        });
+      });
+    }
 
-        async function cancelOrder(orderId) {
+    // Order cancellation
+    async function cancelOrder(orderId) {
       const result = await Swal.fire({
         title: 'Do you want to cancel this order?',
         text: 'Provide a reason for cancellation (optional)',
@@ -899,22 +1167,17 @@
         confirmButtonText: 'Yes, cancel it',
         cancelButtonText: 'No'
       });
-  
+
       if (result.isConfirmed) {
         try {
           const response = await fetch('/cancelOrder', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              orderId,
-              reason: result.value || ''
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, reason: result.value || '' })
           });
-  
+
           const data = await response.json();
-  
+
           if (data.success) {
             await Swal.fire({
               icon: 'success',
@@ -922,7 +1185,7 @@
               text: data.message,
               confirmButtonColor: '#82ae46'
             });
-            window.location.reload(); // Refresh to update status
+            window.location.reload();
           } else {
             await Swal.fire({
               icon: 'error',
@@ -940,27 +1203,22 @@
           });
         }
       }
+    }
+
+    // Close Email Modal
+    function closeEmailModal() {
+      document.getElementById('emailModal').style.display = 'none';
+      document.getElementById('email-form').reset();
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function (event) {
+      if (event.target.className === 'modal') {
+        event.target.style.display = 'none';
+        resetFormValidation();
+      }
     };
-
-    function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    Swal.fire({
-      icon: 'success',
-      title: 'Copied!',
-      text: 'Referral code copied to clipboard.',
-      confirmButtonColor: '#3085d6'
-    });
-  }).catch(err => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Failed to copy referral code.',
-      confirmButtonColor: '#3085d6'
-    });
-  });
-}
-
-      </script>
+  </script>
 </body>
 
 </html>
