@@ -637,6 +637,9 @@
                           <% if (order.status === 'Pending' || order.status === 'Processing') { %>
                             <button class="btn btn-secondary" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                           <% } %>
+                          <% if (order.status === 'Pending') { %>
+                            <button class="btn btn-primary" onclick="retryPayment('<%= order._id %>')">Retry Payment</button>
+                          <% } %>
                         </div>
                       </div>
                     </div>
@@ -825,8 +828,8 @@
   </section>
 
   <!-- Footer (Placeholder for EJS include) -->
-  <!-- <%- include("../../views/partials/user/footer") %> -->
-
+   <%- include("../../views/partials/user/footer") %> 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
     // Tab switching
     function showTab(tabId) {
@@ -1218,6 +1221,149 @@
         resetFormValidation();
       }
     };
+
+    async function retryPayment(orderId) {
+      try {
+        const response = await fetch('/retryPayment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '<%= csrfToken %>',
+          },
+          body: JSON.stringify({ orderId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+
+        if (data.success && data.razorpayOrder) {
+          if (typeof Razorpay === 'undefined') {
+            console.error('Razorpay SDK not loaded');
+            Swal.fire({
+              icon: 'error',
+              title: 'Payment Error',
+              text: 'Razorpay payment service is unavailable. Please try again later.',
+              confirmButtonColor: '#82ae46',
+            });
+            return;
+          }
+
+          const options = {
+            key: data.razorpayOrder.key,
+            amount: data.razorpayOrder.amount,
+            currency: data.razorpayOrder.currency,
+            order_id: data.razorpayOrder.id,
+            name: 'MobiVault',
+            description: `Retry Payment for Order #${data.orderDetails.orderId}`,
+            image: '/images/admin-logo.png',
+            handler: async function (response) {
+              try {
+                const verifyResponse = await fetch('/verify-razorpay-payment', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': '<%= csrfToken %>',
+                  },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderDetails: data.orderDetails,
+                  }),
+                });
+
+                const verifyData = await verifyResponse.json();
+
+                if (verifyResponse.ok && verifyData.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Payment Successful',
+                    text: 'Your payment was successful, and the order has been updated!',
+                    confirmButtonColor: '#82ae46',
+                    timer: 2000,
+                    showConfirmButton: false,
+                  }).then(() => {
+                    window.location.href = `/order/success?orderId=${verifyData.orderId}`;
+                  });
+                } else {
+                  throw new Error(verifyData.message || 'Payment verification failed');
+                }
+              } catch (error) {
+                console.error('Razorpay verification error:', error);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Payment Failed',
+                  text: error.message || 'Unable to verify payment. Please contact support.',
+                  confirmButtonColor: '#82ae46',
+                }).then(() => {
+                  window.location.href = `/paymentfailedpage?error=${encodeURIComponent(error.message || 'Verification failed')}`;
+                });
+              }
+            },
+            prefill: {
+              name: '<%= user.name || "" %>',
+              email: '<%= user.email || "" %>',
+              contact: '<%= user.phone || "" %>',
+            },
+            notes: {
+              order_id: data.orderDetails.orderId || 'N/A',
+            },
+            theme: {
+              color: '#82ae46',
+            },
+            method: {
+              card: true,
+              upi: true,
+              netbanking: true,
+              wallet: true,
+              emi: true,
+            },
+            modal: {
+              ondismiss: function () {
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Payment Cancelled',
+                  text: 'You cancelled the payment. You can retry again to complete your order.',
+                  confirmButtonColor: '#82ae46',
+                }).then(() => {
+                  window.location.href = `/paymentfailedpage?error=${encodeURIComponent('Payment cancelled by user')}`;
+                });
+              },
+            },
+          };
+
+          const rzp = new Razorpay(options);
+          rzp.on('payment.failed', function (response) {
+            console.error('Razorpay payment failed:', response.error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Payment Failed',
+              text: response.error.description || 'Payment failed. Please try again.',
+              confirmButtonColor: '#82ae46',
+            }).then(() => {
+              window.location.href = `/paymentfailedpage?error=${encodeURIComponent(response.error.description || 'Payment failed')}`;
+            });
+          });
+          rzp.open();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Failed to initiate payment retry.',
+            confirmButtonColor: '#82ae46',
+          });
+        }
+      } catch (error) {
+        console.error('Error in retryPayment:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while initiating payment retry: ' + error.message,
+          confirmButtonColor: '#82ae46',
+        });
+      }
+    }
   </script>
 </body>
 

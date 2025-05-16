@@ -117,10 +117,10 @@ router.post('/order/return', userAuth, checkoutController.returnOrder);
 router.post('/verify-razorpay-payment', userAuth, checkoutController.verifyRazorpayPayment);
 router.post('/retry-order', userAuth, checkoutController.retryOrder);
 router.get('/paymentfailedpage', userAuth, checkoutController.paymentFailed);
-router.post('/cancelOrder',userAuth, checkoutController.cancelOrder);
-router.post('/cancelOrderItem',userAuth, checkoutController.cancelOrderItem);
-router.post('/order/returnItem',userAuth, checkoutController.returnOrderItem); 
-router.post('/updateOrderStatus',userAuth, checkoutController.updateOrderStatusToDelivered)
+router.post('/cancelOrderItem', userAuth, checkoutController.cancelOrderItem);
+router.post('/order/returnItem', userAuth, checkoutController.returnOrderItem);
+router.post('/retryPayment', userAuth, checkoutController.retryPayment);
+router.post('/updateOrderStatus', userAuth, checkoutController.updateOrderStatusToDelivered);
 
 // Coupon Management
 router.get('/applyCoupon', userAuth, cartController.couponApply);

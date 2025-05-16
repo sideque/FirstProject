@@ -130,7 +130,13 @@ const orderSchema = new Schema({
   },
   invoice: { 
     type: String 
-  }
+  },
+  razorpayOrderId: { type: String },
+  razorpayPaymentId: { type: String },
+  isRetryable: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);

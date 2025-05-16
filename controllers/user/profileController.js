@@ -152,6 +152,7 @@ const userProfile = async (req, res) => {
       user: userData,
       orders,
       addresses,
+      csrfToken: req.csrfToken ? req.csrfToken() : '',
       currentPage: 'profile',
     });
   } catch (error) {
