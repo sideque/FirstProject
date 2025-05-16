@@ -432,7 +432,7 @@
 
 <body>
   <!-- Header (Placeholder for EJS include) -->
-  <!-- <%- include("../../views/partials/user/header") %> -->
+  <%- include("../../views/partials/user/header") %>
 
   <div class="hero-wrap hero-bread" style="background-image: url('/images/p41.jpg');">
     <div class="container">
@@ -482,7 +482,7 @@
             <li><a href="#" onclick="showTab('profile-orders')"><i class="fa fa-shopping-bag"></i> Order History</a></li>
             <li><a href="#" onclick="showTab('profile-edit')"><i class="fa fa-pencil"></i> Edit Profile</a></li>
             <li><a href="#" onclick="showTab('profile-security')"><i class="fa fa-lock"></i> Change Password</a></li>
-            <li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+            <li><a style="color: red;" href="/logout"><i style="color: red;" class="fa fa-sign-out"></i> Logout</a></li>
           </ul>
         </div>
 
@@ -571,7 +571,7 @@
                         <% } %>
                         <form action="/profile/address/delete" method="POST" style="display:inline;">
                           <input type="hidden" name="addressIndex" value="<%= index %>">
-                          <button type="submit" class="btn btn-secondary">Delete</button>
+                          <button style="color: red; text-decoration: none;"  type="submit" class="btn btn-secondary">Delete</button>
                         </form>
                       </div>
                     </div>
