@@ -188,6 +188,9 @@
                     try {
                         const response = await fetch('/admin/addProduct', {
                             method: 'POST',
+                             headers: {
+                                'Accept': 'application/json'
+                            },
                             body: formData
                         });
 
