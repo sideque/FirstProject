@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require('../models/userSchema');
-require('dotenv').config();
+const env = require('dotenv').config();
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -47,8 +47,12 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((id, done) => {
     User.findById(id)
-        .then(user => done(null, user))
-        .catch(err => done(err, null));
+        .then(user => {
+            done(null, user);
+        })
+        .catch(err => {
+            done(err, null);
+        });
 });
 
 module.exports = passport;
