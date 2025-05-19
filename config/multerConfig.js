@@ -2,13 +2,6 @@ const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
 
-// Debug: Check env variables before configuring Cloudinary
-console.log("Cloudinary ENV:", {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -72,7 +65,7 @@ const uploadProfileImage = multer({
   storage: profileStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter,
-}).single('profileImage'); // Accept a single file for 'profileImage'
+}).single('profileImage'); 
 
 module.exports = {
   uploadProductImages,
