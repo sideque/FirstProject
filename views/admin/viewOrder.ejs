@@ -423,10 +423,10 @@
                                 <tr>
                                     <td>
                                        <div class="product-image">
-                                            <img
-                                                src="/uploads/product-images/<%= item.image || 'default.webp' %>"
-                                                alt="<%= item.name || 'Product Image' %>"
-                                                onerror="this.src='/uploads/product-images/default.webp';"
+                                        <img 
+                                            src="<%= item.image || 'https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1234567890/product-images/default.webp' %>" 
+                                            alt="<%= item.name || 'Product Image' %>" 
+                                            onerror="this.onerror=null; this.src='https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1234567890/product-images/default.webp';"
                                             />
                                         </div>
 
