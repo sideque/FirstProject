@@ -8,6 +8,7 @@ const Cart = require('../../models/cartSchema');
 const Coupon = require('../../models/couponSchema');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const upload = require("../../config/multerConfig");
 const { getProductOffers } = require('./offerController');
 
 // Initialize Razorpay with environment variables

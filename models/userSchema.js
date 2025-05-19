@@ -10,7 +10,6 @@ const userSchema = new Schema(
     },
     username: {
       type: String,
-      unique: true,
       sparse: true,
       trim: true,
     },
@@ -34,7 +33,6 @@ const userSchema = new Schema(
     },
     googleId: {
       type: String,
-      unique: true,
       sparse: true,
     },
     password: {
