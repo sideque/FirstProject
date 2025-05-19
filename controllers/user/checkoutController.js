@@ -1,20 +1,22 @@
+const mongoose = require('mongoose');
+const Product = require('../../models/productSchema');
 const User = require('../../models/userSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
-const Product = require('../../models/productSchema');
 const Wallet = require('../../models/walletSchema');
 const Cart = require('../../models/cartSchema');
 const Coupon = require('../../models/couponSchema');
-const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { getProductOffers } = require('./offerController');
 
+// Initialize Razorpay with environment variables
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+// Helper function to create Razorpay order
 const createRazorpayOrder = async (amount, userId) => {
   const roundedAmount = Math.round(parseFloat(amount) * 100);
   const options = {
@@ -25,6 +27,86 @@ const createRazorpayOrder = async (amount, userId) => {
   return await razorpay.orders.create(options);
 };
 
+// Load product details page
+const loadProductDetails = async (req, res) => {
+  try {
+    const productId = req.query.id;
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      console.error('Invalid product ID:', productId);
+      return res.redirect('/pageNotFound');
+    }
+
+    const product = await Product.findById(productId).populate('category brand');
+    if (!product) {
+      console.error('Product not found for ID:', productId);
+      return res.redirect('/pageNotFound');
+    }
+
+    console.log('Product data:', JSON.stringify(product, null, 2));
+    console.log('Raw product images:', product.productImage);
+
+    // Format images to match shop page
+    let images = [];
+    if (product.productImage && Array.isArray(product.productImage)) {
+      images = product.productImage.map(img => img); // Use Cloudinary URL directly
+    }
+    const formattedImages = images.map(url => ({ url }));
+    console.log('Formatted product images:', formattedImages);
+
+    // Simplified offer handling
+    const discountedPrice = product.salePrice;
+    const offerPercentage = product.productOffer || 0;
+
+    // Fetch related products
+    const relatedProducts = await Product.find({
+      category: product.category ? product.category._id : null,
+      _id: { $ne: product._id },
+      isBlocked: false,
+      quantity: { $gt: 0 },
+    })
+      .limit(4)
+      .select('productName productImage salePrice regularPrice productOffer brand quantity')
+      .populate('brand');
+
+    console.log('Raw related products:', JSON.stringify(relatedProducts, null, 2));
+
+    const processedRelatedProducts = relatedProducts.map(relatedProduct => {
+      let relatedImages = [];
+      if (relatedProduct.productImage && Array.isArray(relatedProduct.productImage)) {
+        relatedImages = relatedProduct.productImage.map(img => img);
+      }
+      const relatedFormattedImages = relatedImages.map(url => ({ url }));
+      console.log(`Formatted images for ${relatedProduct.productName}:`, relatedFormattedImages);
+
+      return {
+        _id: relatedProduct._id,
+        productName: relatedProduct.productName,
+        formattedImages: relatedFormattedImages,
+        salePrice: relatedProduct.salePrice,
+        regularPrice: relatedProduct.regularPrice,
+        productOffer: relatedProduct.productOffer || 0,
+        brand: relatedProduct.brand,
+        quantity: relatedProduct.quantity || 0,
+      };
+    });
+
+    res.render('product-details', {
+      product: {
+        ...product.toObject(),
+        salePrice: discountedPrice,
+        productOffer: offerPercentage,
+        formattedImages,
+      },
+      relatedProducts: processedRelatedProducts,
+      allOffers: [], // Replace with actual offers if needed
+    });
+  } catch (error) {
+    console.error('Error loading product details:', error);
+    res.redirect('/pageNotFound');
+  }
+};
+
+// Load checkout page
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -79,7 +161,7 @@ const loadCheckout = async (req, res) => {
           name: item.productId.productName,
           price,
           originalPrice,
-          image: item.productId.productImage[0],
+          image: item.productId.productImage && item.productId.productImage.length > 0 ? item.productId.productImage[0] : '', // Ensure valid Cloudinary URL or empty string
           quantity: item.stock,
           offer: bestOffer
             ? {
@@ -128,80 +210,7 @@ const loadCheckout = async (req, res) => {
   }
 };
 
-const loadProductDetails = async (req, res) => {
-  try {
-    const productId = req.query.id;
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.redirect('/pageNotFound');
-    }
-
-    const product = await Product.findById(productId)
-      .populate('category brand');
-    if (!product) {
-      return res.redirect('/pageNotFound');
-    }
-
-    const { bestOffer, allOffers } = await getProductOffers(
-      product._id,
-      product.category ? product.category._id : null,
-      product.brand ? product.brand._id : null
-    );
-
-    let discountedPrice = product.salePrice;
-    let offerPercentage = 0;
-    if (bestOffer && bestOffer.discountType === 'percentage') {
-      offerPercentage = bestOffer.offerAmount;
-      discountedPrice = Math.round(product.salePrice * (1 - offerPercentage / 100) * 100) / 100;
-    }
-
-    const relatedProducts = await Product.find({
-      category: product.category ? product.category._id : null,
-      _id: { $ne: product._id },
-    })
-      .limit(4)
-      .select('productName productImage salePrice brand')
-      .populate('brand');
-
-    const processedRelatedProducts = await Promise.all(
-      relatedProducts.map(async (relatedProduct) => {
-        const { bestOffer: relatedBestOffer } = await getProductOffers(
-          relatedProduct._id,
-          relatedProduct.category ? relatedProduct.category._id : null,
-          relatedProduct.brand ? relatedProduct.brand._id : null
-        );
-
-        let relatedDiscountedPrice = relatedProduct.salePrice;
-        let relatedOfferPercentage = 0;
-        if (relatedBestOffer && relatedBestOffer.discountType === 'percentage') {
-          relatedOfferPercentage = relatedBestOffer.offerAmount;
-          relatedDiscountedPrice =
-            Math.round(relatedProduct.salePrice * (1 - relatedBestOffer.offerAmount / 100) * 100) /
-            100;
-        }
-
-        return {
-          ...relatedProduct.toObject(),
-          salePrice: relatedDiscountedPrice,
-          productOffer: relatedOfferPercentage,
-        };
-      })
-    );
-
-    res.render('product-details', {
-      product: {
-        ...product.toObject(),
-        salePrice: discountedPrice,
-        productOffer: offerPercentage,
-      },
-      relatedProducts: processedRelatedProducts,
-      allOffers,
-    });
-  } catch (error) {
-    console.error('Error loading product details:', error);
-    res.redirect('/pageNotFound');
-  }
-};
-
+// Place order
 const placeOrder = async (req, res) => {
   try {
     const { addressId, paymentMethod } = req.body;
@@ -393,6 +402,7 @@ const placeOrder = async (req, res) => {
   }
 };
 
+// Verify Razorpay payment
 const verifyRazorpayPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderDetails } = req.body;
@@ -467,6 +477,7 @@ const verifyRazorpayPayment = async (req, res) => {
   }
 };
 
+// Load order details page
 const loadOrderDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -496,6 +507,7 @@ const loadOrderDetails = async (req, res) => {
   }
 };
 
+// Return entire order
 const returnOrder = async (req, res) => {
   try {
     const { orderId, reason } = req.body;
@@ -539,6 +551,7 @@ const returnOrder = async (req, res) => {
   }
 };
 
+// Return single order item
 const returnOrderItem = async (req, res) => {
   try {
     const { orderId, itemId, reason } = req.body;
@@ -599,6 +612,7 @@ const returnOrderItem = async (req, res) => {
   }
 };
 
+// Cancel entire order
 const cancelOrder = async (req, res) => {
   try {
     const { orderId, reason } = req.body;
@@ -707,6 +721,7 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+// Cancel single order item
 const cancelOrderItem = async (req, res) => {
   try {
     const { orderId, itemId, reason } = req.body;
@@ -759,7 +774,7 @@ const cancelOrderItem = async (req, res) => {
         paymentMethod: 'Refund',
         transactionId: `TXN${Date.now()}`,
         orderId: order.orderId,
-        description: `Refund for cancelled item in order ${order.orderId} (${order.paymentMethod} payment)`,
+        description: `Refund for cancelled item in order ${order.orderId}`,
         date: new Date(),
       });
       await wallet.save();
@@ -775,7 +790,7 @@ const cancelOrderItem = async (req, res) => {
 
     res.json({ success: true, message: 'Item cancelled successfully' });
   } catch (error) {
-    console.error('Error cancelling order item:', error);
+    console.error('Error cancelling item:', error);
     res.json({ success: false, message: 'An error occurred' });
   }
 };
@@ -1042,6 +1057,7 @@ const retryPayment = async (req, res) => {
 };
 
 module.exports = {
+  loadProductDetails,
   loadCheckout,
   placeOrder,
   verifyRazorpayPayment,

@@ -474,7 +474,7 @@
       <div class="profile-container">
         <!-- Profile Sidebar -->
         <div class="profile-sidebar">
-          <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" class="profile-pic">
+          <img src="<%= user.profileImage %>" alt="Profile Picture" class="profile-pic">
           <h3 class="profile-name"><%= user.name %></h3>
           <ul class="profile-nav">
             <li><a href="#" class="active" onclick="showTab('profile-details')"><i class="fa fa-user"></i> My Details</a></li>
@@ -608,9 +608,9 @@
                         <% order.orderItems.slice(0, 1).forEach(function(item) { %>
                           <% if (item.product) { %>
                             <div class="order-product">
-                              <img 
+                             <img 
                                 src="<%= item.product.productImage && item.product.productImage.length > 0 
-                                      ? '/uploads/product-images/' + item.product.productImage[0] 
+                                      ? item.product.productImage[0] 
                                       : '/images/default.webp' %>" 
                                 alt="<%= item.product.productName || 'Product' %>" 
                                 class="product-img"
@@ -662,9 +662,9 @@
               </div>
               <form id="edit-profile-form" action="/profileUpdate" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
-                  <label class="form-label">Profile Picture</label>
+                  <label class="profile-image">Profile Picture</label>
                   <div class="profile-pic-upload">
-                    <img src="/uploads/product-images/<%= user.profileImage %>" alt="Profile Picture" id="profile-preview">
+                   <img src="<%= user.profileImage %>" alt="Profile Image" style="width:100px; border-radius: 50%;">
                     <input type="file" id="profile-image" name="profileImage" accept="image/*" style="display: none;">
                     <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile-image').click()">Change Picture</button>
                   </div>
@@ -852,6 +852,7 @@
         reader.readAsDataURL(file);
       }
     });
+
 
     // Address modal functions
     function openAddressModal() {

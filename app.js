@@ -5,13 +5,10 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
-// const morgan = require("morgan");
-const fs = require('fs');
 const passport = require('./config/passport');
 const mongoURI = require('./config/db');
 
 dotenv.config();
-
 
 const app = express();
 // app.use(morgan('dev'));
@@ -19,17 +16,16 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use((req, res, next) => {
   console.log(`${req.method} request received at ${req.url}`);
   next();
 });
 
-
 app.use((req, res, next) => {
     res.set('cache-control', 'no-store')
     next()
 });
+
 app.use(session({
     secret: process.env.SESSION_SECRET || "mySecret",
     resave: false,
@@ -63,16 +59,8 @@ app.set("views", [
     path.join(__dirname, "views/partials")
 ]);
 
+// Serve static files from public directory
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.use((req, res, next) => {
-    if (req.url.includes('/uploads/')) {
-        const relativePath = req.url.replace('/uploads/', '');
-        const absolutePath = path.join(__dirname, 'uploads', relativePath);
-    }
-    next();
-});
 
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");

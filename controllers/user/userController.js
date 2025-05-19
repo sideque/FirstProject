@@ -19,11 +19,9 @@ const pageNotFound = async (req, res) => {
 
 const loadHomePage = async (req, res) => {
     try {
-        
         const user = req.session.user;
-        const categories = await Category.find({ isListed: true, isDeleted:false });
-        const brands = await Brand.find({ isListed: true, isDeleted:false });
-        
+        const categories = await Category.find({ isListed: true, isDeleted: false });
+        const brands = await Brand.find({ isListed: true, isDeleted: false });
 
         let productData = await Product.find({
             isBlocked: false,
@@ -32,26 +30,22 @@ const loadHomePage = async (req, res) => {
             quantity: { $gt: 0 },
         })
             .populate("category", "name")
-            .populate('brand','name')
+            .populate('brand', 'name')
             .select(
                 "productName productImage regularPrice salePrice productOffer category rating createdOn"
             )
             .sort({ createdOn: -1 })
             .limit(4);
-        
+
         const formattedProducts = productData.map((product) => {
             let images = [];
             if (product.productImage && Array.isArray(product.productImage)) {
-                images = product.productImage.map((img) =>
-                    img.startsWith("/uploads/product-images/")
-                        ? img
-                        : `/uploads/product-images/${img}`
-                );
+                images = product.productImage.map((img) => img); // Use Cloudinary URL directly
             }
             return {
                 _id: product._id,
                 name: product.productName,
-                image: images[0] || "https://placehold.co/300x300/darkgray/white?text=No+Image",
+                formattedImages: images.map(url => ({ url })), // Match EJS structure
                 price: product.regularPrice,
                 salePrice: product.salePrice || product.regularPrice,
                 discount: product.productOffer || 0,
@@ -62,7 +56,7 @@ const loadHomePage = async (req, res) => {
 
         if (user) {
             const userData = await User.findOne({ _id: user._id });
-            res.render("home",{ 
+            res.render("home", { 
                 user: userData, 
                 products: formattedProducts,
                 currentPage: "home",
@@ -75,7 +69,7 @@ const loadHomePage = async (req, res) => {
         }
     } catch (error) {
         console.log("Home page not loading:", error);
-        res.status(500).render("page-404")
+        res.status(500).render("page-404");
     }
 };
 
@@ -485,15 +479,21 @@ const loadShoppingPage = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('brand');
+            .populate('brand')
+            .populate('category'); // Added to ensure category.name is available
 
         const products = productsData.map((product) => {
-            const formattedImages = (product.productImage || []).map((img) =>
-                img.startsWith('/uploads/product-images/') ? img : `/uploads/product-images/${img}`
-            );
+            const formattedImages = (product.productImage || []).map((img) => ({ url: img })); // Use Cloudinary URL directly
             return {
-                ...product.toObject(),
-                productImage: formattedImages,
+                _id: product._id,
+                productName: product.productName,
+                formattedImages,
+                regularPrice: product.regularPrice,
+                salePrice: product.salePrice || product.regularPrice,
+                productOffer: product.productOffer || 0,
+                brand: product.brand,
+                category: product.category,
+                rating: product.rating || 0,
             };
         });
 

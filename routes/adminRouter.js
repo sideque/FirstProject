@@ -10,7 +10,7 @@ const couponController = require('../controllers/admin/couponController');
 const offerController = require('../controllers/admin/offerController');
 const salesController = require('../controllers/admin/salesController');
 const { adminAuth } = require("../middlewares/auth");
-const upload = require("../middlewares/multerConfig");
+const { uploadProductImages, uploadProfileImage } = require("../config/multerConfig");
 
 // Admin Routes
 router.get('/pageerror', adminController.pageerror);
@@ -47,7 +47,6 @@ router.get("/brand", adminAuth, brandController.brandInfo);
 router.post("/addBrand", adminAuth, brandController.addBrand);
 router.get("/add-brand", adminAuth, brandController.loadAddBrand);
 router.post("/addBrandOffer", adminAuth, brandController.addBrandOffer);
-// router.post("/removeBrandOffer", adminAuth, brandController.removeBrandOffer);
 router.get("/listBrand", adminAuth, brandController.getListBrand);
 router.get("/unlistBrand", adminAuth, brandController.getUnlistBrand);
 router.get("/brand-has-products/:id", adminAuth, brandController.brandHasProducts);
@@ -57,20 +56,20 @@ router.get("/edit-brand/:id", adminAuth, brandController.loadEditBrand);
 router.post("/edit-brand/:id", adminAuth, brandController.editBrand);
 
 // Product Management
-router.get("/product", adminAuth, productController.getProductAddPage);
-router.get("/add-product", adminAuth, productController.getProductPage);
-router.post("/addProduct", adminAuth, upload.array("images", 3), productController.addProducts);
-router.get("/product/:id", adminAuth, productController.getProductData);
-router.get("/edit-product/:id", adminAuth, productController.getEditProduct);
-router.post("/updateProduct", adminAuth, upload.array("images", 3), productController.updateProduct);
-router.get("/delete-product/:id", adminAuth, productController.deleteProduct);
-router.post("/toggle-product-status/:id", adminAuth, productController.toggleProductStatus);
-router.delete("/delete-product-image/:productId/:imageName", adminAuth, productController.deleteProductImage);
-router.get("/remove-duplicate-products", adminAuth, productController.removeDuplicateProducts);
+router.get('/product', adminAuth, productController.getProductAddPage);
+router.get('/add-product', adminAuth, productController.getProductPage);
+router.get('/product/:id', adminAuth, productController.getProductData); // Removed duplicate definition
+router.get('/edit-product/:id', adminAuth, productController.getEditProduct);
+router.post('/addProduct', adminAuth, uploadProductImages, productController.addProducts); // Added missing route
+router.post('/updateProduct', adminAuth, uploadProductImages, productController.updateProduct);
+router.get('/delete-product/:id', adminAuth, productController.deleteProduct);
+router.post('/toggle-product-status/:id', adminAuth, productController.toggleProductStatus);
+router.delete('/delete-product-image/:productId/:imageName', adminAuth, productController.deleteProductImage);
+router.get('/remove-duplicate-products', adminAuth, productController.removeDuplicateProducts);
 
 // Order Management
 router.get('/orders', adminAuth, orderController.loadOrder);
-router.get('/vieworder/:id', adminAuth, orderController.viewOrder); // Using :id for orderId
+router.get('/vieworder/:id', adminAuth, orderController.viewOrder); 
 router.patch('/updateStatus/:id', adminAuth, orderController.updateOrderStatus);
 router.get('/returnOrder', adminAuth, orderController.verifyReturnRequest);
 router.get('/orders/clear', adminAuth, orderController.clearFilters);

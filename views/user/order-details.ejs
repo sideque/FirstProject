@@ -395,8 +395,10 @@
               <% order.orderItems.forEach(function(item) { %>
                 <tr>
                  <td data-label="Image" class="image-col">
-                  <img 
-                      src="/uploads/product-images/<%= item.product.productImage[0] || 'default.webp' %>" 
+                 <img 
+                      src="<%= item.product.productImage && item.product.productImage.length > 0 
+                              ? item.product.productImage[0] 
+                              : '/images/default.webp' %>" 
                       alt="<%= item.product.productName || 'Product' %>" 
                       class="product-img">
               </td>

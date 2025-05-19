@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.css">
     <link rel="stylesheet" href="/css/sideBar.css">
     <link rel="stylesheet" href="/css/add-product.css">
-    <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
 </head>
 <body>
-
-    <%-include("../../views/partials/admin/admin-sidebar")%> 
+    <%- include("../../views/partials/admin/admin-sidebar") %> 
     
     <div class="main-content" id="mainContent">
         <div class="form-container">
@@ -31,36 +28,24 @@
                         <div class="mb-3">
                             <label class="form-label">Product Images (3 images required):</label>
                             <div class="image-preview-container">
-                                <div class="image-wrapper">
-                                    <div class="image-preview image-preview-empty" id="imagePreview0"></div>
-                                    <button type="button" class="delete-image-btn" id="deleteBtn0">×</button>
-                                </div>
-                                
-                                <div class="image-wrapper">
-                                    <div class="image-preview image-preview-empty" id="imagePreview1"></div>
-                                    <button type="button" class="delete-image-btn" id="deleteBtn1">×</button>
-                                </div>
-                                
-                                <div class="image-wrapper">
-                                    <div class="image-preview image-preview-empty" id="imagePreview2"></div>
-                                    <button type="button" class="delete-image-btn" id="deleteBtn2">×</button>
-                                </div>
+                                <% for(let i=0; i<3; i++) { %>
+                                    <div class="image-wrapper">
+                                        <div class="image-preview <%= !product.productImage[i] ? 'image-preview-empty' : '' %>" 
+                                             id="imagePreview<%= i %>" 
+                                             style="<%= product.productImage[i] ? `background-image: url('${product.productImage[i]}')` : '' %>"></div>
+                                        <button type="button" class="delete-image-btn" id="deleteBtn<%= i %>" 
+                                                style="<%= product.productImage[i] ? 'display: flex' : 'display: none' %>">×</button>
+                                    </div>
+                                <% } %>
                             </div>
                             
-                            <input type="file" class="hidden-file-input" id="productImage0" name="images" 
-                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 0)">
-                            <input type="file" class="hidden-file-input" id="productImage1" name="images" 
-                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 1)">
-                            <input type="file" class="hidden-file-input" id="productImage2" name="images" 
-                                accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, 2)">
+                            <% for(let i=0; i<3; i++) { %>
+                                <input type="file" class="hidden-file-input" id="productImage<%= i %>" name="images" 
+                                    accept="image/png, image/jpeg, image/jpg, image/webp" onchange="handleFileSelect(event, <%= i %>)">
+                            <% } %>
                             
-                            <input type="hidden" id="croppedImage0" name="croppedImages">
-                            <input type="hidden" id="croppedImage1" name="croppedImages">
-                            <input type="hidden" id="croppedImage2" name="croppedImages">
-                            
-                            <input type="hidden" id="imagePositions" name="imagePositions" value="">
                             <input type="hidden" id="productId" name="productId" value="<%= product._id %>">
-                            <input type="hidden" id="existingImages" name="existingImages" value="">
+                            <input type="hidden" id="existingImages" name="existingImages" value="<%= JSON.stringify(product.productImage || []) %>">
                             
                             <div id="images-error" class="error-message"></div>
                             <div class="mt-2">
@@ -74,99 +59,84 @@
                             <input type="text" class="form-control" id="productName" name="productName" value="<%= product.productName %>" placeholder="Enter product name">
                             <div id="productName-error" class="error-message"></div>
                         </div>
-                        
                         <div class="mb-3">
                             <label for="description" class="form-label">Product Description:</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter product description"><%= product.description %></textarea>
+                            <textarea class="form-control" id="description" name="description" rows="3"><%= product.description %></textarea>
                             <div id="description-error" class="error-message"></div>
                         </div>
-
                         <div class="mb-3">
                             <label for="brand" class="form-label">Brand:</label>
                             <select class="form-control" id="brand" name="brand">
-                                <option value="" selected disabled>Select a Brand</option>
-                                <% for(let i=0; i<brand.length; i++) { %>
-                                    <option value="<%= brand[i]._id %>" <%= (brand[i].name === product.brand.name) ? 'selected' : '' %>><%= brand[i].name %></option>
-                                <% } %>
+                                <option value="" disabled>Select a Brand</option>
+                                <% brand.forEach(b => { %>
+                                    <option value="<%= b._id %>" <%= b._id.toString() === product.brand._id.toString() ? 'selected' : '' %>><%= b.name %></option>
+                                <% }) %>
                             </select>
                             <div id="brand-error" class="error-message"></div>
                         </div>
-
                         <div class="mb-3">
                             <label for="regularPrice" class="form-label">Regular Price:</label>
-                            <input value="<%= product.regularPrice %>" type="text" class="form-control" id="regularPrice" name="regularPrice" placeholder="0.00">
+                            <input type="text" class="form-control" id="regularPrice" name="regularPrice" value="<%= product.regularPrice.toFixed(2) %>" placeholder="0.00">
                             <div id="regularPrice-error" class="error-message"></div>
                         </div>
                     </div>
-                    
                     <div class="col-md-6">
-                         
                         <div class="mb-3">
                             <label for="category" class="form-label">Category:</label>
                             <select class="form-control" id="category" name="category">
-                                <option value="" selected disabled>Select a Category</option>
-                                <% for(let i=0; i<cat.length; i++) { %>
-                                    <option value="<%= cat[i]._id %>" <%= (cat[i].name === product.category.name) ? 'selected' : '' %>><%= cat[i].name %></option>
-                                <% } %>
+                                <option value="" disabled>Select a Category</option>
+                                <% cat.forEach(c => { %>
+                                    <option value="<%= c._id %>" <%= c._id.toString() === product.category._id.toString() ? 'selected' : '' %>><%= c.name %></option>
+                                <% }) %>
                             </select>
                             <div id="category-error" class="error-message"></div>
                         </div>
-                        
                         <div class="mb-3">
                             <label for="salePrice" class="form-label">Sale Price:</label>
-                            <input type="text" class="form-control" id="salePrice" name="salePrice" value="<%= product.salePrice || '' %>" placeholder="0.00">
+                            <input type="text" class="form-control" id="salePrice" name="salePrice" value="<%= product.salePrice ? product.salePrice.toFixed(2) : '' %>" placeholder="0.00">
                             <div id="salePrice-error" class="error-message"></div>
                         </div>
-                        
                         <div class="mb-3">
                             <label for="quantity" class="form-label">Stock Count:</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" value="<%= product.quantity || 0 %>" placeholder="0">
+                            <input type="number" class="form-control" id="quantity" name="quantity" value="<%= product.quantity %>">
                             <div id="quantity-error" class="error-message"></div>
                         </div>
-                   </div>
-
+                    </div>
                     <div class="col-12">
                         <h5 class="section-title">Phone Specifications</h5>
                     </div>
-
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="processor" class="form-label">Processor:</label>
-                            <input type="text" class="form-control" id="processor" name="processor" value="<%= product.processor || '' %>" placeholder="e.g. Snapdragon 8 Gen 2, Apple A17 Bionic">
+                            <input type="text" class="form-control" id="processor" name="processor" value="<%= product.processor || '' %>" placeholder="e.g. Snapdragon 8 Gen 2">
                             <div id="processor-error" class="error-message"></div>
                         </div>
-
                         <div class="mb-3">
                             <label for="storage" class="form-label">Storage:</label>
                             <input type="text" class="form-control" id="storage" name="storage" value="<%= product.storage || '' %>" placeholder="e.g. 128GB UFS 3.1">
                             <div id="storage-error" class="error-message"></div>
                         </div>
                     </div>
-
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="ram" class="form-label">RAM:</label>
                             <input type="text" class="form-control" id="ram" name="ram" value="<%= product.ram || '' %>" placeholder="e.g. 8GB LPDDR5X">
                             <div id="ram-error" class="error-message"></div>
                         </div>
-
                         <div class="mb-3">
                             <label for="camera" class="form-label">Camera:</label>
                             <input type="text" class="form-control" id="camera" name="camera" value="<%= product.camera || '' %>" placeholder="e.g. 50MP (Main) + 12MP (Ultra-wide)">
                             <div id="camera-error" class="error-message"></div>
                         </div>
                     </div>
-                    
                     <div class="col-12 text-end">
                         <button type="submit" id="submitProductBtn" class="add-product-btn">UPDATE PRODUCT</button>
                     </div>
-                    
                 </div>
             </form>
         </div>
     </div>
-    
-    <!-- Modal for crop image -->
+
     <div id="cropModal" class="crop-modal">
         <div class="crop-modal-content">
             <span class="close-modal" onclick="closeCropModal()">×</span>
@@ -180,303 +150,190 @@
             </div>
         </div>
     </div>
-    
-    <button id="scrollTopBtn" class="scroll-top-btn" onclick="scrollToTop()">↑</button>
-    
-    <!-- Product Images Data (hidden) -->
-    <div id="productImagesData" 
-         data-product-id="<%= product._id %>"
-         data-images="<%= JSON.stringify(product.productImage || []) %>"
-         style="display: none;"></div>
-    
-    <!-- Scripts -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
-    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
-    
+
     <script>
-        // Global variables
         let cropper;
         let currentImageIndex = -1;
-        const previewElements = [
-            document.getElementById("imagePreview0"),
-            document.getElementById("imagePreview1"),
-            document.getElementById("imagePreview2"),
-        ];
-        const deleteButtons = [
-            document.getElementById("deleteBtn0"),
-            document.getElementById("deleteBtn1"),
-            document.getElementById("deleteBtn2"),
-        ];
-        let existingImages = [null, null, null]; // Store existing image filenames
-    
-        // Initialize the page
+        const previewElements = Array.from({length: 3}, (_, i) => document.getElementById(`imagePreview${i}`));
+        const deleteButtons = Array.from({length: 3}, (_, i) => document.getElementById(`deleteBtn${i}`));
+        const fileInputs = Array.from({length: 3}, (_, i) => document.getElementById(`productImage${i}`));
+        let existingImages = <%- JSON.stringify(product.productImage || []) %>;
+
         document.addEventListener("DOMContentLoaded", function () {
-            // Set up image preview click handlers
             previewElements.forEach((preview, index) => {
-                preview.addEventListener("click", () => {
-                    document.getElementById(`productImage${index}`).click();
-                });
-    
-                // Initially hide delete buttons
-                deleteButtons[index].style.display = "none";
-    
-                // Set up delete button click handlers
+                preview.addEventListener("click", () => fileInputs[index].click());
                 deleteButtons[index].addEventListener("click", (e) => {
                     e.stopPropagation();
                     deleteImage(index);
                 });
             });
-    
-            // Set up scroll to top button
+
             window.addEventListener("scroll", function () {
                 const scrollBtn = document.getElementById("scrollTopBtn");
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    scrollBtn.style.display = "flex";
-                } else {
-                    scrollBtn.style.display = "none";
-                }
+                scrollBtn.style.display = (window.scrollY > 20) ? "flex" : "none";
             });
-    
-            // Set up form submission for updating product
-            document.getElementById("productForm").addEventListener("submit", function (e) {
+
+            document.getElementById("productForm").addEventListener("submit", async function (e) {
                 e.preventDefault();
-    
                 if (validateForm()) {
-                    const form = this;
-                    const formData = new FormData(form);
-    
-                    // Clean up existingImages to exclude null or empty values
-                    const filteredExistingImages = existingImages.filter((img) => img !== null && img !== "");
-                    formData.set("existingImages", JSON.stringify(filteredExistingImages));
-    
-                    // Verify Base64 cropped images
-                    const croppedImageFields = ["croppedImage0", "croppedImage1", "croppedImage2"];
-                    croppedImageFields.forEach((field, index) => {
-                        const base64Data = document.getElementById(field).value;
-                        if (base64Data && !isValidBase64Image(base64Data)) {
-                            console.warn(`Invalid Base64 data for ${field}`);
-                            formData.delete(field); // Remove invalid data
-                            showError("images-error", `Invalid cropped image in slot ${index + 1}`);
-                        }
-                    });
-    
-                    // Debug: Log FormData contents
-                    console.log("FormData contents:");
-                    for (let [key, value] of formData.entries()) {
-                        console.log(`${key}: ${value}`);
-                    }
-    
-                    // Show loading state
+                    const formData = new FormData(this);
+                    formData.set("existingImages", JSON.stringify(existingImages));
                     Swal.fire({
                         title: "Updating Product...",
-                        text: "Please wait while we update your product",
                         allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
+                        didOpen: () => Swal.showLoading()
                     });
-    
-                    fetch("/admin/updateProduct", {
-                        method: "POST",
-                        body: formData,
-                    })
-                        .then((response) => {
-                            if (!response.ok) {
-                                return response.json().then((err) => {
-                                    throw new Error(err.message || "Network response was not ok");
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then((data) => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: "Success!",
-                                    text: data.message || "Product updated successfully",
-                                    icon: "success",
-                                    confirmButtonText: "OK",
-                                }).then(() => {
-                                    window.location.href = "/admin/product";
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Error!",
-                                    text: data.message || "Failed to update product",
-                                    icon: "error",
-                                    confirmButtonText: "OK",
-                                });
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Submission error:", error);
+
+                    try {
+                        const response = await fetch("/admin/updateProduct", {
+                            method: "POST",
+                            body: formData
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            Swal.fire({
+                                title: "Success!",
+                                text: data.message,
+                                icon: "success"
+                            }).then(() => {
+                                window.location.href = "/admin/product";
+                            });
+                        } else {
                             Swal.fire({
                                 title: "Error!",
-                                text: error.message || "An error occurred while updating the product. Please try again.",
-                                icon: "error",
-                                confirmButtonText: "OK",
+                                text: data.message,
+                                icon: "error"
                             });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            title: "Error!",
+                            text: "An error occurred.",
+                            icon: "error"
                         });
+                    }
                 }
             });
-    
-            // Load product images when page loads
-            loadProductImages();
+
+            setupLiveValidation();
         });
-    
-        // Function to validate Base64 image data
-        function isValidBase64Image(base64String) {
-            // Check if the string starts with a valid data URI prefix
-            const base64Regex = /^data:image\/(jpeg|png|jpg|webp);base64,/;
-            if (!base64Regex.test(base64String)) {
-                return false;
-            }
-    
-            // Remove the prefix and check if the remaining string is valid Base64
-            const base64Data = base64String.replace(base64Regex, "");
-            try {
-                // Attempt to decode Base64 to ensure it's valid
-                const decoded = atob(base64Data);
-                // Optional: Check decoded size (max 10MB)
-                const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
-                if (decoded.length > maxSizeInBytes) {
-                    console.error("Base64 image too large");
-                    return false;
+
+        function setupLiveValidation() {
+            const fields = [
+                { id: 'productName', errorId: 'productName-error', validate: value => value.trim() ? '' : 'Product name is required' },
+                { id: 'description', errorId: 'description-error', validate: value => value.trim() ? '' : 'Product description is required' },
+                { id: 'brand', errorId: 'brand-error', validate: value => value ? '' : 'Please select a brand' },
+                { id: 'category', errorId: 'category-error', validate: value => value ? '' : 'Please select a category' },
+                {
+                    id: 'regularPrice',
+                    errorId: 'regularPrice-error',
+                    validate: value => {
+                        const num = parseFloat(value);
+                        if (!value.trim()) return 'Regular price is required';
+                        if (isNaN(num) || num <= 0) return 'Regular price must be greater than 0';
+                        return '';
+                    }
+                },
+                {
+                    id: 'salePrice',
+                    errorId: 'salePrice-error',
+                    validate: value => {
+                        if (!value.trim()) return '';
+                        const num = parseFloat(value);
+                        if (isNaN(num) || num <= 0) return 'Sale price must be greater than 0';
+                        return '';
+                    }
+                },
+                {
+                    id: 'quantity',
+                    errorId: 'quantity-error',
+                    validate: value => {
+                        const num = parseInt(value);
+                        if (!value.trim()) return 'Stock count is required';
+                        if (isNaN(num) || num < 0) return 'Stock count cannot be negative';
+                        return '';
+                    }
                 }
-                return true;
-            } catch (e) {
-                console.error("Base64 decode error:", e);
-                return false;
-            }
-        }
-    
-        // Function to load product images
-        function loadProductImages() {
-            const dataElement = document.getElementById("productImagesData");
-            const productId = dataElement.getAttribute("data-product-id");
-            const productImages = JSON.parse(dataElement.getAttribute("data-images"));
-    
-            if (!productId || !productImages.length) return;
-    
-            // Process product images
-            productImages.forEach((imagePath, index) => {
-                // Normalize image path
-                let imageUrl;
-                if (!imagePath) {
-                    return; // Skip empty paths
-                } else if (imagePath.startsWith("/uploads/product-images/")) {
-                    // Path already has prefix
-                    imageUrl = imagePath;
-                    // Get just the filename for the existingImages array
-                    imagePath = imagePath.substring("/uploads/product-images/".length);
-                } else {
-                    // Add prefix to path
-                    imageUrl = `/uploads/product-images/${imagePath}`;
+            ];
+
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                element.addEventListener('input', () => {
+                    const error = field.validate(element.value);
+                    if (error) showError(field.errorId, error);
+                    else hideError(field.errorId);
+                });
+
+                if (field.id === 'regularPrice' || field.id === 'salePrice') {
+                    element.addEventListener('input', (e) => {
+                        let value = e.target.value.replace(/[^0-9.]/g, '');
+                        const parts = value.split('.');
+                        if (parts.length > 2) value = `${parts[0]}.${parts[1]}`;
+                        if (parts[1] && parts[1].length > 2) value = `${parts[0]}.${parts[1].substring(0, 2)}`;
+                        e.target.value = value;
+                    });
                 }
-    
-                previewElements[index].style.backgroundImage = `url('${imageUrl}')`;
-                previewElements[index].classList.remove("image-preview-empty");
-                deleteButtons[index].style.display = "flex";
-    
-                // Store existing image filename
-                existingImages[index] = imagePath;
-    
-                // Setup delete button for server images
-                deleteButtons[index].onclick = function (e) {
-                    e.stopPropagation();
-                    deleteServerImage(imagePath, productId, index);
-                };
             });
-    
-            // Update existingImages hidden field
-            document.getElementById("existingImages").value = JSON.stringify(existingImages);
         }
-    
-        // Function to handle file selection
+
         function handleFileSelect(event, index) {
             const file = event.target.files[0];
             if (!file) return;
-    
+
             const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
             if (!validTypes.includes(file.type)) {
-                showError("images-error", "Please select an image file (JPEG, JPG, PNG or webp)");
+                showError("images-error", "Please select an image file (JPEG, JPG, PNG, or WEBP)");
                 event.target.value = "";
                 return;
             }
-    
-            // Check file size (max 10MB)
-            const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+
+            const maxSizeInBytes = 10 * 1024 * 1024;
             if (file.size > maxSizeInBytes) {
                 showError("images-error", "Image size should not exceed 10MB");
                 event.target.value = "";
                 return;
             }
-    
+
             const reader = new FileReader();
             reader.onload = function (e) {
-                // Open crop modal with selected image
                 document.getElementById("cropImage").src = e.target.result;
                 document.getElementById("cropModal").style.display = "block";
-    
-                // Initialize cropper
-                if (cropper) {
-                    cropper.destroy();
-                }
-    
+                if (cropper) cropper.destroy();
                 cropper = new Cropper(document.getElementById("cropImage"), {
                     aspectRatio: 1,
                     viewMode: 1,
                     background: false,
                     zoomable: true,
                     cropBoxResizable: true,
+                    autoCropArea: 1,
                 });
-    
                 currentImageIndex = index;
             };
-    
             reader.readAsDataURL(file);
         }
-    
-        // Function to crop the image
+
         function cropImage() {
             if (!cropper) return;
-    
-            const canvas = cropper.getCroppedCanvas({
-                width: 300,
-                height: 300,
-            });
-    
-            const croppedImageDataURL = canvas.toDataURL("image/jpeg");
-    
-            // Verify Base64 data
-            if (!isValidBase64Image(croppedImageDataURL)) {
-                showError("images-error", "Invalid cropped image data. Please try again.");
+            const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+            canvas.toBlob((blob) => {
+                const file = new File([blob], `cropped-image-${currentImageIndex}.webp`, { type: 'image/webp' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInputs[currentImageIndex].files = dataTransfer.files;
+                previewElements[currentImageIndex].style.backgroundImage = `url(${URL.createObjectURL(blob)})`;
+                previewElements[currentImageIndex].classList.remove("image-preview-empty");
+                deleteButtons[currentImageIndex].style.display = "flex";
+                existingImages[currentImageIndex] = null;
+                document.getElementById("existingImages").value = JSON.stringify(existingImages);
+                hideError("images-error");
                 closeCropModal();
-                return;
-            }
-    
-            // Update preview
-            previewElements[currentImageIndex].style.backgroundImage = `url('${croppedImageDataURL}')`;
-            previewElements[currentImageIndex].classList.remove("image-preview-empty");
-    
-            // Store cropped image
-            document.getElementById(`croppedImage${currentImageIndex}`).value = croppedImageDataURL;
-    
-            // Update existingImages array - set to null to indicate a new image
-            existingImages[currentImageIndex] = null;
-    
-            // Show delete button
-            deleteButtons[currentImageIndex].style.display = "flex";
-    
-            // Clear any previous image validation error
-            hideError("images-error");
-    
-            // Close modal
-            closeCropModal();
+            }, 'image/webp');
         }
-    
-        // Function to close crop modal
+
         function closeCropModal() {
             document.getElementById("cropModal").style.display = "none";
             if (cropper) {
@@ -484,28 +341,21 @@
                 cropper = null;
             }
         }
-    
-        // Function to delete an image
+
         function deleteImage(index) {
-            // Clear the preview
-            previewElements[index].style.backgroundImage = "";
-            previewElements[index].classList.add("image-preview-empty");
-    
-            // Clear the stored image
-            document.getElementById(`croppedImage${index}`).value = "";
-    
-            // Update existingImages array
+            if (existingImages[index]) {
+                deleteServerImage(existingImages[index], '<%= product._id %>', index);
+            } else {
+                previewElements[index].style.backgroundImage = "";
+                previewElements[index].classList.add("image-preview-empty");
+                fileInputs[index].value = "";
+                deleteButtons[index].style.display = "none";
+            }
             existingImages[index] = null;
-    
-            // Hide delete button
-            deleteButtons[index].style.display = "none";
-    
-            // Reset file input
-            document.getElementById(`productImage${index}`).value = "";
+            document.getElementById("existingImages").value = JSON.stringify(existingImages);
         }
-    
-        // Function to delete an existing image on the server
-        function deleteServerImage(imagePath, productId, index) {
+
+        function deleteServerImage(imageUrl, productId, index) {
             Swal.fire({
                 title: "Delete Image?",
                 text: "Are you sure you want to delete this image?",
@@ -514,54 +364,41 @@
                 confirmButtonColor: "#d33",
                 cancelButtonColor: "#3085d6",
                 confirmButtonText: "Yes, delete it!",
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    fetch(`/admin/delete-product-image/${productId}/${imagePath}`, {
-                        method: "DELETE",
-                    })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.success) {
-                                // Clear the preview
-                                deleteImage(index);
-    
-                                // Update existingImages array
-                                existingImages[index] = null;
-    
-                                Swal.fire("Deleted!", "The image has been deleted.", "success");
-                            } else {
-                                Swal.fire("Error!", "Failed to delete image.", "error");
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Error:", error);
-                            Swal.fire("Error!", "An error occurred while deleting the image.", "error");
+                    try {
+                        const response = await fetch(`/admin/delete-product-image/${productId}/${encodeURIComponent(imageUrl)}`, {
+                            method: "DELETE"
                         });
+                        const data = await response.json();
+                        if (data.success) {
+                            previewElements[index].style.backgroundImage = "";
+                            previewElements[index].classList.add("image-preview-empty");
+                            deleteButtons[index].style.display = "none";
+                            Swal.fire("Deleted!", "The image has been deleted.", "success");
+                        } else {
+                            Swal.fire("Error!", data.message, "error");
+                        }
+                    } catch (error) {
+                        Swal.fire("Error!", "An error occurred while deleting the image.", "error");
+                    }
                 }
             });
         }
-    
-        // Function to validate form
+
         function validateForm() {
             let isValid = true;
-    
-            // Check if at least one image is provided (either new or existing)
-            const hasNewImages = [
-                document.getElementById("croppedImage0").value !== "",
-                document.getElementById("croppedImage1").value !== "",
-                document.getElementById("croppedImage2").value !== "",
-            ];
-    
-            const noImages = hasNewImages.every((i) => !i) && existingImages.every((i) => i === null);
-    
-            if (noImages) {
-                showError("images-error", "Please upload at least one product image");
+            const newImagesCount = fileInputs.filter(input => input.files.length > 0).length;
+            const existingImagesCount = existingImages.filter(img => img).length;
+            const totalImages = newImagesCount + existingImagesCount;
+
+            if (totalImages !== 3) {
+                showError("images-error", `Exactly three product images are required. Found ${totalImages} images.`);
                 isValid = false;
             } else {
                 hideError("images-error");
             }
-    
-            // Validate product name
+
             const productName = document.getElementById("productName").value;
             if (!productName.trim()) {
                 showError("productName-error", "Product name is required");
@@ -569,8 +406,7 @@
             } else {
                 hideError("productName-error");
             }
-    
-            // Validate description
+
             const description = document.getElementById("description").value;
             if (!description.trim()) {
                 showError("description-error", "Product description is required");
@@ -578,8 +414,7 @@
             } else {
                 hideError("description-error");
             }
-    
-            // Validate brand
+
             const brand = document.getElementById("brand").value;
             if (!brand) {
                 showError("brand-error", "Please select a brand");
@@ -587,8 +422,7 @@
             } else {
                 hideError("brand-error");
             }
-    
-            // Validate category
+
             const category = document.getElementById("category").value;
             if (!category) {
                 showError("category-error", "Please select a category");
@@ -596,17 +430,16 @@
             } else {
                 hideError("category-error");
             }
-    
-            // Validate regular price
+
             const regularPrice = document.getElementById("regularPrice").value;
-            if (!regularPrice.trim() || isNaN(parseFloat(regularPrice))) {
-                showError("regularPrice-error", "Valid regular price is required");
+            const regularPriceNum = parseFloat(regularPrice);
+            if (!regularPrice.trim() || isNaN(regularPriceNum) || regularPriceNum <= 0) {
+                showError("regularPrice-error", "Regular price must be greater than 0");
                 isValid = false;
             } else {
                 hideError("regularPrice-error");
             }
-    
-            // Validate sale price (if provided)
+
             const salePrice = document.getElementById("salePrice").value;
             if (salePrice.trim() && isNaN(parseFloat(salePrice))) {
                 showError("salePrice-error", "Sale price must be a valid number");
@@ -614,8 +447,7 @@
             } else {
                 hideError("salePrice-error");
             }
-    
-            // Validate stock count
+
             const quantity = document.getElementById("quantity").value;
             if (!quantity.trim() || isNaN(parseInt(quantity))) {
                 showError("quantity-error", "Valid stock count is required");
@@ -623,36 +455,29 @@
             } else {
                 hideError("quantity-error");
             }
-    
-            // If form is not valid, scroll to first error
+
             if (!isValid) {
                 const firstError = document.querySelector('.error-message[style="display: block;"]');
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
             }
-    
+
             return isValid;
         }
-    
-        // Function to show error message
+
         function showError(id, message) {
             const errorElement = document.getElementById(id);
             errorElement.textContent = message;
             errorElement.style.display = "block";
         }
-    
-        // Function to hide error message
+
         function hideError(id) {
             document.getElementById(id).style.display = "none";
         }
-    
-        // Function to scroll to top
+
         function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-            });
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
     </script>
 </body>

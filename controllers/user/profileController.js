@@ -6,7 +6,7 @@ const Order = require('../../models/orderSchema');
 const Wallet = require("../../models/walletSchema");
 const Payment = require("../../models/paymentSchema");
 const env = require("dotenv").config();
-const upload = require("../../middlewares/multerConfig");
+const upload = require("../../config/multerConfig")
 const saltRounds = 10;
 const mongoose = require("mongoose");
 
@@ -207,7 +207,7 @@ const profileUpdate = async (req, res) => {
       phone: phone || undefined,
       username: username || undefined,
       gender: gender || undefined,
-      profileImage: req.file ? req.file.filename : undefined,
+      profileImage: req.file ? req.file.path : undefined,
     };
 
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);

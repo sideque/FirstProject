@@ -7,7 +7,7 @@ const offerController = require('../controllers/user/offerController');
 const { userAuth } = require('../middlewares/auth');
 const passport = require('passport');
 const productController = require('../controllers/user/productController');
-const upload = require('../middlewares/multerConfig');
+const { uploadProductImages, uploadProfileImage } = require("../config/multerConfig");
 const cartController = require('../controllers/user/cartController');
 
 router.use((req, res, next) => {
@@ -82,7 +82,7 @@ router.get('/reset-password', profileController.getResetPassPage);
 router.post('/resend-forgot-otp', profileController.resendOtp);
 router.post('/new-password', profileController.postNewPassword);
 router.get('/userProfile', userAuth, profileController.userProfile);
-router.post('/profileUpdate', userAuth, upload.single('profileImage'), profileController.profileUpdate);
+router.post('/profileUpdate', userAuth, uploadProfileImage, profileController.profileUpdate);
 router.post('/profile/change-password', userAuth, profileController.postUserNewPassword);
 
 // Address routes

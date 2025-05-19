@@ -348,10 +348,9 @@
             <% cart.forEach(item => { %>
               <div class="summary-product">
                 <img 
-                    src="<%= item.image ? '/uploads/product-images/' + item.image : '/images/placeholder.webp' %>" 
+                    src="<%= item.image && item.image.length > 0 ? item.image : '/images/placeholder.webp' %>" 
                     alt="<%= item.name || 'Product Name' %>" 
                     class="product-image">
-
                 <div class="product-details">
                   <h3 class="product-name"><%= item.name %></h3>
                   <div class="product-meta">Quantity: <%= item.quantity %></div>
@@ -565,7 +564,7 @@
             order_id: data.razorpayOrder.id,
             name: 'MobiVault',
             description: 'Order Payment',
-            image: '/images/admin-logo.png', 
+            image: '/images/admin-logo.png',
             handler: async function (response) {
               try {
                 const verifyResponse = await fetch('/verify-razorpay-payment', {

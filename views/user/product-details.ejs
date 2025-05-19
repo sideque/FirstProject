@@ -676,28 +676,27 @@
           <div class="product-gallery zoom-container">
             <img 
                 src="<%= product.productImage && product.productImage.length > 0 
-                        ? '/uploads/product-images/' + product.productImage[0] 
-                        : '/images/placeholder.webp' %>" 
+                        ? product.productImage[0] 
+                        : 'https://placehold.co/300x300?text=No+Image' %>" 
                 alt="<%= product.productName || 'Product Image' %>" 
                 class="main-image zoom-image" 
                 id="mainImage"
-                onerror="this.src='/images/placeholder.webp'; console.log('Main image load failed for <%= product.productName %>');">
+                onerror="this.src='https://placehold.co/300x300?text=Image+Not+Found'; console.log('Main image load failed for <%= product.productName %>');">
             <div class="zoom-lens"></div>
-           <div class="thumbnails">
+            <div class="thumbnails">
               <% if (product.productImage && Array.isArray(product.productImage) && product.productImage.length > 0) { %>
                 <% product.productImage.forEach((image, index) => { %>
-                 <img 
-                    src="/uploads/product-images/<%= image %>" 
-                    alt="<%= product.productName || 'Product' %> thumbnail <%= index + 1 %>" 
-                    class="thumbnail <%= index === 0 ? 'active' : '' %>" 
-                    style="width: 60px; height: 60px; object-fit: cover; margin: 5px;"
-                    onerror="this.src='/images/default-thumbnail.jpg'; console.log('Thumbnail load failed for <%= product.productName %> - image <%= index + 1 %>');">
+                  <img 
+                      src="<%= image %>" 
+                      alt="<%= product.productName || 'Product' %> thumbnail <%= index + 1 %>" 
+                      class="thumbnail <%= index === 0 ? 'active' : '' %>" 
+                      style="width: 60px; height: 60px; object-fit: cover; margin: 5px;"
+                      onerror="this.src='https://placehold.co/60x60?text=Thumbnail+Not+Found'; console.log('Thumbnail load failed for <%= product.productName %> - image <%= index + 1 %>');">
                 <% }) %>
               <% } else { %>
                 <p>No additional images available.</p>
               <% } %>
             </div>
-
           </div>
         </div>
 
