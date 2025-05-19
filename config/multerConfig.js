@@ -1,6 +1,14 @@
+require('dotenv').config();  // Load env variables early
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
+
+// Debug: Check env variables before configuring Cloudinary
+console.log("Cloudinary ENV:", {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Configure Cloudinary
 cloudinary.config({
