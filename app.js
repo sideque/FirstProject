@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+dotenv.config({ path: "D:\\week 8\\myProject\\.env" });
 const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");

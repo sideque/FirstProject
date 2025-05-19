@@ -202,6 +202,7 @@ const profileUpdate = async (req, res) => {
   try {
     const userId = req.session.user;
     const { name, phone, username, gender } = req.body;
+    console.log('File from Multer:', req.file);
     const updateData = {
       name,
       phone: phone || undefined,

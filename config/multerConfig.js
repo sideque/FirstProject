@@ -1,4 +1,3 @@
-require('dotenv').config();  // Load env variables early
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
