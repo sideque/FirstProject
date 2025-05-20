@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Details</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     .order-tracking {
       background: #fff;
@@ -49,30 +50,31 @@
       align-items: center;
       justify-content: center;
       margin: 0 auto 15px;
-      color: #aaa;
+      color: #fff;
       font-size: 20px;
       border: 4px solid #fff;
+      transition: background-color 0.3s ease;
     }
 
+    /* Active (Completed or Current Step) */
     .timeline-item.active .timeline-icon {
-      background: #82ae46;
-      color: white;
+      background: #28a745; /* Green for completed/current */
     }
 
+    /* Pending */
     .timeline-item.pending .timeline-icon {
-      background: #f0ad4e;
-      color: white;
+      background: #ffc107; /* Yellow for pending */
     }
 
+    /* Cancelled */
     .timeline-item.cancelled .timeline-icon {
-      background: #d9534f;
-      color: white;
+      background: #dc3545; /* Red for cancelled */
     }
 
+    /* Return Requested/Returned */
     .timeline-item.return-request .timeline-icon,
     .timeline-item.returned .timeline-icon {
-      background: #6c757d;
-      color: white;
+      background: #6c757d; /* Gray for returns */
     }
 
     .timeline-content h4 {
@@ -328,6 +330,7 @@
         <div class="order-tracking">
           <h3 class="card-title">Order Tracking</h3>
           <div class="tracking-timeline">
+            <!-- Order Placed -->
             <div class="timeline-item active">
               <div class="timeline-icon"><i class="fa fa-check-circle"></i></div>
               <div class="timeline-content">
@@ -335,19 +338,28 @@
                 <p><%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
               </div>
             </div>
-            <div class="timeline-item <%= ['Processing', 'Shipped', 'Delivered'].includes(order.status) ? 'active' : (order.status === 'Cancelled' ? 'cancelled' : order.status === 'Pending' ? 'pending' : '') %>">
+
+            <!-- Processing -->
+            <div class="timeline-item <%= ['Processing', 'Shipped', 'Delivered'].includes(order.status) ? 'active' : (order.status === 'Cancelled' ? 'cancelled' : 'pending') %>">
               <div class="timeline-icon"><i class="fa fa-cog"></i></div>
               <div class="timeline-content">
                 <h4>Processing</h4>
-                <p><%= order.status === 'Pending' ? 'Pending' : (order.status === 'Cancelled' ? 'Cancelled' : 'Completed') %></p>
+                <p>
+                  <%= order.status === 'Pending' ? 'Pending' : 
+                      order.status === 'Cancelled' ? 'Cancelled' : 
+                      order.status === 'Processing' ? 'In Progress' : 
+                      'Completed' %>
+                </p>
               </div>
             </div>
-            <div class="timeline-item <%= ['Shipped', 'Delivered'].includes(order.status) ? 'active' : (order.status === 'Cancelled' ? 'cancelled' : '') %>">
+
+            <!-- Shipped -->
+            <div class="timeline-item <%= ['Shipped', 'Delivered'].includes(order.status) ? 'active' : (order.status === 'Cancelled' ? 'cancelled' : 'pending') %>">
               <div class="timeline-icon"><i class="fa fa-truck"></i></div>
               <div class="timeline-content">
                 <h4>Shipped</h4>
-                <% if (order.shippedDate) { %>
-                  <p><%= new Date(order.shippedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                <% if (order.status === 'Shipped' || order.status === 'Delivered') { %>
+                  <p><%= order.shippedDate ? new Date(order.shippedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'In Transit' %></p>
                   <% if (order.trackingId) { %>
                     <p class="tracking-id">Tracking ID: <strong><%= order.trackingId %></strong></p>
                   <% } %>
@@ -356,25 +368,29 @@
                 <% } %>
               </div>
             </div>
-            <div class="timeline-item <%= order.status === 'Delivered' ? 'active' : (order.status === 'Cancelled' ? 'cancelled' : '') %>">
+
+            <!-- Delivered -->
+            <div class="timeline-item <%= order.status === 'Delivered' ? 'active' : (order.status === 'Cancelled' ? 'cancelled' : 'pending') %>">
               <div class="timeline-icon"><i class="fa fa-box-open"></i></div>
               <div class="timeline-content">
                 <h4>Delivered</h4>
-                <% if (order.deliveredDate) { %>
-                  <p><%= new Date(order.deliveredDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                <% if (order.status === 'Delivered') { %>
+                  <p><%= order.deliveredDate ? new Date(order.deliveredDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Delivered' %></p>
                 <% } else { %>
                   <p><%= order.status === 'Cancelled' ? 'Cancelled' : 'Pending' %></p>
                 <% } %>
               </div>
             </div>
+
+            <!-- Return Request/Returned (if applicable) -->
             <% if (['Return Request', 'Returned'].includes(order.status)) { %>
-            <div class="timeline-item <%= order.status === 'Returned' ? 'active' : 'pending' %>">
-              <div class="timeline-icon"><i class="fa fa-undo"></i></div>
-              <div class="timeline-content">
-                <h4>Return <%= order.status === 'Return Request' ? 'Requested' : 'Completed' %></h4>
-                <p><%= order.returnReason || 'No reason provided' %></p>
+              <div class="timeline-item <%= order.status === 'Returned' ? 'active' : 'pending' %>">
+                <div class="timeline-icon"><i class="fa fa-undo"></i></div>
+                <div class="timeline-content">
+                  <h4>Return <%= order.status === 'Return Request' ? 'Requested' : 'Completed' %></h4>
+                  <p><%= order.returnReason || 'No reason provided' %></p>
+                </div>
               </div>
-            </div>
             <% } %>
           </div>
         </div>
@@ -394,14 +410,14 @@
             <tbody>
               <% order.orderItems.forEach(function(item) { %>
                 <tr>
-                 <td data-label="Image" class="image-col">
-                 <img 
+                  <td data-label="Image" class="image-col">
+                    <img 
                       src="<%= item.product.productImage && item.product.productImage.length > 0 
                               ? item.product.productImage[0] 
                               : '/images/default.webp' %>" 
                       alt="<%= item.product.productName || 'Product' %>" 
                       class="product-img">
-              </td>
+                  </td>
                   <td data-label="Product">
                     <div class="product-info">
                       <div class="product-name"><%= item.product.productName || 'Unknown product' %></div>
@@ -420,7 +436,9 @@
                     ₹<%= (item.price * item.stock).toLocaleString('en-IN') %>
                   </td>
                   <td data-label="Status">
-                    <span class="order-status status-<%= item.status.toLowerCase().replace(' ', '-') %>"><%= item.status %></span>
+                    <span class="order-status status-<%= order.status === 'Pending' ? 'pending' : item.status.toLowerCase().replace(' ', '-') %>">
+                      <%= order.status === 'Pending' ? 'Pending' : item.status %>
+                    </span>
                   </td>
                   <td data-label="Action">
                     <% if ((order.status === 'Processing' || order.status === 'Pending') && item.status !== 'Cancelled' && item.status !== 'Delivered') { %>

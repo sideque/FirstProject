@@ -327,7 +327,7 @@ const placeOrder = async (req, res) => {
         offerId: item.offerId,
         offerAmount: item.offerAmount,
         couponId: couponApplied ? couponId : null,
-        status: 'Processing',
+        status: paymentMethod === 'Razorpay' ? 'Pending' : 'Processing', // Set to 'Pending' for Razorpay
       })),
       totalPrice: subtotal,
       discount,
@@ -337,7 +337,7 @@ const placeOrder = async (req, res) => {
       address: selectedAddress,
       paymentMethod,
       paymentStatus: paymentMethod === 'Wallet' ? 'Completed' : 'Pending',
-      status: 'Pending',
+      status: paymentMethod === 'Razorpay' ? 'Pending' : 'Processing', // Set overall status to 'Pending' for Razorpay
       invoiceDate: new Date(),
       createdOn: new Date(),
       couponApplied,
@@ -444,7 +444,7 @@ const verifyRazorpayPayment = async (req, res) => {
     }
 
     order.orderItems.forEach((item) => {
-      item.status = 'Processing';
+      item.status = 'Processing'; // Update item status to 'Processing' after payment is verified
     });
     order.totalPrice = totalPrice;
     order.discount = discount;
@@ -454,7 +454,7 @@ const verifyRazorpayPayment = async (req, res) => {
     order.address = selectedAddress;
     order.paymentMethod = 'Razorpay';
     order.paymentStatus = 'Completed';
-    order.status = 'Processing';
+    order.status = 'Processing'; // Update overall order status to 'Processing'
     order.razorpayOrderId = razorpay_order_id;
     order.razorpayPaymentId = razorpay_payment_id;
     order.couponApplied = couponApplied;
@@ -489,6 +489,8 @@ const loadOrderDetails = async (req, res) => {
     const order = await Order.findOne({ _id: id, userId }).populate('orderItems.product');
 
     if (!order) return res.redirect('/pageNotFound');
+
+    console.log('Order Status:', order.status); // Debug log to check the status
 
     const addressDoc = await Address.findOne({ userId });
     const selectedAddress = addressDoc
@@ -1019,6 +1021,12 @@ const retryPayment = async (req, res) => {
     const razorpayOrder = await createRazorpayOrder(finalAmount, userId);
 
     order.razorpayOrderId = razorpayOrder.id;
+    // Ensure orderItems status remains 'Pending' until payment is verified
+    order.orderItems.forEach((item) => {
+      if (item.status !== 'Cancelled') {
+        item.status = 'Pending';
+      }
+    });
     await order.save();
 
     const cartItems = order.orderItems.map((item) => ({

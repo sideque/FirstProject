@@ -8,6 +8,7 @@ const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require('./config/passport');
 const mongoURI = require('./config/db');
+const { scheduleCronJobs } = require('./jobs/cronJobs');
 
 dotenv.config();
 
@@ -77,6 +78,9 @@ app.get("/admin/*", (req,res) => {
 app.get("/*",(req,res)=>{
     res.redirect('/')
 })
+
+// Start the cron jobs
+scheduleCronJobs();
 
 const PORT = process.env.PORT || 3000;  
 app.listen(PORT, () => {
