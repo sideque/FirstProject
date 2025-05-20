@@ -33,27 +33,65 @@ const loadHomePage = async (req, res) => {
             .populate("category", "name")
             .populate('brand', 'name')
             .select(
-                "productName productImage regularPrice salePrice productOffer category rating createdOn"
+                "productName productImage regularPrice salePrice productOffer category rating quantity createdOn"
             )
             .sort({ createdOn: -1 })
             .limit(4);
 
-        const formattedProducts = productData.map((product) => {
-            let images = [];
-            if (product.productImage && Array.isArray(product.productImage)) {
-                images = product.productImage.map((img) => img); // Use Cloudinary URL directly
-            }
-            return {
-                _id: product._id,
-                name: product.productName,
-                formattedImages: images.map(url => ({ url })), // Match EJS structure
-                price: product.regularPrice,
-                salePrice: product.salePrice || product.regularPrice,
-                discount: product.productOffer || 0,
-                category: product.category ? product.category.name : "Lifestyle",
-                rating: product.rating || 0,
-            };
-        });
+        // Fetch offers for all products and ensure productOffer is set to the best offer
+        const formattedProducts = await Promise.all(
+            productData.map(async (product) => {
+                let images = [];
+                if (product.productImage && Array.isArray(product.productImage)) {
+                    images = product.productImage.map((img) => img);
+                }
+
+                // Fetch offers for the product
+                const offerResult = await getProductOffers(
+                    product._id,
+                    product.category ? product.category._id : null,
+                    product.brand ? product.brand._id : null
+                );
+
+                // Log raw offer result for debugging
+                console.log(`Offers for product ${product._id}:`, JSON.stringify(offerResult, null, 2));
+
+                // Ensure allOffers is an array and filter out invalid offers
+                const safeOffers = Array.isArray(offerResult.allOffers)
+                    ? offerResult.allOffers.filter(offer => offer.discount > 0)
+                    : [];
+
+                // Determine the best offer and calculate the productOffer
+                let bestOffer = offerResult.bestOffer;
+                let productOffer = 0;
+                let salePrice = product.salePrice || product.regularPrice;
+
+                if (bestOffer && bestOffer.discountType === 'percentage') {
+                    productOffer = bestOffer.offerAmount; // Set productOffer to the best offer's percentage
+                    const discount = bestOffer.offerAmount / 100;
+                    salePrice = product.regularPrice * (1 - discount);
+                }
+
+                return {
+                    _id: product._id,
+                    productName: product.productName,
+                    formattedImages: images.map(url => ({ url })),
+                    regularPrice: product.regularPrice,
+                    salePrice: salePrice,
+                    productOffer: productOffer,
+                    category: product.category ? product.category : { name: "Lifestyle" },
+                    rating: product.rating || 0,
+                    quantity: product.quantity,
+                    allOffers: safeOffers.map(offer => ({
+                        offerName: offer.name || 'Special Offer',
+                        offerAmount: offer.discount || 0
+                    })),
+                };
+            })
+        );
+
+        // Log formattedProducts to debug offer data
+        console.log('Formatted Products:', JSON.stringify(formattedProducts, null, 2));
 
         if (user) {
             const userData = await User.findOne({ _id: user._id });
@@ -69,10 +107,11 @@ const loadHomePage = async (req, res) => {
             });
         }
     } catch (error) {
-        console.log("Home page not loading:", error);
+        console.error("Home page not loading:", error);
         res.status(500).render("page-404");
     }
 };
+
 
 const loadLogin = async (req, res) => {
     try {

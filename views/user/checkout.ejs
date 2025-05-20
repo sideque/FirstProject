@@ -541,7 +541,7 @@
           body: JSON.stringify({ addressId, paymentMethod }),
         });
 
-        const data = await response.json();
+          const data = await response.json();
 
         if (!response.ok) throw new Error(data.message || `HTTP error! Status: ${response.status}`);
 
