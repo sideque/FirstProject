@@ -70,7 +70,15 @@ const { applyTimestamps } = require("./models/userSchema");
 app.use("/", userRouter);
 app.use("/admin", adminRouter);
 
-const PORT = process.env.PORT || 3000;
+app.get("/admin/*", (req,res) => {
+    res.redirect("/admin/dashboard")
+})
+
+app.get("/*",(req,res)=>{
+    res.redirect('/')
+})
+
+const PORT = process.env.PORT || 3000;  
 app.listen(PORT, () => {
     console.log(`Server Running on http://localhost:${PORT}`);
 });
