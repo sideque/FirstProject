@@ -842,16 +842,32 @@
     }
 
     // Profile image preview
-    document.getElementById('profile-image')?.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          document.getElementById('profile-preview').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+   document.getElementById('profile-image')?.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+     
+    if (file) {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+      if (!validTypes.includes(file.type)) {
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid File Type',
+          text: 'Only JPEG, JPG, PNG, and WEBP files are allowed!',
+          confirmButtonColor: '#d33'
+        });
+
+        e.target.value = '';
+        return;
       }
-    });
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('profile-preview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+   })
 
 
     // Address modal functions
