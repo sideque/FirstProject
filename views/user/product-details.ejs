@@ -896,8 +896,8 @@
                   <a href="/product?id=<%= relatedProduct._id %>" class="img-prod">
                     <img 
                       src="<%= relatedProduct.productImage && relatedProduct.productImage.length > 0 
-                              ? '/uploads/product-images/' + relatedProduct.productImage[0] 
-                              : 'https://via.placeholder.com/300x300?text=No+Image' %>" 
+                        ? relatedProduct.productImage[0].replace('/upload/', '/upload/w_300,h_300,c_fit/') 
+                        : 'https://via.placeholder.com/300x300?text=No+Image' %>"
                       alt="<%= relatedProduct.productName %> mobile phone"
                       style="height: 320px; width: 100%; object-fit: contain; padding: 10px;"
                       onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text=Error'; console.log('Image load failed for <%= relatedProduct.productName %>');">

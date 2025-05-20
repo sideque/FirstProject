@@ -10,11 +10,13 @@ const productController = require('../controllers/user/productController');
 const { uploadProductImages, uploadProfileImage } = require("../config/multerConfig");
 const cartController = require('../controllers/user/cartController');
 
+// Middleware to log route and session info (unchanged)
 router.use((req, res, next) => {
     // console.log('Route:', req.path, 'Session:', req.session.user);
     next();
 });
 
+// Error page
 router.get('/pageNotFound', userController.pageNotFound);
 
 // Sign up Management
@@ -23,6 +25,7 @@ router.post('/signup', userController.signup);
 router.post('/verify-otp', userController.verifyOtp);
 router.post('/resend-otp', userController.resendOtp);
 
+// Google Authentication
 router.get(
     '/auth/google',
     passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -56,6 +59,7 @@ router.get(
     }
 );
 
+// EmailJS Configuration
 router.get('/config', (req, res) => {
     res.json({
         EMAILJS_PUBLIC_KEY: 'i1J2JkmCjVYU7yS5t',
@@ -64,15 +68,18 @@ router.get('/config', (req, res) => {
     });
 });
 
+// Authentication Routes
 router.get('/login', userController.loadLogin);
 router.post('/login', userController.login);
 router.get('/logout', userController.logout);
+
+// Static Pages
 router.get('/about', userController.loadAboutPage);
 router.get('/contact', userController.loadContactPage);
 
-// Home page & Shopping page
-router.get('/', userController.loadHomePage);
-router.get('/shop', userAuth, userController.loadShoppingPage);
+// Home and Shop Pages
+router.get('/', userController.loadHomePage); 
+router.get('/shop', userAuth, userController.loadShoppingPage); 
 
 // Profile Management
 router.get('/forgot-password', profileController.getForgotPassPage);
@@ -85,7 +92,7 @@ router.get('/userProfile', userAuth, profileController.userProfile);
 router.post('/profileUpdate', userAuth, uploadProfileImage, profileController.profileUpdate);
 router.post('/profile/change-password', userAuth, profileController.postUserNewPassword);
 
-// Address routes
+// Address Routes
 router.get('/addAddress', userAuth, profileController.loadAddress);
 router.post('/addAddress', userAuth, profileController.addAddress);
 router.post('/profile/address/default', userAuth, profileController.setDefaultAddress);
@@ -101,13 +108,18 @@ router.post('/resend-email-otp', userAuth, profileController.resendOtp);
 router.get('/product', userAuth, productController.productController);
 router.post('/quantityController', userAuth, productController.checkQuantity);
 
-// Cart
+// Cart Management
 router.get('/cart', userAuth, cartController.loadCart);
 router.post('/cart/add', userAuth, cartController.addToCart);
 router.post('/cart/update', userAuth, cartController.updateCartItem);
 router.post('/cart/remove', userAuth, cartController.removeCartItem);
 
-// Order
+// Wishlist Management
+router.get('/wishlist', userAuth, cartController.loadWishlist);
+router.post('/addtowish', userAuth, cartController.addToWishList); // Handles wishlist button in shop.ejs
+router.post('/wishlist/remove', userAuth, cartController.removeFromWishlist);
+
+// Order Management
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
 router.post('/cancelOrder', userAuth, checkoutController.cancelOrder);
@@ -129,12 +141,7 @@ router.get('/coupons/available', userAuth, cartController.getAvailableCoupons);
 router.get('/check-applied-coupon', userAuth, cartController.checkAppliedCoupon);
 
 // Offer Management
-router.get('/offer', userAuth, offerController.getProductOffers);
-
-// WishList Management
-router.get('/wishlist', userAuth, cartController.loadWishlist);
-router.post('/addtowish', userAuth, cartController.addToWishList);
-router.post('/wishlist/remove', userAuth, cartController.removeFromWishlist);
+router.get('/offer', userAuth, offerController.getProductOffers); // Displays product offers
 
 // Wallet Management
 router.get('/wallet', userAuth, profileController.loadWallet);

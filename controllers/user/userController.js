@@ -4,6 +4,7 @@ const Category = require('../../models/categorySchema');
 const Product = require('../../models/productSchema');
 const Brand = require('../../models/brandSchema');
 const Wallet = require('../../models/walletSchema');
+const { getProductOffers } = require('./offerController');
 const env = require('dotenv').config();
 const csrf = require('csurf');
 const nodemailer = require('nodemailer');
@@ -480,22 +481,34 @@ const loadShoppingPage = async (req, res) => {
             .skip(skip)
             .limit(limit)
             .populate('brand')
-            .populate('category'); // Added to ensure category.name is available
+            .populate('category');
 
-        const products = productsData.map((product) => {
-            const formattedImages = (product.productImage || []).map((img) => ({ url: img })); // Use Cloudinary URL directly
-            return {
-                _id: product._id,
-                productName: product.productName,
-                formattedImages,
-                regularPrice: product.regularPrice,
-                salePrice: product.salePrice || product.regularPrice,
-                productOffer: product.productOffer || 0,
-                brand: product.brand,
-                category: product.category,
-                rating: product.rating || 0,
-            };
-        });
+        const products = await Promise.all(
+            productsData.map(async (product) => {
+                const formattedImages = (product.productImage || []).map((img) => ({ url: img }));
+                
+                // Fetch offers for the product
+                const { allOffers } = await getProductOffers(
+                    product._id,
+                    product.category ? product.category._id : null,
+                    product.brand ? product.brand._id : null
+                );
+
+                return {
+                    _id: product._id,
+                    productName: product.productName,
+                    formattedImages,
+                    regularPrice: product.regularPrice,
+                    salePrice: product.salePrice || product.regularPrice,
+                    productOffer: product.productOffer || 0,
+                    brand: product.brand,
+                    category: product.category,
+                    rating: product.rating || 0,
+                    quantity: product.quantity || 0,
+                    allOffers: allOffers || [], // Attach all offers
+                };
+            })
+        );
 
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limit);
