@@ -395,7 +395,7 @@ const loadShoppingPage = async (req, res) => {
         const user = req.session.user;
         const { category, brand, search, priceRange, page: pageQuery } = req.query;
         const page = parseInt(pageQuery) || 1;
-        const limit = 9;
+        const limit = 6;
         const skip = (page - 1) * limit;
 
         // Validate category and brand ObjectIds
