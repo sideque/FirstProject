@@ -3,7 +3,6 @@ const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const mongoose = require('mongoose');
 
-
 const loadSalesReport = async (req, res) => {
     try {
         const { range, start, end, page = 1 } = req.query;
@@ -28,8 +27,8 @@ const loadSalesReport = async (req, res) => {
             fromDate.setDate(toDate.getDate() - 7);
         }
 
-        // Build filter
-        let filter = {};
+        // Build filter with Delivered status
+        let filter = { status: 'Delivered' };
         if (fromDate && toDate) {
             filter.createdOn = { $gte: fromDate, $lte: toDate };
         }
@@ -53,10 +52,7 @@ const loadSalesReport = async (req, res) => {
             discount: order.discount || 0,
             coupon: order.couponDiscount || 0,
             finalAmount: order.finalAmount || 0,
-            returnCancelled: order.cancelOrReturn || 0,
-            revokedCoupon: order.revokedCoupon || 0,
-            date: order.createdOn.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric' }),
-            status: order.status || 'Pending'
+            date: order.createdOn.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric' })
         }));
 
         const totalPages = Math.ceil(totalOrders / limit);
@@ -117,14 +113,11 @@ const downloadExcel = async (req, res) => {
             { header: 'Discount', key: 'discount', width: 15 },
             { header: 'Coupon', key: 'coupon', width: 15 },
             { header: 'Final Amount', key: 'finalAmount', width: 15 },
-            { header: 'Return/Cancelled', key: 'returnCancelled', width: 15 },
-            { header: 'Revoked Coupon', key: 'revokedCoupon', width: 15 },
-            { header: 'Date', key: 'date', width: 20 },
-            { header: 'Status', key: 'status', width: 15 }
+            { header: 'Date', key: 'date', width: 20 }
         ];
 
         // Add title
-        worksheet.mergeCells('A1:I1');
+        worksheet.mergeCells('A1:H1');
         worksheet.getCell('A1').value = 'MobiVault, Sales Report';
         worksheet.getCell('A1').font = { size: 16, bold: true };
         worksheet.getCell('A1').alignment = { horizontal: 'center' };
@@ -132,7 +125,7 @@ const downloadExcel = async (req, res) => {
         // Add date range
         const fromDate = start ? new Date(start).toLocaleDateString('en-GB') : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB');
         const toDate = end ? new Date(end).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
-        worksheet.mergeCells('A2:I2');
+        worksheet.mergeCells('A2:H2');
         worksheet.getCell('A2').value = `Report From: ${fromDate} To: ${toDate}`;
         worksheet.getCell('A2').font = { italic: true };
         worksheet.getCell('A2').alignment = { horizontal: 'center' };
@@ -145,10 +138,7 @@ const downloadExcel = async (req, res) => {
                 discount: `₹${order.discount.toLocaleString('en-IN')}`,
                 coupon: `₹${order.coupon.toLocaleString('en-IN')}`,
                 finalAmount: `₹${order.finalAmount.toLocaleString('en-IN')}`,
-                returnCancelled: `₹${order.returnCancelled.toLocaleString('en-IN')}`,
-                revokedCoupon: `₹${order.revokedCoupon.toLocaleString('en-IN')}`,
-                date: order.date,
-                status: order.status
+                date: order.date
             });
         });
 
@@ -160,9 +150,6 @@ const downloadExcel = async (req, res) => {
             `₹${salesSummary.discounts.toLocaleString('en-IN')}`,
             `₹${salesSummary.coupons.toLocaleString('en-IN')}`,
             `₹${salesSummary.netSales.toLocaleString('en-IN')}`,
-            `₹${salesSummary.cancelOrReturn.toLocaleString('en-IN')}`,
-            `₹${salesSummary.revokedCoupon?.toLocaleString('en-IN') || '0'}`,
-            '',
             `Total Orders: ${totalOrders}`
         ]);
 
@@ -200,8 +187,8 @@ const downloadPDF = async (req, res) => {
         doc.moveDown(2);
 
         // Table headers
-        const headers = ['Order ID', 'Amount', 'Discount', 'Coupon', 'Final Amount', 'Return/Cancelled', 'Revoked Coupon', 'Date', 'Status'];
-        const columnWidths = [90, 90, 70, 70, 90, 100, 100, 80, 90];
+        const headers = ['Order ID', 'Amount', 'Discount', 'Coupon', 'Final Amount', 'Date'];
+        const columnWidths = [90, 90, 70, 70, 90, 100, 100, 80];
         const startX = 30;
         let currentY = doc.y;
 
@@ -224,10 +211,7 @@ const downloadPDF = async (req, res) => {
                 `₹${row.discount.toLocaleString('en-IN')}`,
                 `₹${row.coupon.toLocaleString('en-IN')}`,
                 `₹${row.finalAmount.toLocaleString('en-IN')}`,
-                `₹${row.returnCancelled.toLocaleString('en-IN')}`,
-                `₹${row.revokedCoupon.toLocaleString('en-IN')}`,
-                row.date,
-                row.status
+                row.date
             ];
             rowData.forEach((cell, i) => {
                 doc.rect(currentX, currentY, columnWidths[i], 20).stroke();
@@ -245,10 +229,7 @@ const downloadPDF = async (req, res) => {
             `₹${salesSummary.discounts.toLocaleString('en-IN')}`,
             `₹${salesSummary.coupons.toLocaleString('en-IN')}`,
             `₹${salesSummary.netSales.toLocaleString('en-IN')}`,
-            `₹${salesSummary.cancelOrReturn.toLocaleString('en-IN')}`,
-            `₹${salesSummary.revokedCoupon?.toLocaleString('en-IN') || '0'}`,
-            '',
-            `Total Orders: ${totalOrders}`
+            ''
         ];
         currentX = startX;
         doc.fontSize(10).font('Helvetica-Bold');
@@ -266,7 +247,7 @@ const downloadPDF = async (req, res) => {
 };
 
 const getReportData = async (range, start, end) => {
-    let filter = {};
+    let filter = { status: 'Delivered' };
     if (range && range !== 'custom') {
         const days = parseInt(range);
         const fromDate = new Date();
@@ -294,8 +275,7 @@ const getReportData = async (range, start, end) => {
         finalAmount: order.finalAmount || 0,
         returnCancelled: order.cancelOrReturn || 0,
         revokedCoupon: order.revokedCoupon || 0,
-        date: order.createdOn.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric' }),
-        status: order.status || 'Pending'
+        date: order.createdOn.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'short', day: 'numeric' })
     }));
 
     return {

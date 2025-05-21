@@ -116,7 +116,7 @@ router.post('/cart/remove', userAuth, cartController.removeCartItem);
 
 // Wishlist Management
 router.get('/wishlist', userAuth, cartController.loadWishlist);
-router.post('/addtowish', userAuth, cartController.addToWishList); // Handles wishlist button in shop.ejs
+router.post('/addtowish', userAuth, cartController.addToWishList); 
 router.post('/wishlist/remove', userAuth, cartController.removeFromWishlist);
 
 // Order Management

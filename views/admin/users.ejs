@@ -215,7 +215,7 @@
                         <td><%= user.name %></td>
                         <td><%= user.email %></td>
                         <td><%= user.phone || 'N/A' %></td>
-                        <td><%= user.createdOn.toDateString() %></td>
+                        <td><%= user.createdOn ? user.createdOn.toDateString() : 'N/A' %></td>
                         <td><button class="action-btn details-btn" onclick="showWallet('<%= user._id %>')">Details</button></td>
                         <td>
                             <% if (user.isBlocked) { %>

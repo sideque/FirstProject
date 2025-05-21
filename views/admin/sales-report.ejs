@@ -10,7 +10,6 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-    /* Include your CSS from the provided HTML here */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -155,29 +154,6 @@
     .sales-table tr:hover {
       background-color: #353535;
     }
-    .status-badge {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .status-pending {
-      background-color: #ffc107;
-      color: #212529;
-    }
-    .status-completed {
-      background-color: #28a745;
-      color: #fff;
-    }
-    .status-cancelled {
-      background-color: #dc3545;
-      color: #fff;
-    }
-    .status-returned {
-      background-color: #6c757d;
-      color: #fff;
-    }
     .select-filter {
       background-color: #3a3a3a;
       border: 1px solid #555;
@@ -241,7 +217,7 @@
             <option value="custom" <%= range === 'custom' ? 'selected' : '' %>>Select Range</option>
             <option value="1" <%= range === '1' ? 'selected' : '' %>>Today</option>
             <option value="2" <%= range === '2' ? 'selected' : '' %>>Yesterday</option>
-            <option value="7" <%= range === '7' ? 'selected' : '' %>>This Week</option>
+            <<|control208|> value="7" <%= range === '7' ? 'selected' : '' %>>This Week</option>
             <option value="14" <%= range === '14' ? 'selected' : '' %>>Last Week</option>
             <option value="30" <%= range === '30' ? 'selected' : '' %>>This Month</option>
             <option value="60" <%= range === '60' ? 'selected' : '' %>>Last Month</option>
@@ -270,11 +246,6 @@
           <div class="summary-card">
             <div class="card-title">Gross Sales</div>
             <div class="card-value">₹<%= salesSummary.totalSales.toLocaleString('en-IN') %></div>
-          </div>
-          
-          <div class="summary-card">
-            <div class="card-title">Cancelled Or Returned</div>
-            <div class="card-value">₹<%= salesSummary.cancelOrReturn.toLocaleString('en-IN') %></div>
           </div>
           
           <div class="summary-card">
@@ -308,10 +279,7 @@
               <th>DISCOUNT</th>
               <th>COUPON</th>
               <th>FINAL AMOUNT</th>
-              <th>RETURN/CANCELLED</th>
-              <th>REVOKED COUPON</th>
               <th>DATE</th>
-              <th>STATUS</th>
             </tr>
           </thead>
           <tbody>
@@ -322,14 +290,7 @@
                 <td>₹<%= order.discount.toLocaleString('en-IN') %></td>
                 <td>₹<%= order.coupon.toLocaleString('en-IN') %></td>
                 <td>₹<%= order.finalAmount.toLocaleString('en-IN') %></td>
-                <td>₹<%= order.returnCancelled.toLocaleString('en-IN') %></td>
-                <td>₹<%= order.revokedCoupon.toLocaleString('en-IN') %></td>
                 <td><%= order.date %></td>
-                <td>
-                  <span class="status-badge status-<%= order.status.toLowerCase().replace(' ', '-') %>">
-                    <%= order.status %>
-                  </span>
-                </td>
               </tr>
             <% }) %>
           </tbody>
@@ -423,4 +384,4 @@
     });
   </script>
 </body>
-</html>
+</html> 

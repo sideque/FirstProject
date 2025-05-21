@@ -53,9 +53,6 @@ const loadHomePage = async (req, res) => {
                     product.brand ? product.brand._id : null
                 );
 
-                // Log raw offer result for debugging
-                console.log(`Offers for product ${product._id}:`, JSON.stringify(offerResult, null, 2));
-
                 // Ensure allOffers is an array and filter out invalid offers
                 const safeOffers = Array.isArray(offerResult.allOffers)
                     ? offerResult.allOffers.filter(offer => offer.discount > 0)
@@ -90,8 +87,6 @@ const loadHomePage = async (req, res) => {
             })
         );
 
-        // Log formattedProducts to debug offer data
-        console.log('Formatted Products:', JSON.stringify(formattedProducts, null, 2));
 
         if (user) {
             const userData = await User.findOne({ _id: user._id });
@@ -254,8 +249,8 @@ const signup = async (req, res) => {
     req.session.userOtp = otp;
     req.session.otpExpires = Date.now() + 60 * 1000;
     req.session.userData = { name, phone, email, password, referral };
-    res.render('verify-otp');
     console.log("OTP Sent", otp);
+    res.render('verify-otp');
   } catch (error) {
     console.log("sign up error", error);
     res.redirect("/pageNotFound");
